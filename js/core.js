@@ -21,6 +21,14 @@ const RESOURCES=[
   // Паёк — готовое блюдо из пищеблока (см. BUILDING_TYPES 'kitchen'), заменяет собой
   // прямую раздачу сырого урожая рабочим (см. CLASSES/PER_WORKER_RATE/HR_RATION_COST ниже).
   {id:'ration',name:'Паёк',formula:'Паёк',tier:0,weight:1.2,shapeIdx:10,colorVar:'ration'},
+  // Пластины — передел руды на металлургическом заводе (см. BUILDING_TYPES 'factory' ниже):
+  // 2 ед. руды за цикл дают 1 ед. пластины — тот же расклад и для железа, и для меди.
+  {id:'iron_plate',name:'Железная пластина',formula:'Fe',tier:0,weight:1.8,shapeIdx:11,colorVar:'iron_plate'},
+  {id:'copper_plate',name:'Медная пластина',formula:'Cu',tier:0,weight:2.0,shapeIdx:12,colorVar:'copper_plate'},
+  // Хлопок — урожай фермы (та же грядка, что пшеница/картофель/кукуруза/томаты), сырьё для
+  // одежды со швейного цеха (см. BUILDING_TYPES 'textile' ниже).
+  {id:'cotton',name:'Хлопок',formula:'Gossypium',tier:0,weight:0.5,shapeIdx:13,colorVar:'cotton'},
+  {id:'clothing',name:'Одежда',formula:'Одежда',tier:0,weight:0.8,shapeIdx:14,colorVar:'clothing'},
 ];
 
 const POP_GOODS=[];
@@ -86,6 +94,11 @@ const BUILDING_TYPES=[
   // Угольная ТЭС — сжигает уголь, даёт стабильную электроэнергию круглосуточно (в отличие
   // от солнца, которое ночью не работает вовсе, см. sunFactor).
   {id:'tpp',name:'Угольная ТЭС',cost:{iron_ore:1550,stone:1700,copper_ore:720},area:30,icon:'rigTPP',neutralColor:'energy',category:'energy'},
+  // Металлургический завод — передел руды (железной/медной) в пластины, рецепт выбирается
+  // после постройки, как у горнодобывающей установки (тот же тип на разные выходы).
+  {id:'factory',name:'Металлургический завод',cost:{iron_ore:900,stone:950,copper_ore:450},area:22,icon:'rigFactory',neutralColor:'factory',category:'processing'},
+  // Швейный цех — шьёт одежду из хлопка с фермы.
+  {id:'textile',name:'Швейный цех',cost:{iron_ore:430,stone:480,copper_ore:160},area:13,icon:'rigTextile',neutralColor:'textile',category:'processing'},
 ];
 // Категории вкладки «Стройка» — карточки группируются по ним с заголовком-разделителем.
 const BUILD_CATEGORIES=[
@@ -93,6 +106,7 @@ const BUILD_CATEGORIES=[
   {id:'energy',label:'Энергия'},
   {id:'farming',label:'Ферма'},
   {id:'food',label:'Питание'},
+  {id:'processing',label:'Переработка'},
   {id:'storage',label:'Хранение жидкостей'},
 ];
 // Площадь участка базы: каждая построенная установка занимает area своего типа,
@@ -143,6 +157,7 @@ const BUILDINGS=[
   {id:'potato',type:'farm',unlock:0,tier:0,cycle:20700,in:{water:23},out:{potato:59},workers:9,power:69,skill:'agro'},
   {id:'corn',type:'farm',unlock:0,tier:0,cycle:17550,in:{water:26},out:{corn:43},workers:9,power:59,skill:'agro'},
   {id:'tomato',type:'farm',unlock:0,tier:0,cycle:10976,in:{water:20},out:{tomato:20},workers:9,power:37,skill:'agro'},
+  {id:'cotton',type:'farm',unlock:0,tier:0,cycle:13000,in:{water:18},out:{cotton:22},workers:9,power:48,skill:'agro'},
   // Пищеблок — готовит паёк из урожая (см. CLASSES/PER_WORKER_RATE/HR_RATION_COST ниже, где
   // паёк заменил прямую раздачу сырого урожая рабочим). Два рецепта на выбор: зерновой быстрее
   // готовится, картофельный — дольше и дешевле сырьём. У обоих одна выходная позиция ('ration'),
@@ -152,6 +167,13 @@ const BUILDINGS=[
   // Угольная ТЭС — генератор, как солнечная панель (энергия не идёт через warehouse-лимит,
   // см. runProdBuilding), но топливо вместо солнца: жжёт уголь и даёт энергию и днём, и ночью.
   {id:'coal_power',label:'Сжигание угля',type:'tpp',unlock:0,tier:0,cycle:1525,in:{coal:3},out:{energy:255},workers:8},
+  // Металлургический завод — передел руды в пластины, 2 ед. руды за цикл на 1 ед. пластины
+  // (один и тот же расклад для железа и меди, см. обсуждение экономики). Цикл подобран так,
+  // чтобы на полной мощности забирать ровно выпуск одной горнодобывающей установки той же руды.
+  {id:'iron_plate',label:'Прокат: железная пластина',type:'factory',unlock:0,tier:0,cycle:1440,in:{iron_ore:2},out:{iron_plate:1},workers:12,power:35},
+  {id:'copper_plate',label:'Прокат: медная пластина',type:'factory',unlock:0,tier:0,cycle:1014,in:{copper_ore:2},out:{copper_plate:1},workers:12,power:32},
+  // Швейный цех — шьёт одежду из хлопка с фермы.
+  {id:'clothing',type:'textile',unlock:0,tier:0,cycle:2600,in:{cotton:3,water:1},out:{clothing:2},workers:7,power:20,skill:'agro'},
 ];
 
 const SERVICE_BUILDINGS=[];
@@ -282,6 +304,8 @@ function richLabel(b){
   if(b.type==='farm') return 'Плодородие почвы';
   if(b.type==='kitchen') return 'Слаженность кухни';
   if(b.type==='tpp') return 'Настройка топки';
+  if(b.type==='factory') return 'Слаженность передела';
+  if(b.type==='textile') return 'Слаженность цеха';
   return 'Богатство месторождения';
 }
 function skillAffectsRichness(skId){ return BUILDINGS.some(b=>b.tier===0 && b.type!=='solar' && recipeSkillId(b)===skId); }

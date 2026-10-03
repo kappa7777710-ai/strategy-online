@@ -134,6 +134,15 @@ const ICONS={
   tomato:'<circle cx="10" cy="11.5" r="6.3"/><path d="M10 5.2c-1 0-1.8-1-1.8-2.2M10 5.2c1 0 1.8-1 1.8-2.2M10 5.2v1.6" stroke="currentColor" stroke-width="1" fill="none" opacity="0.6"/><ellipse cx="8" cy="9" rx="1.4" ry="1" opacity="0.25" style="fill:var(--hi)"/>',
   // Паёк — жестяная банка-паёк с откинутой крышкой: явно готовый продукт, не сырьё.
   ration:'<rect x="3" y="7" width="14" height="10" rx="1.3" opacity="0.9"/><path d="M3.5 7c0-2.4 1.8-4 4-4h5c2.2 0 4 1.6 4 4" fill="none" stroke="currentColor" stroke-width="1.3" opacity="0.6"/><path d="M3 9.6h14" style="stroke:var(--ink)" stroke-width="1" opacity="0.3"/><circle cx="10" cy="13.3" r="1.6" style="fill:var(--ink)" opacity="0.35"/>',
+  // Пластины — прокатанный лист металла: прямоугольная плита с бликом по верхнему краю
+  // и двумя рёбрами жёсткости (железная) или рядом клёпок (медная) — тот же силуэт,
+  // разные детали, чтобы не выглядели перекрашенной копией друг друга.
+  iron_plate:'<rect x="3" y="6" width="14" height="8" rx="1.2" opacity="0.9"/><rect x="3" y="6" width="14" height="2" style="fill:var(--hi)" opacity="0.4"/><rect x="4.5" y="9" width="11" height="1.1" style="fill:var(--ink)" opacity="0.2"/><rect x="4.5" y="11.4" width="11" height="1.1" style="fill:var(--ink)" opacity="0.2"/>',
+  copper_plate:'<rect x="3" y="6" width="14" height="8" rx="1.6" opacity="0.92"/><rect x="3" y="6" width="14" height="2" style="fill:var(--hi)" opacity="0.4"/><g style="fill:var(--ink)" opacity="0.28"><circle cx="5.4" cy="10" r="0.9"/><circle cx="14.6" cy="10" r="0.9"/><circle cx="10" cy="7.3" r="0.7"/><circle cx="10" cy="12.6" r="0.7"/></g>',
+  // Хлопок — пушистая коробочка (гроздь перекрывающихся кружков) на стебле, как у урожая фермы.
+  cotton:'<path d="M10 17V12" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="7.3" cy="8.8" r="3.3" opacity="0.92"/><circle cx="12.7" cy="8.8" r="3.3" opacity="0.92"/><circle cx="10" cy="6" r="3.3" opacity="0.92"/><circle cx="10" cy="10.2" r="2.8" opacity="0.85"/><circle cx="8.3" cy="7" r="1" style="fill:var(--hi)" opacity="0.4"/>',
+  // Одежда — силуэт футболки: явно готовый товар, не сырьё.
+  clothing:'<path d="M7 2 4 5l1.6 2.4L7 6.5V17h6V6.5l1.4.9L16 5 13 2c-.5 1-1.6 1.6-3 1.6S7.5 3 7 2Z"/><path d="M7 2c1.2 1.6 3 2 3 2s1.8-.4 3-2" style="stroke:var(--hi)" stroke-width="0.8" fill="none" opacity="0.5"/>',
   class1:'<path d="M3 13a7 5 0 0 1 14 0v1H3z"/><rect x="2" y="13" width="16" height="2.2" rx="1"/><rect x="9" y="6" width="2" height="4" opacity="0.6"/>',
   skillT0:'<path d="M2 11c4-6 8-7.5 13-5.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="8.7" y="8" width="2.2" height="11" rx="1" transform="rotate(28 8.7 8)"/>',
   // Агрономия — росток с двумя листьями, а не кирка: явно другой навык, не горное дело.
@@ -157,6 +166,11 @@ const ICONS={
   rigKitchen:'<path d="M4 18h12" stroke="currentColor" stroke-width="1.5"/><rect x="5" y="9" width="10" height="7" rx="1.2"/><path d="M5 9c0-2.8 2.2-5 5-5s5 2.2 5 5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 4c-.6-.8-.6-1.6 0-2.3M13 4c.6-.8.6-1.6 0-2.3" stroke="currentColor" stroke-width="1" fill="none" opacity="0.6"/><circle cx="10" cy="12.6" r="1.6" style="fill:var(--ink)" opacity="0.4"/>',
   // Угольная ТЭС — дымовая труба с дымком над кучей угля.
   rigTPP:'<rect x="8" y="2" width="4" height="12" rx="0.6"/><path d="M8 14h4l1.5 4h-7z" opacity="0.85"/><path d="M10 2c0-1.4-1-2-1.6-2.6M10 2c0 1.4 1 .6 1.8-.2" stroke="currentColor" stroke-width="0.9" fill="none" opacity="0.45"/><polygon points="2,18 3,15 6,14 8,15 8,18" opacity="0.75"/><path d="M4 18h13" stroke="currentColor" stroke-width="1.5"/>',
+  // Металлургический завод — печь с дымовой трубой: тот же язык, что у ТЭС, но ниже и шире,
+  // с решёткой топки вместо кучи угля.
+  rigFactory:'<rect x="3" y="9" width="14" height="9" rx="1"/><rect x="7.5" y="1.5" width="3" height="8" rx="0.5"/><path d="M7.5 1.5c0-1.2-.9-1.7-1.5-2.2M10.5 1.5c0 1.2.9.5 1.6-.2" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.45"/><rect x="7" y="12.3" width="6" height="4" rx="0.5" style="fill:var(--ink)" opacity="0.35"/><path d="M8 12.3v4M10 12.3v4M12 12.3v4" style="stroke:var(--card)" stroke-width="0.6"/>',
+  // Швейный цех — катушка нитки с иглой: явно текстильное производство, не металл/еда.
+  rigTextile:'<rect x="6" y="3.5" width="8" height="13" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 6.8h8M6 9.5h8M6 12.2h8" stroke="currentColor" stroke-width="0.9" opacity="0.5"/><path d="M14.5 14.5l3.3 3.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="18" cy="18" r="0.9" style="fill:var(--hi)"/>',
   // Малый аккумулятор — корпус-таблетка с плюсовым контактом и молнией на лицевой стороне.
   battery:'<rect x="4" y="5" width="12" height="14" rx="2.2" opacity="0.9"/><rect x="7.3" y="2.3" width="5.4" height="2.6" rx="1" opacity="0.9"/><path d="M11.3 7.2 7.2 12.8h2.9l-0.9 4.3 4.6-6.1h-2.9z" style="fill:var(--ink)"/>',
   // Электроэнергия — молния с лёгким бликом вдоль края.
@@ -355,6 +369,28 @@ const RES48={
     '<path d="M9 24h30" style="stroke:var(--ink)" stroke-width="1.4" opacity=".24"/>'+
     '<circle cx="24" cy="31" r="4.2" style="fill:var(--ink)" opacity=".32"/>'+
     '<path d="M17 10.5h14" style="stroke:var(--hi)" stroke-width="1.2" opacity=".35"/>',
+  // Пластины — прокатанный лист с бликом по верхнему краю. Железная — рёбра жёсткости
+  // (прямые линии), медная — клёпки по углам (круги) — та же пара различий, что в ICONS.
+  iron_plate:'<ellipse cx="24" cy="42.5" rx="16" ry="2.6" opacity=".22"/>'+
+    '<rect x="8" y="16" width="32" height="18" rx="2.5" opacity=".92"/>'+
+    '<rect x="8" y="16" width="32" height="5" rx="2.5" style="fill:var(--hi)" opacity=".32"/>'+
+    '<rect x="12" y="23" width="24" height="2.2" style="fill:var(--ink)" opacity=".18"/>'+
+    '<rect x="12" y="28" width="24" height="2.2" style="fill:var(--ink)" opacity=".18"/>'+
+    '<circle cx="13" cy="19.5" r="1.3" style="fill:var(--ink)" opacity=".25"/><circle cx="35" cy="19.5" r="1.3" style="fill:var(--ink)" opacity=".25"/>',
+  copper_plate:'<ellipse cx="24" cy="42.5" rx="16" ry="2.6" opacity=".22"/>'+
+    '<rect x="8" y="15" width="32" height="19" rx="3" opacity=".92"/>'+
+    '<rect x="8" y="15" width="32" height="5.5" rx="3" style="fill:var(--hi)" opacity=".36"/>'+
+    '<g style="fill:var(--ink)" opacity=".24"><circle cx="13" cy="24.5" r="1.6"/><circle cx="35" cy="24.5" r="1.6"/><circle cx="24" cy="18.7" r="1.4"/><circle cx="24" cy="30.3" r="1.4"/></g>',
+  // Хлопок — та же пушистая коробочка, что в ICONS, увеличенная до 48-пиксельного холста.
+  cotton:'<ellipse cx="24" cy="42.5" rx="14" ry="2.4" opacity=".22"/>'+
+    '<path d="M24 40V27" stroke="currentColor" stroke-width="2" fill="none" opacity=".6"/>'+
+    '<circle cx="16" cy="19" r="8" opacity=".92"/><circle cx="32" cy="19" r="8" opacity=".92"/><circle cx="24" cy="12" r="8" opacity=".92"/><circle cx="24" cy="22" r="7" opacity=".85"/>'+
+    '<g style="fill:var(--hi)" opacity=".4"><circle cx="13" cy="16" r="2"/><circle cx="21" cy="9" r="2"/><circle cx="29" cy="16" r="2"/></g>',
+  // Одежда — та же футболка, что в ICONS, со швом-подсказкой по вороту.
+  clothing:'<ellipse cx="24" cy="43" rx="13" ry="2.4" opacity=".22"/>'+
+    '<path d="M17 6 10 12l4 5 3-2V40h14V15l3 2 4-5-7-6c-1.2 2-3 3-7 3s-5.8-1-7-3Z" opacity=".92"/>'+
+    '<path d="M17 6c1.2 2 3 3 7 3s5.8-1 7-3" style="stroke:var(--hi)" stroke-width="1.4" fill="none" opacity=".4"/>'+
+    '<path d="M20 15v9M28 15v9" style="stroke:var(--ink)" stroke-width="1" opacity=".18" fill="none"/>',
 };
 // Крупные силуэты установок. Колесо/шкив (.rig-wheel) крутится, пока установка работает;
 // руда в вагонетке и вода в баке красятся в цвет того, что сейчас добывается (--oc).
@@ -418,6 +454,19 @@ const TYPE48={
     '<path d="M6 24 14 15h16l6 9Z" opacity=".55"/>'+
     '<rect x="6" y="24" width="22" height="17" rx="2" opacity=".7"/>'+
     '<g style="fill:var(--oc,var(--hi))" opacity=".9"><circle cx="12" cy="34" r="2.2"/><circle cx="18" cy="35.6" r="2.6"/><circle cx="24" cy="34.4" r="2"/></g>',
+  // Металлургический завод — печь с дымовой трубой (те же пропорции-«арка+начинка», что у
+  // kitchen, но труба вместо купола), заслонка топки окрашена в --oc текущего рецепта.
+  factory:'<rect x="2" y="41" width="44" height="2.5" rx="1.25" opacity=".3"/>'+
+    '<rect x="10" y="18" width="28" height="23" rx="2" opacity=".85"/>'+
+    '<rect x="20" y="3" width="8" height="16" rx="1" opacity=".8"/>'+
+    '<path d="M20 3c1.6-2.6.5-4.6-1-6.2M28 3c-1.6-2.4-.4-4.2 1-5.8" stroke="currentColor" stroke-width="1.1" fill="none" opacity=".4"/>'+
+    '<rect x="16" y="27" width="16" height="11" rx="1.5" style="fill:var(--oc,var(--hi))" opacity=".85"/>'+
+    '<path d="M18 22c-1-2 0-3.4 1.4-4.6M24 22c-1-2.4 0-4 1.6-5.4M30 22c-1-2 0-3.4 1.4-4.6" stroke="currentColor" stroke-width="1.2" fill="none" opacity=".55"/>',
+  // Швейный цех — катушка с нитью (ряды --oc-окрашенной нити вместо «начинки») и игла на боку.
+  textile:'<rect x="2" y="41" width="44" height="2.5" rx="1.25" opacity=".3"/>'+
+    '<rect x="14" y="8" width="20" height="30" rx="8" fill="none" stroke="currentColor" stroke-width="2.4"/>'+
+    '<g style="fill:var(--oc,var(--hi))" opacity=".85"><rect x="16" y="14" width="16" height="4" rx="1.5"/><rect x="16" y="21" width="16" height="4" rx="1.5"/><rect x="16" y="28" width="16" height="4" rx="1.5"/></g>'+
+    '<path d="M34 34l8 8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="43" cy="43" r="1.6" style="fill:var(--hi)" opacity=".7"/>',
 };
 const UI20={
   worker:'<path d="M4.5 9a5.5 5.5 0 0 1 11 0z"/><rect x="3" y="8.3" width="14" height="2" rx="1"/><circle cx="10" cy="12" r="2.6" opacity=".85"/><path d="M4 19.5c0-3.6 2.6-5.3 6-5.3s6 1.7 6 5.3z" opacity=".7"/>',
