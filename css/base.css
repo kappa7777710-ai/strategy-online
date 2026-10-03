@@ -51,9 +51,40 @@
   --font-body:'IBM Plex Sans',sans-serif;
   --font-mono:'IBM Plex Mono',monospace;
 }
-body{background:var(--bg);color:var(--text-primary);font-family:var(--font-body);}
+body{background:var(--bg);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;}
 *{box-sizing:border-box;}
 [hidden]{display:none!important;}
+
+/* Космический фон базы: звёздное поле + цветные туманности + два кольца-«станции» вдали
+   (намёк на орбитальную станцию, без фотографии — процедурная замена, см. обсуждение с игроком).
+   Оба слоя fixed и z-index:-1/-2, поэтому не мешают скроллу и кликам; HUD-панели поверх
+   (см. .bevel-frame/.panel/.hotbar ниже) полупрозрачные с blur — фон аккуратно просвечивает. */
+body::before{
+  content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:
+    radial-gradient(ellipse 900px 620px at 14% -8%,rgba(79,209,231,.11),transparent 62%),
+    radial-gradient(ellipse 820px 680px at 112% 18%,rgba(179,136,255,.10),transparent 58%),
+    radial-gradient(ellipse 720px 520px at 55% 118%,rgba(244,85,123,.08),transparent 60%),
+    radial-gradient(circle at 87% 80%,transparent 0 148px,rgba(135,152,181,.12) 150px,rgba(135,152,181,.16) 157px,transparent 160px,transparent 999px),
+    radial-gradient(circle at 87% 80%,transparent 0 96px,rgba(135,152,181,.09) 98px,rgba(135,152,181,.13) 102px,transparent 104px,transparent 999px),
+    var(--bg);
+}
+body::after{
+  content:'';position:fixed;inset:-10%;z-index:-1;pointer-events:none;opacity:.55;
+  background-repeat:repeat;background-size:230px 230px;
+  background-image:
+    radial-gradient(1.6px 1.6px at 12% 22%,#fff,transparent 60%),
+    radial-gradient(1.1px 1.1px at 36% 64%,#fff,transparent 60%),
+    radial-gradient(1.8px 1.8px at 58% 12%,#fff,transparent 60%),
+    radial-gradient(1.1px 1.1px at 81% 46%,#fff,transparent 60%),
+    radial-gradient(1.4px 1.4px at 24% 86%,#fff,transparent 60%),
+    radial-gradient(1.1px 1.1px at 92% 82%,#fff,transparent 60%),
+    radial-gradient(1.6px 1.6px at 47% 35%,#fff,transparent 60%),
+    radial-gradient(1.1px 1.1px at 70% 93%,#fff,transparent 60%);
+  animation:starsDrift 220s linear infinite;
+}
+@keyframes starsDrift{from{transform:translate(0,0);}to{transform:translate(-230px,-230px);}}
+@media (prefers-reduced-motion:reduce){ body::after{animation:none;} }
 .page{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:28px 60px;display:flex;flex-direction:column;gap:22px;}
 .eyebrow{font-family:var(--font-body);font-size:11px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--text-muted);}
 h1{font-family:var(--font-display);font-weight:700;font-size:30px;letter-spacing:.01em;margin:2px 0 0;text-wrap:balance;color:var(--text-primary);}
@@ -63,7 +94,7 @@ h1{font-family:var(--font-display);font-weight:700;font-size:30px;letter-spacing
 .stat-label{font-size:10.5px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;}
 .stat-value{font-family:var(--font-mono);font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;}
 
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px 18px 20px;}
+.panel{background:color-mix(in srgb,var(--panel) 88%,transparent);backdrop-filter:blur(14px) saturate(1.15);-webkit-backdrop-filter:blur(14px) saturate(1.15);border:1px solid var(--border);border-radius:14px;padding:18px 18px 20px;}
 .panel h2{font-family:var(--font-display);font-weight:600;font-size:15px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-secondary);margin:0 0 12px;}
 .ledger-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;}
 .chip{display:flex;gap:9px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--chip-color,var(--tier0));border-radius:8px;padding:9px 10px;}
@@ -89,7 +120,8 @@ h1{font-family:var(--font-display);font-weight:700;font-size:30px;letter-spacing
 .devbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);}
 .devbar button{font-family:var(--font-mono);font-size:12px;background:var(--card);color:var(--text-secondary);border:1px solid var(--border);border-radius:7px;padding:6px 10px;cursor:pointer;}
 .devbar button.active{background:var(--skill);border-color:var(--skill);color:#0A0D18;}
-.bevel-frame{border-radius:16px;background:linear-gradient(180deg,#1A2143,#0E1328);border:2px solid #2B3563;
+.bevel-frame{border-radius:16px;background:linear-gradient(180deg,rgba(26,33,67,.90),rgba(14,19,40,.90));border:2px solid #2B3563;
+  backdrop-filter:blur(14px) saturate(1.15);-webkit-backdrop-filter:blur(14px) saturate(1.15);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.4);}
 .bevel{background:linear-gradient(180deg,#2A3360 0%,#1A2142 55%,#141A34 100%);border:1px solid #0B0F20;border-radius:12px;
   box-shadow:inset 0 2px 0 rgba(255,255,255,.10),inset 0 -3px 0 rgba(0,0,0,.35),0 2px 0 rgba(0,0,0,.35);}
