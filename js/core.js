@@ -388,9 +388,9 @@ function colorVarOf(res){ return res.colorVar || ('tier'+res.tier); }
 
 function freshState(){
   const resources={};
-  // Тестовый стартовый набор: все базовые ресурсы по 500 — чтобы сразу было с чем тестировать
+  // Тестовый стартовый набор: все базовые ресурсы по 10000 — чтобы сразу было с чем тестировать
   // любую постройку/рецепт, без ручной правки через консоль.
-  RESOURCES.forEach(r=>resources[r.id]=500);
+  RESOURCES.forEach(r=>resources[r.id]=10000);
   POP_GOODS.forEach(r=>resources[r.id]=0);
   const richness={};
   RESOURCES.filter(r=>r.tier===0).forEach(r=>{ const k=r.family||r.id; if(richness[k]==null) richness[k]=Math.round((0.8+Math.random()*0.5)*100)/100; });
@@ -447,9 +447,9 @@ if((state.population||0)<30){
   saveState();
 }
 // Жёсткий пол базовых ресурсов для тестовой версии: каждый раз при загрузке поднимаем то,
-// что ниже 500, не трогая то, что уже выше (наработанные запасы не срезаем).
+// что ниже 10000, не трогая то, что уже выше (наработанные запасы не срезаем).
 let resourcesTopUp=false;
-RESOURCES.forEach(r=>{ if((state.resources[r.id]||0)<500){ state.resources[r.id]=500; resourcesTopUp=true; } });
+RESOURCES.forEach(r=>{ if((state.resources[r.id]||0)<10000){ state.resources[r.id]=10000; resourcesTopUp=true; } });
 if(resourcesTopUp) saveState();
 
 const util={};
