@@ -1,0 +1,147 @@
+/* Тестовая тема в духе SAGE: космический HUD, стеклянные панели со срезанными углами,
+   янтарный основной акцент и циановые линии. Подключается только в sage-test.html поверх
+   обычных стилей — переопределяет токены и каркас, игровую логику не трогает. */
+:root{
+  --bg:#04060B;
+  --panel:rgba(10,16,28,.78);
+  --card:rgba(16,24,40,.72);
+  --card-hover:rgba(26,38,60,.85);
+  --border:rgba(110,170,210,.16);
+  --border-strong:rgba(110,170,210,.32);
+  --text-primary:#E6EEF6;
+  --text-secondary:#93A6BC;
+  --text-muted:#56677D;
+  --amber:#F5A524;
+  --amber-dim:rgba(245,165,36,.18);
+  --cyan:#45D8E6;
+  --skill:#F5A524;
+  --radius:0px;
+  --cut:10px;
+  --font-display:'Oxanium','Rajdhani',sans-serif;
+}
+html,body{min-height:100%;}
+body{
+  background:
+    radial-gradient(1200px 700px at 85% -10%,rgba(245,165,36,.10),transparent 60%),
+    radial-gradient(900px 600px at -10% 110%,rgba(69,216,230,.08),transparent 60%),
+    radial-gradient(ellipse at 50% 50%,#0A1020 0%,#04060B 70%);
+  background-attachment:fixed;
+}
+/* Звёзды и сетка — отдельными фиксированными слоями под интерфейсом. */
+body::before,body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;}
+body::before{
+  background-image:
+    radial-gradient(1px 1px at 12% 18%,#fff8,transparent 60%),radial-gradient(1px 1px at 72% 34%,#fff9,transparent 60%),
+    radial-gradient(1.5px 1.5px at 33% 72%,#fffa,transparent 60%),radial-gradient(1px 1px at 88% 81%,#fff7,transparent 60%),
+    radial-gradient(1px 1px at 55% 9%,#fff8,transparent 60%),radial-gradient(1.5px 1.5px at 6% 58%,#cfe8ff,transparent 60%),
+    radial-gradient(1px 1px at 46% 46%,#fff6,transparent 60%),radial-gradient(1px 1px at 94% 12%,#ffe2b0,transparent 60%);
+  background-size:420px 420px;
+  opacity:.8;
+}
+body::after{
+  background-image:linear-gradient(rgba(110,170,210,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(110,170,210,.045) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse at 50% 40%,#000 30%,transparent 80%);
+}
+
+/* ---------- Верхняя HUD-полоса ---------- */
+.sage-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:20px;padding:10px 20px;
+  background:linear-gradient(180deg,rgba(4,6,11,.95),rgba(4,6,11,.80));backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);}
+.sage-top::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--amber) 20%,var(--amber) 40%,transparent 60%);opacity:.6;}
+.sage-brand{display:flex;align-items:center;gap:10px;flex:none;}
+.sage-brand svg{width:28px;height:28px;color:var(--amber);}
+.sage-brand b{font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:.22em;text-transform:uppercase;}
+.sage-brand span{display:block;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.18em;color:var(--text-muted);text-transform:uppercase;}
+.sage-top .stats-row{margin:0 0 0 auto;gap:0;flex-wrap:nowrap;}
+.sage-top .stat{padding:0 16px;border-left:1px solid var(--border);}
+.sage-top .stat-label{font-family:var(--font-display);font-size:9.5px;letter-spacing:.16em;}
+.sage-top .stat-value{font-size:14px;color:var(--cyan);}
+
+/* ---------- Каркас: левая колонна команд + рабочая область ---------- */
+.page{max-width:1360px;padding:22px 20px 60px;gap:18px;}
+.sage-shell{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;align-items:start;}
+.sage-rail{position:sticky;top:76px;}
+.sage-main{min-width:0;display:flex;flex-direction:column;}
+
+.sage-head{position:relative;padding:18px 22px;background:var(--panel);border:1px solid var(--border);
+  clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,24px 100%,0 calc(100% - 24px));}
+.sage-head::before{content:"";position:absolute;left:0;top:0;width:3px;height:40px;background:var(--amber);}
+.eyebrow{font-family:var(--font-mono);color:var(--amber);letter-spacing:.2em;}
+h1{font-family:var(--font-display);font-weight:600;font-size:28px;letter-spacing:.08em;text-transform:uppercase;}
+.sub{color:var(--text-secondary);}
+
+/* ---------- Хотбар разделов → вертикальное меню команд ---------- */
+.sections{align-items:stretch;gap:12px;}
+.hotbar{flex-direction:column;gap:4px;padding:8px;max-width:none;border-radius:0;
+  background:var(--panel);border:1px solid var(--border);box-shadow:none;backdrop-filter:blur(6px);
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));}
+.hb-slot{flex:none;aspect-ratio:auto;flex-direction:row;justify-content:flex-start;gap:12px;height:44px;padding:0 12px 0 30px;
+  border-radius:0;background:transparent;border:1px solid transparent;box-shadow:none;color:var(--text-secondary);}
+.hb-slot:hover{filter:none;background:rgba(110,170,210,.06);border-color:var(--border);}
+.hb-slot:active{transform:none;box-shadow:none;}
+.hb-slot svg{width:22px;max-width:22px;flex:none;filter:none;}
+.hb-name{font-size:12px;letter-spacing:.14em;}
+.hb-key{top:50%;left:9px;transform:translateY(-50%);}
+.hb-dot{position:static;margin-left:auto;border-radius:0;border:none;height:17px;line-height:17px;
+  clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%);}
+.hb-fill{left:30px;right:12px;bottom:3px;height:2px;border-radius:0;}
+.hb-slot.active{color:var(--text-primary);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--c) 22%,transparent),transparent 85%);
+  border-color:color-mix(in srgb,var(--c) 45%,transparent);
+  box-shadow:inset 3px 0 0 var(--c);}
+.hb-slot.active svg{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--c) 80%,transparent));}
+.hb-caption{max-width:none;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;
+  border:1px solid var(--border);background:var(--panel);}
+.hb-caption b{font-size:15px;letter-spacing:.12em;text-transform:uppercase;}
+.hb-caption .hb-hint{margin-left:0;}
+
+/* ---------- Вкладки ---------- */
+.tabs{border-bottom:1px solid var(--border);gap:2px;}
+.tab-btn{font-family:var(--font-display);letter-spacing:.14em;font-size:12px;padding:10px 16px;
+  clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px);}
+.tab-btn.active{background:linear-gradient(180deg,color-mix(in srgb,var(--tab-color,var(--amber)) 16%,transparent),transparent);}
+
+/* ---------- Панели и карточки: стекло + срезанные углы ---------- */
+.panel,.modal{border-radius:0;background:var(--panel);backdrop-filter:blur(6px);
+  clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,var(--cut) 100%,0 calc(100% - var(--cut)));}
+.panel h2{font-family:var(--font-display);letter-spacing:.18em;color:var(--amber);font-size:13px;}
+.panel h2::before{content:"// ";color:var(--text-muted);}
+.bcard,.chip{border-radius:0;background:var(--card);
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);}
+.bcard:hover{background:var(--card-hover);}
+.chip-bar,.warehouse-bar{border-radius:0;}
+.bevel,.bevel-frame,.sunk{border-radius:0!important;}
+.bevel-frame{background:var(--panel);border:1px solid var(--border);box-shadow:none;}
+.bevel{background:linear-gradient(180deg,rgba(40,58,86,.6),rgba(16,24,40,.8));border:1px solid var(--border);box-shadow:inset 0 1px 0 rgba(255,255,255,.05);}
+.sunk{background:rgba(2,4,8,.6);border:1px solid var(--border);}
+
+/* ---------- Кнопки ---------- */
+.build-btn,.tile-btn,.wh-tank-btn,.modal-close{border-radius:0!important;font-family:var(--font-display)!important;letter-spacing:.12em;text-transform:uppercase;
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);}
+.modal-close{background:var(--amber);color:#120C02;}
+.modal-close:hover{filter:brightness(1.1);}
+
+/* ---------- Тестовая панель и примечание ---------- */
+.devbar{padding:10px 14px;border:1px dashed var(--border-strong);font-family:var(--font-mono);}
+.devbar button{border-radius:0;}
+.devbar button.active{background:var(--amber);border-color:var(--amber);color:#120C02;}
+.footnote{border-top-color:var(--border);}
+.modal-backdrop{background:rgba(2,3,6,.78);backdrop-filter:blur(3px);}
+
+/* ---------- Узкие экраны: колонна команд снова становится горизонтальной ---------- */
+@media (max-width:860px){
+  .sage-shell{grid-template-columns:minmax(0,1fr);}
+  .sage-rail{position:static;}
+  .hotbar{flex-direction:row;overflow-x:auto;}
+  .hb-slot{flex:1 0 56px;flex-direction:column;justify-content:center;height:58px;padding:0 4px;gap:4px;}
+  .hb-key{display:none;}
+  .hb-dot{position:absolute;top:2px;right:2px;margin:0;}
+  .hb-fill{left:4px;right:4px;}
+  .hb-slot.active{box-shadow:inset 0 -3px 0 var(--c);}
+  .sage-top{flex-wrap:wrap;gap:8px 14px;padding:8px 16px;}
+  .sage-top .stats-row{margin:0;width:100%;overflow-x:auto;}
+  .sage-top .stat:first-child{border-left:none;padding-left:0;}
+}
+@media (max-width:560px){ .hb-name{display:block;font-size:9px;letter-spacing:.06em;} }
