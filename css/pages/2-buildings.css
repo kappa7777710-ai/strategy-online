@@ -1,0 +1,24 @@
+/* Вкладка «Здания». */
+.unit-yard{display:flex;flex-wrap:wrap;gap:9px;margin-top:2px;}
+.unit-tile{position:relative;width:78px;display:flex;flex-direction:column;align-items:center;gap:5px;background:radial-gradient(circle at 50% 30%,var(--card-hover),var(--panel));border:1px solid var(--border);border-radius:11px;padding:9px 6px 8px;}
+.unit-tile.worn{border-color:var(--tier1);}
+.unit-tile.damaged{border-color:var(--bad);}
+.unit-tile-id{position:absolute;top:5px;left:7px;font-family:var(--font-mono);font-size:8.5px;color:var(--text-muted);}
+.unit-tile-icon svg{width:32px;height:32px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));}
+.unit-tile.damaged .unit-tile-icon svg{opacity:.55;}
+.unit-tile.worn .unit-tile-icon svg{opacity:.8;}
+.unit-tile-bar{width:100%;height:5px;border-radius:3px;background:var(--border);overflow:hidden;}
+.unit-tile-bar .fill{height:100%;transition:width .3s;}
+.unit-tile-bar.ok .fill{background:var(--good);}
+.unit-tile-bar.warn .fill{background:var(--tier1);}
+.unit-tile-bar.bad .fill{background:var(--bad);}
+.unit-tile-pct{font-family:var(--font-mono);font-size:9.5px;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+.unit-tile-actions{display:flex;gap:5px;margin-top:1px;}
+.tile-btn{width:23px;height:23px;padding:0;display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--border);border-radius:6px;cursor:pointer;}
+.tile-btn svg{width:12px;height:12px;}
+.tile-btn.repair{color:var(--tier1);}
+.tile-btn.repair:hover:not(:disabled){border-color:var(--tier1);}
+.tile-btn.repair:disabled{opacity:.35;cursor:not-allowed;}
+.tile-btn.demolish{color:var(--bad);}
+.tile-btn.demolish:hover{border-color:var(--bad);}
+.tile-btn.ok-mark{color:var(--good);font-size:12px;cursor:default;}

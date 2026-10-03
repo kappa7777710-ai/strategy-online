@@ -1,0 +1,40 @@
+/* Меню разделов — хотбар. */
+.sections{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.hotbar{display:flex;gap:8px;padding:10px;border-radius:16px;width:100%;max-width:720px;
+  background:linear-gradient(180deg,#1A2143,#0E1328);border:2px solid #2B3563;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.45);}
+.hb-slot{position:relative;flex:1 1 0;min-width:0;aspect-ratio:1;border-radius:12px;cursor:pointer;font:inherit;color:var(--text-secondary);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;
+  background:linear-gradient(180deg,#2A3360 0%,#1A2142 55%,#141A34 100%);border:1px solid #0B0F20;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.10),inset 0 -3px 0 rgba(0,0,0,.35),0 2px 0 rgba(0,0,0,.35);
+  transition:transform .1s,box-shadow .15s,filter .15s;}
+.hb-slot:hover{filter:brightness(1.15);}
+.hb-slot:active{transform:translateY(2px);box-shadow:inset 0 3px 6px rgba(0,0,0,.5);}
+.hb-slot svg{width:52%;height:auto;max-width:48px;color:var(--c);filter:drop-shadow(0 2px 2px rgba(0,0,0,.5));}
+.hb-name{font-family:var(--font-display);font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase;line-height:1;}
+.hb-key{position:absolute;top:4px;left:6px;font-family:var(--font-mono);font-size:9.5px;color:var(--text-muted);}
+.hb-dot{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--c);color:#0A0D18;
+  font-family:var(--font-mono);font-weight:500;font-size:10.5px;line-height:15px;text-align:center;border:2px solid #0E1328;}
+.hb-fill{position:absolute;left:5px;right:5px;bottom:4px;height:3px;border-radius:2px;background:rgba(0,0,0,.45);overflow:hidden;}
+.hb-fill i{display:block;height:100%;background:var(--c);}
+.hb-slot.active{color:var(--text-primary);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c) 34%,#1A2142) 0%,#171E3C 70%);
+  box-shadow:0 0 0 2px var(--c),0 0 18px color-mix(in srgb,var(--c) 55%,transparent),inset 0 2px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.3);}
+.hb-slot.active svg{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--c) 80%,transparent));}
+/* Шестерёнки «Цеха» крутятся, пока хоть одна установка реально работает. Малая (8 зубьев)
+   вращается навстречу большой (10 зубьев) в 10/8 раза быстрее — зацепление выглядит честно. */
+.hb-slot .gear-lg,.hb-slot .gear-sm{transform-box:fill-box;transform-origin:center;}
+.hb-slot.spinning .gear-lg{animation:hb-spin 6s linear infinite;}
+.hb-slot.spinning .gear-sm{animation:hb-spin 4.8s linear infinite reverse;}
+@keyframes hb-spin{to{transform:rotate(360deg);}}
+@media (prefers-reduced-motion:reduce){ .hb-slot.spinning .gear-lg,.hb-slot.spinning .gear-sm{animation:none;} }
+.hb-caption{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;padding:0 4px;width:100%;max-width:720px;}
+.hb-caption b{font-family:var(--font-display);font-weight:700;font-size:19px;letter-spacing:.03em;color:var(--c);}
+.hb-caption span{font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);}
+.hb-caption .hb-hint{margin-left:auto;font-family:var(--font-body);font-size:11px;color:var(--text-muted);}
+.hb-caption kbd{font-family:var(--font-mono);font-size:10.5px;color:var(--text-secondary);background:var(--card);border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:0 5px;}
+@media (max-width:560px){
+  .hotbar{gap:5px;padding:7px;border-radius:14px;}
+  .hb-name,.hb-key,.hb-caption .hb-hint{display:none;}
+  .hb-slot svg{width:62%;}
+}

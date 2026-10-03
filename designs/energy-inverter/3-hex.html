@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Тактическая сеть</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="inv-base.css">
+<style>
+/* Вариант 3 · «Тактическая сеть»: HUD в духе космических стратегий. Инвертор — центральный гекс,
+   источники и потребители — соты вокруг, энергия идёт по лучам-шевронам. */
+:root{
+  --v-bg:#05070A;--v-card:rgba(14,20,26,.9);--v-panel:rgba(10,14,19,.92);--v-line:rgba(255,138,31,.18);--v-line2:rgba(255,138,31,.42);
+  --v-accent:#FF8A1F;--v-accent2:#FF8A1F;--v-radius:2px;--v-text:#E8EEF2;--v-dim:#93A3AE;--v-mute:#5A6872;
+  --v-pop:linear-gradient(180deg,rgba(18,24,30,.98),rgba(9,12,16,.98));
+  --or:#FF8A1F;--cy:#3FE0F0;
+  --hexbg:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0 L56 16.2 V48.5 L28 64.7 L0 48.5 V16.2Z M28 97 V64.7' fill='none' stroke='%23FF8A1F' stroke-opacity='.06'/%3E%3C/svg%3E");
+}
+body{background:var(--hexbg),radial-gradient(70% 50% at 50% 30%,rgba(255,138,31,.07),transparent 70%),#05070A;}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px);z-index:2000;}
+.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;color:var(--or);}
+.eyebrow::before{content:'// ';}
+h1{margin:2px 0 0;font-family:var(--font-display);font-weight:700;font-size:34px;letter-spacing:.16em;text-transform:uppercase;}
+h1 span{color:var(--or);}
+.sub{margin:4px 0 0;color:var(--v-dim);font-size:13px;max-width:72ch;}
+.inv-btn.active{background:var(--or);border-color:var(--or);}
+.inv-ctl{border-radius:0;}
+
+/* угловые скобки */
+.br{--bc:var(--or);background:
+  linear-gradient(var(--bc),var(--bc)) 0 0/12px 1.5px no-repeat,linear-gradient(var(--bc),var(--bc)) 0 0/1.5px 12px no-repeat,
+  linear-gradient(var(--bc),var(--bc)) 100% 0/12px 1.5px no-repeat,linear-gradient(var(--bc),var(--bc)) 100% 0/1.5px 12px no-repeat,
+  linear-gradient(var(--bc),var(--bc)) 0 100%/12px 1.5px no-repeat,linear-gradient(var(--bc),var(--bc)) 0 100%/1.5px 12px no-repeat,
+  linear-gradient(var(--bc),var(--bc)) 100% 100%/12px 1.5px no-repeat,linear-gradient(var(--bc),var(--bc)) 100% 100%/1.5px 12px no-repeat,
+  var(--v-panel);border:1px solid rgba(255,138,31,.10);}
+
+/* телеметрия */
+.hud{display:grid;grid-template-columns:auto repeat(6,minmax(0,1fr));gap:0;padding:0;}
+.hud>div{padding:10px 14px;border-left:1px solid rgba(255,138,31,.12);min-width:0;}
+.hud>div:first-child{border-left:none;}
+.hud span{display:block;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--v-mute);white-space:nowrap;}
+.hud b{display:block;font-family:var(--font-mono);font-weight:500;font-size:16px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.hud .st{display:flex;align-items:center;gap:10px;}
+.hud .st b{font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.18em;text-transform:uppercase;}
+.blinker{width:10px;height:10px;transform:rotate(45deg);background:currentColor;box-shadow:0 0 10px currentColor;animation:bl 1.2s steps(2) infinite;}
+@keyframes bl{50%{opacity:.25;}}
+
+/* карта */
+.map{position:relative;height:660px;}
+#fl{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible;}
+.fl-base{stroke-linecap:butt;}
+.fl-dash{stroke-linecap:butt;filter:drop-shadow(0 0 3px currentColor);}
+.tile{position:absolute;left:calc(50% + var(--x));top:var(--y);transform:translate(-50%,-50%);width:var(--w,206px);height:calc(var(--w,206px)*.866);z-index:3;}
+.hx{position:absolute;inset:0;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);background:var(--nc,var(--or));opacity:.95;}
+.hx::before{content:'';position:absolute;inset:1.5px;clip-path:inherit;background:radial-gradient(80% 80% at 50% 30%,color-mix(in srgb,var(--nc,var(--or)) 14%,#0B1015),#080B0F 75%);}
+.tile.dim .hx{opacity:.35;}
+.tile.on .hx{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--nc) 60%,transparent));}
+.tin{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 22%;gap:1px;}
+.tl{display:flex;align-items:center;gap:5px;font-family:var(--font-display);font-weight:700;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--nc);line-height:1.1;}
+.tv{font-family:var(--font-mono);font-weight:500;font-size:19px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.ts{font-family:var(--font-mono);font-size:10px;color:var(--v-dim);white-space:nowrap;}
+.tbar{width:100%;height:4px;background:rgba(255,255,255,.07);margin-top:5px;display:flex;gap:1px;}
+.tbar i{display:block;height:100%;background:var(--nc);box-shadow:0 0 6px var(--nc);transition:width .4s;}
+.cnt{position:absolute;top:10%;left:50%;transform:translateX(-50%);font-family:var(--font-mono);font-size:10px;color:var(--v-mute);}
+.tile .i-btn{width:17px;height:17px;font-size:9.5px;border-radius:2px;}
+.tile .pop{left:-10px;top:calc(100% + 4px);}
+.tile.right .gpop{right:calc(100% - 20px);top:-10px;transform:translateX(8px);}
+.tile.grp{cursor:help;outline:none;}
+.tile:has(.pop),.tile.grp:hover,.tile.grp:focus-within{z-index:60;}
+.tile.grp:focus-visible .hx{filter:drop-shadow(0 0 0 2px #fff);}
+.sm .tv{font-size:16px;}
+
+/* ядро */
+.core{--w:330px;z-index:4;}
+.core .hx{background:var(--sc);}
+.core .hx::before{background:radial-gradient(60% 60% at 50% 45%,color-mix(in srgb,var(--sc) 22%,#0B1015),#06090C 80%);}
+.core svg.ring{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+.core .tin{padding:0 18%;}
+.core .lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;color:var(--v-mute);}
+.core .pct{font-family:var(--font-display);font-weight:700;font-size:58px;line-height:.95;letter-spacing:.02em;color:var(--sc);text-shadow:0 0 22px color-mix(in srgb,var(--sc) 60%,transparent);}
+.core .pl{font-family:var(--font-display);font-weight:600;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--v-dim);}
+.spin{transform-origin:50% 50%;transform-box:fill-box;animation:spin 24s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.cells{display:flex;gap:3px;margin-top:4px;}
+.cells i{width:9px;height:18px;background:rgba(63,224,240,.12);clip-path:polygon(0 10%,100% 0,100% 90%,0 100%);}
+.cells i.on{background:var(--cy);box-shadow:0 0 8px var(--cy);}
+.cells.low i.on{background:#F4557B;}
+
+/* журнал */
+.sec-h{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.sec-h h2{margin:0;font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.2em;text-transform:uppercase;}
+.sec-h h2::before{content:'▸ ';color:var(--or);}
+.sec-h .p-tabs{margin-left:auto;}
+.p-tab{border-radius:0;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);background:rgba(255,138,31,.07);border:none;padding:7px 18px;}
+.p-tab.active{background:var(--or);color:#120800;}
+.live{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--font-mono);font-size:12px;color:var(--v-dim);}
+.live b{font-weight:500;color:var(--or);}
+.cov{font-size:11.5px;color:var(--v-mute);} .cov:empty{display:none;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+.kpi{--bc:var(--kc);padding:12px 14px;position:relative;}
+.kh{display:flex;align-items:center;gap:8px;}
+.kl{flex:1;min-width:0;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--kc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.kv{font-family:var(--font-display);font-weight:700;font-size:28px;letter-spacing:.02em;line-height:1.1;margin-top:4px;white-space:nowrap;}
+.ks{font-family:var(--font-mono);font-size:11px;color:var(--v-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.kseg{display:grid;grid-template-columns:repeat(20,1fr);gap:2px;margin:8px 0 6px;}
+.kseg i{height:5px;background:rgba(255,255,255,.06);}
+.kseg i.on{background:var(--kc);box-shadow:0 0 5px var(--kc);}
+.kpi .i-btn{border-radius:2px;}
+.d-wrap{border-radius:0;}
+.d-table tr.grp td{color:var(--or);}
+
+@media (max-width:1180px){
+  .map{height:auto;display:flex;flex-wrap:wrap;justify-content:center;gap:6px 4px;padding:10px 0;}
+  .tile{position:relative;left:auto;top:auto;transform:none;}
+  .core{order:-1;flex-basis:100%;max-width:330px;margin:0 auto 10px;}
+  #fl{display:none;}
+  .tile.right .gpop{right:auto;left:0;top:calc(100% + 4px);}
+  .hud{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .hud>div{border-top:1px solid rgba(255,138,31,.12);}
+}
+@media (max-width:520px){ .hud{grid-template-columns:repeat(2,minmax(0,1fr));} .tile{--w:172px;} .core{--w:300px;} .tv{font-size:16px;} }
+</style>
+</head>
+<body>
+<div class="page">
+  <a class="back" href="index.html">← Все варианты</a>
+  <header>
+    <div class="eyebrow">ИНДУСТРИАЛЬНЫЙ ПОЯС / ЭНЕРГИЯ / ВАРИАНТ 3</div>
+    <h1>Тактическая <span>сеть</span></h1>
+    <p class="sub">HUD как в космической стратегии: инвертор — командный гекс в центре, вокруг соты источников и потребителей. Энергия идёт по лучам; чем ярче и быстрее шевроны — тем больше мощность.</p>
+  </header>
+  <div id="invCtl"></div>
+  <div id="app"></div>
+</div>
+<script src="inv-core.js"></script>
+<script>
+(function(){
+var I=INV, L=null;
+var stCol={ok:'#4ADE9B',sag:'#FF8A1F',black:'#F4557B'};
+// позиции сот вокруг центра (cx = 50%, cy = 300px), шаг сот ~ ширина 206
+var CY=300, IN=300, OUT=466, DY=92;
+function tile(id,pos,nc,inner,cls,extra,w){
+  return '<div class="tile '+(cls||'')+'" id="'+id+'" style="--x:'+pos[0]+'px;--y:'+pos[1]+'px;--nc:'+nc+(w?';--w:'+w+'px':'')+'"'+(extra||'')+'><div class="hx"></div><div class="tin">'+inner+'</div></div>';
+}
+function seg(p,n){ var s='',on=Math.round(Math.max(0,Math.min(1,p))*n); for(var i=0;i<n;i++) s+='<i style="width:'+(100/n)+'%;'+(i<on?'':'background:transparent;box-shadow:none')+'"></i>'; return s; }
+function render(c){
+  var col=stCol[c.state], pct=c.frac*100, h='';
+  // источники: внутренняя колонка — генераторы, внешняя — солнце и будущие
+  var gp=[[-IN,CY-DY],[-IN,CY+DY]], op=[[-OUT,CY-2*DY],[-OUT,CY],[-OUT,CY+2*DY]];
+  h+=tile('nSun',op[0],'#FFDD57',
+    '<span class="tl">Солнце '+I.infoBtn('sun')+'</span><span class="tv" data-live="sunPct">'+Math.round(c.sun*100)+'%</span><span class="ts" data-live="sunTxt">'+(c.day?'ДЕНЬ':'НОЧЬ')+' · '+c.clock+'</span>'+
+    '<div class="tbar" data-live="sunBar">'+seg(c.sun,10)+'</div>',c.day?'on':'dim').replace('</div></div>','</div>'+I.sunPopHtml()+'</div>');
+  c.gens.forEach(function(g,i){
+    var k='g_'+g.id, p=gp[i]||[-IN,CY+DY*(2*i-1)];
+    var t=tile('nGen-'+g.id,p,g.color,'<span class="cnt">×'+g.count+'</span><span class="tl">'+(g.isSolar?'Панели':'ТЭС')+(g.isSolar?' '+I.infoBtn('gen',g.id):'')+'</span>'+
+      '<span class="tv" data-live="'+k+'_n">'+I.kw(g.now)+'</span><span class="ts" data-live="'+k+'_o">из '+I.kw(g.nameplate)+'</span>'+
+      '<span class="ts" data-live="'+k+'_x">'+(g.isSolar?'сутки ≈ '+I.kwh(g.daily):'работает '+Math.round(g.pct)+'%')+'</span>'+
+      '<div class="tbar" data-live="'+k+'_b">'+seg(g.pct/100,10)+'</div>',g.now>0?'on':'dim');
+    h+=t.replace(/<\/div><\/div>$/,'</div>'+I.genPopHtml(g)+'</div>');
+  });
+  I.PLANNED.forEach(function(p,i){
+    h+=tile('nPlan-'+p.id,op[i+1],p.color,'<span class="tl">'+(p.id==='admin'?'Админ. центр':'Генератор')+'</span><span class="tv">'+I.kw(0)+'</span><span class="ts">'+p.kind+'</span><span class="ts">не подключён</span>','dim sm');
+  });
+  // ядро
+  var N=36, lit=Math.round(c.frac*N), ring='';
+  for(var s=0;s<N;s++){ var t0=s/N, t1=(s+0.7)/N; ring+='<path d="'+hexSeg(t0,t1)+'" fill="'+(s<lit?col:'rgba(255,255,255,.07)')+'"/>'; }
+  var cells=''; for(var b=0;b<10;b++) cells+='<i class="'+(b<Math.round(c.pct/10)?'on':'')+'"></i>';
+  h+='<div class="tile core" id="nCore" style="--x:0px;--y:'+CY+'px;--sc:'+col+'"><div class="hx"></div>'+
+    '<svg class="ring" viewBox="0 0 330 285.8" aria-hidden="true"><g data-live="cRing">'+ring+'</g>'+
+      '<polygon class="spin" points="'+hexPts(165,142.9,118)+'" fill="none" stroke="'+col+'" stroke-opacity=".35" stroke-dasharray="3 9"/></svg>'+
+    '<div class="tin"><span class="lbl">INV-01 // ИНВЕРТОР</span><span class="pct" data-live="cPct">'+(pct<99.5&&pct>0?pct.toFixed(1):Math.round(pct))+'%</span><span class="pl">обеспечено</span>'+
+      '<div class="cells'+(c.pct<15?' low':'')+'" data-live="cCells" title="Заряд аккумуляторов">'+cells+'</div><span class="ts" data-live="cBatT">заряд '+Math.round(c.pct)+'%</span></div></div>';
+  // потребители
+  var ip=[[IN,CY-DY],[IN,CY+DY]], opp=[[OUT,CY-2*DY],[OUT,CY],[OUT,CY+2*DY]], slots=ip.concat(opp);
+  c.groups.forEach(function(g,i){
+    var p=slots[i]||[OUT,CY+DY*(i-2)];
+    h+='<div class="tile grp right has-gpop'+(g.sum>0.01?' on':'')+'" tabindex="0" id="nGrp-'+g.id+'" style="--x:'+p[0]+'px;--y:'+p[1]+'px;--nc:'+g.color+'" aria-describedby="gpop-'+g.id+'"><div class="hx"></div><div class="tin">'+
+      '<span class="cnt">'+g.units+' уст.</span><span class="tl">'+g.name+'</span><span class="tv" data-live="gv_'+g.id+'">'+I.kw(g.sum)+'</span>'+
+      '<span class="ts">'+g.kinds+' '+I.plural(g.kinds,'вид','вида','видов')+'</span><span class="ts" data-live="gl_'+g.id+'">загрузка '+Math.round(g.load)+'%</span>'+
+      '<div class="tbar" data-live="gb_'+g.id+'">'+seg(g.load/100,10)+'</div></div>'+I.groupPop(g)+'</div>';
+  });
+  // аккумуляторы и сброс
+  h+=tile('nBat',[0,CY+238],'#3FE0F0','<span class="cnt">'+(c.batteries?'×'+c.batteries:'база')+'</span><span class="tl">Аккумуляторы</span><span class="tv" data-live="bJ">'+I.J(c.stored)+'</span>'+
+    '<span class="ts" data-live="bOf">'+I.kwh(c.stored)+' / '+I.kwh(c.cap)+'</span><span class="ts" data-live="bFl" title="'+c.flowTxt+'">'+(Math.abs(c.flow)<0.01?'без изменений':c.flow>0?'▲ заряд':'▼ разряд')+'</span>'+
+    '<div class="tbar" data-live="bBar">'+seg(c.pct/100,10)+'</div>','on',' title="'+c.flowTxt+'"');
+  h+=tile('nCurt',[178,CY+290],'#8C93B0','<span class="tl">Сброс</span><span class="tv" data-live="curtV" style="font-size:14px">'+(c.curtail>0.01?I.kw(c.curtail):'нет')+'</span>',(c.curtail>0.01?'on':'dim')+' sm','',136);
+  return '<section class="br hud" data-live="hud">'+
+      '<div class="st" style="color:'+col+'"><span class="blinker"></span><div><span>статус сети</span><b>'+c.stateLabel+'</b></div></div>'+
+      '<div><span>Потребность</span><b>'+I.kw(c.demand)+'</b></div><div><span>Получено</span><b>'+I.kw(c.supply)+'</b></div>'+
+      '<div><span>Выработка</span><b>'+I.kw(c.gen)+'</b></div><div><span>Акк. поток</span><b style="color:'+(c.flow>0.01?'#3FE0F0':c.flow<-0.01?'#FF8A1F':'inherit')+'">'+c.flowSigned+'</b></div>'+
+      '<div><span>Автономия</span><b>'+c.autonomy+'</b></div><div><span>Аккумуляторы</span><b>'+Math.round(c.pct)+'%</b></div></section>'+
+    '<section class="br map" id="scheme" style="border-color:transparent;background-color:transparent"><svg id="fl" aria-hidden="true"></svg>'+h+'</section>'+
+    journal(c)+'<section class="d-wrap br"><table class="d-table" data-live="tbl">'+I.tableRows(c)+'</table></section>';
+}
+// плоский гекс 330×285.8: точки и отрезки периметра для сегментного кольца
+function hexPts(cx,cy,r){ var p=[]; for(var i=0;i<6;i++){ var a=Math.PI/3*i; p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1)); } return p.join(' '); }
+function hexAt(t,r){ var cx=165,cy=142.9; t=((t%1)+1)%1; var s=Math.floor(t*6), f=t*6-s, a0=Math.PI/3*s-Math.PI/2+Math.PI/6*0, A=[cx+r*Math.cos(Math.PI/3*s-2*Math.PI/3),cy+r*Math.sin(Math.PI/3*s-2*Math.PI/3)], B=[cx+r*Math.cos(Math.PI/3*(s+1)-2*Math.PI/3),cy+r*Math.sin(Math.PI/3*(s+1)-2*Math.PI/3)]; return [A[0]+(B[0]-A[0])*f,A[1]+(B[1]-A[1])*f]; }
+function hexSeg(t0,t1){ var a=hexAt(t0,152),b=hexAt(t1,152),c=hexAt(t1,140),d=hexAt(t0,140); return 'M'+a[0].toFixed(1)+' '+a[1].toFixed(1)+'L'+b[0].toFixed(1)+' '+b[1].toFixed(1)+'L'+c[0].toFixed(1)+' '+c[1].toFixed(1)+'L'+d[0].toFixed(1)+' '+d[1].toFixed(1)+'Z'; }
+function journal(c){
+  var jv=I.journal(I.UI.period);
+  return '<section style="display:flex;flex-direction:column;gap:12px"><div class="sec-h"><h2>Журнал сети</h2><div class="p-tabs">'+I.periodTabs('data-en-period',I.UI.period)+'</div></div>'+
+    '<div class="live" data-live="jLive"><span>&gt; выработка <b>'+I.kw(c.gen)+'</b></span><span>нагрузка <b>'+I.kw(c.demand)+'</b></span><span>обеспечено <b>'+Math.round(c.frac*100)+'%</b></span><span>заряд <b>'+I.J(c.stored)+'</b></span></div>'+
+    '<div class="cov" data-live="jCov">'+jv.covNote+'</div><div class="kpis">'+jv.list.map(function(k){
+      var segs='',on=Math.round(Math.max(0,Math.min(1,k.frac))*20); for(var i=0;i<20;i++) segs+='<i'+(i<on?' class="on"':'')+'></i>';
+      return '<div class="br kpi" style="--kc:'+k.color+'" data-live="k_'+k.id+'"><div class="kh"><span class="kl">'+k.l+'</span><button type="button" class="i-btn" data-kpi-chart="'+k.id+'" title="График: '+k.l.toLowerCase()+'">i</button></div>'+
+        '<div class="kv">'+k.v+'</div><div class="ks">'+k.s+'</div><div class="kseg">'+segs+'</div>'+I.deltaHtml(k.d)+'</div>'; }).join('')+'</div></section>';
+}
+// прямой луч между центрами сот, обрезанный по их краям
+function ray(a,b,host){
+  var ax=a.left+a.width/2-host.left, ay=a.top+a.height/2-host.top, bx=b.left+b.width/2-host.left, by=b.top+b.height/2-host.top;
+  var dx=bx-ax, dy=by-ay, L=Math.hypot(dx,dy)||1, ra=Math.min(a.width,a.height)/2*.95, rb=Math.min(b.width,b.height)/2*.95;
+  return 'M'+(ax+dx/L*ra).toFixed(1)+' '+(ay+dy/L*ra).toFixed(1)+' L'+(bx-dx/L*rb).toFixed(1)+' '+(by-dy/L*rb).toFixed(1);
+}
+function build(c){
+  L=new I.FlowLayer(document.getElementById('fl'),document.getElementById('scheme'),{route:ray,style:function(f,i,on,w){
+    f.base.setAttribute('stroke-width',1.5); f.base.style.opacity=on?'.55':'.18'; f.base.style.strokeDasharray='2 4';
+    f.dash.setAttribute('stroke-width',Math.max(3,w*0.9)); f.dash.style.opacity=on?(0.45+0.55*i).toFixed(2):'0'; f.dash.style.strokeDasharray='7 6'; }});
+  I.stdFlows(L,{sun:'nSun',gen:function(id){ return 'nGen-'+id; },bus:'nCore',admin:'nPlan-admin',genset:'nPlan-genset',bat:'nBat',curt:'nCurt',grp:function(id){ return 'nGrp-'+id; }},c);
+}
+I.start({root:document.getElementById('app'),render:render,build:build,key:function(c){ return c.state; },tick:function(c){ if(L) L.update(c); },layout:function(){ if(L) L.layout(); }});
+})();
+</script>
+</body>
+</html>

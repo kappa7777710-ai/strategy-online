@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Поток энергии</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="inv-base.css">
+<style>
+/* Вариант 4 · «Поток»: инвертор — призма в центре санки-диаграммы. Толщина каждой ленты — её
+   мощность в кВт прямо сейчас, высота карточки — её доля. Видно, куда уходит каждый киловатт. */
+:root{
+  --v-bg:#08090E;--v-card:rgba(255,255,255,.035);--v-panel:rgba(255,255,255,.03);--v-line:rgba(255,255,255,.08);--v-line2:rgba(255,255,255,.16);
+  --v-accent:#A99BFF;--v-accent2:#A99BFF;--v-radius:16px;--v-head:'IBM Plex Sans',sans-serif;
+  --v-pop:linear-gradient(180deg,#191B26,#11121A);
+  --vi:#A99BFF;--cy:#4FD1E7;
+}
+body{background:radial-gradient(50% 40% at 50% 20%,rgba(169,155,255,.10),transparent 70%),radial-gradient(40% 40% at 90% 80%,rgba(79,209,231,.06),transparent 70%),#08090E;}
+.eyebrow{font-size:12px;color:var(--v-mute);}
+h1{margin:4px 0 0;font-family:var(--font-body);font-weight:600;font-size:34px;letter-spacing:-.02em;}
+h1 span{background:linear-gradient(90deg,#FFDD57,#A99BFF 50%,#4FD1E7);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.sub{margin:6px 0 0;color:var(--v-dim);font-size:14px;max-width:70ch;}
+.inv-ctl{border-radius:14px;background:rgba(255,255,255,.025);}
+.inv-btn{border-radius:999px;}
+.inv-btn.active{background:var(--vi);border-color:var(--vi);}
+
+/* санки */
+.flow{position:relative;border-radius:28px;padding:26px 26px 30px;background:rgba(255,255,255,.018);border:1px solid var(--v-line);}
+.flow-h{display:flex;align-items:center;gap:10px;margin:0 0 18px;font-size:12px;color:var(--v-mute);}
+.flow-h b{color:var(--v-text);font-weight:600;font-size:14px;}
+.legend{margin-left:auto;display:flex;gap:14px;flex-wrap:wrap;}
+.legend span{display:inline-flex;align-items:center;gap:6px;}
+.legend i{width:18px;height:6px;border-radius:3px;}
+.cols{position:relative;z-index:2;display:grid;grid-template-columns:170px minmax(200px,240px) 190px minmax(220px,260px);justify-content:space-between;align-items:center;gap:0;}
+.col{display:flex;flex-direction:column;gap:14px;justify-content:center;}
+#rb{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible;}
+.rib{opacity:.32;transition:opacity .3s;}
+.rib.zero{opacity:1;fill:none!important;stroke:rgba(255,255,255,.14);stroke-dasharray:3 5;}
+.dots{fill:none;stroke:#fff;stroke-linecap:round;opacity:.75;animation:dots 1s linear infinite;}
+.dots.rev{animation-direction:reverse;}
+@keyframes dots{to{stroke-dashoffset:-14;}}
+
+.card{position:relative;background:var(--v-card);border:1px solid var(--v-line);border-radius:16px;padding:11px 13px;min-height:62px;display:flex;flex-direction:column;justify-content:center;
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset;transition:border-color .2s;}
+.card::before{content:'';position:absolute;left:-1px;top:14px;bottom:14px;width:3px;border-radius:3px;background:var(--nc,#fff);opacity:.9;}
+.card.r::before{left:auto;right:-1px;}
+.card:hover{border-color:var(--v-line2);}
+.ch{display:flex;align-items:center;gap:8px;}
+.ch h3{margin:0;flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--v-text);}
+.ch .tag{font-family:var(--font-mono);font-size:11px;color:var(--v-mute);}
+.cv{font-family:var(--font-mono);font-size:20px;font-weight:500;line-height:1.2;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.cs{font-family:var(--font-mono);font-size:11px;color:var(--v-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mini{height:3px;border-radius:2px;background:rgba(255,255,255,.07);margin-top:7px;overflow:hidden;}
+.mini i{display:block;height:100%;background:var(--nc);border-radius:inherit;transition:width .4s;}
+.plan{opacity:.5;border-style:dashed;min-height:52px;}
+.plan .cv{font-size:14px;}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(11px,1fr));gap:2px;margin-top:6px;}
+.tiles i{aspect-ratio:1.4;border-radius:2px;background:#FFDD57;opacity:var(--to,1);transition:opacity .5s;}
+.sunico{width:40px;height:40px;flex-shrink:0;}
+.sunrays{transform-origin:20px 20px;animation:spin 28s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#nSun .pop{width:min(400px,92vw);}
+.unmet{--nc:#F4557B;background:repeating-linear-gradient(135deg,rgba(244,85,123,.12) 0 6px,rgba(244,85,123,.03) 6px 12px);border-color:rgba(244,85,123,.35);}
+.grp{cursor:help;outline:none;}
+.grp:focus-visible{border-color:var(--nc);}
+.grp .gpop{right:calc(100% + 14px);top:-8px;transform:translateX(8px);}
+.curt.idle{opacity:.5;}
+
+/* призма-инвертор */
+.prism{position:relative;border-radius:22px;padding:2px;background:linear-gradient(180deg,#FFDD57,#A99BFF 45%,#4FD1E7);box-shadow:0 0 50px rgba(169,155,255,.25);}
+.prism-in{border-radius:20px;background:linear-gradient(180deg,#151624,#0C0D14);padding:16px 14px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;}
+.prism .lbl{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--v-mute);font-weight:600;}
+.ring{width:118px;height:118px;}
+.ring text{font-family:var(--font-mono);}
+.state{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--sc) 14%,transparent);color:var(--sc);}
+.state::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;}
+.pl{width:100%;display:flex;flex-direction:column;gap:3px;}
+.pl div{display:flex;justify-content:space-between;gap:6px;font-size:11.5px;color:var(--v-dim);}
+.pl b{font-family:var(--font-mono);font-weight:500;color:var(--v-text);white-space:nowrap;}
+
+/* журнал */
+.sec-h{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.sec-h h2{margin:0;font-weight:600;font-size:22px;letter-spacing:-.01em;}
+.sec-h .p-tabs{margin-left:auto;background:rgba(255,255,255,.03);border:1px solid var(--v-line);border-radius:999px;padding:3px;}
+.p-tab{font-family:var(--font-body);text-transform:none;letter-spacing:0;font-weight:500;font-size:13px;border:none;background:none;border-radius:999px;padding:6px 14px;}
+.p-tab.active{background:#fff;color:#08090E;}
+.live{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--v-dim);}
+.live b{font-family:var(--font-mono);font-weight:500;color:var(--v-text);}
+.cov{font-size:12px;color:var(--v-mute);} .cov:empty{display:none;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;}
+.kpi{position:relative;background:var(--v-card);border:1px solid var(--v-line);border-radius:18px;padding:14px 16px 12px;min-width:0;transition:border-color .2s,transform .2s;}
+.kpi:hover{border-color:color-mix(in srgb,var(--kc) 45%,transparent);transform:translateY(-1px);}
+.kh{display:flex;align-items:center;gap:8px;}
+.kl{flex:1;min-width:0;font-size:12.5px;color:var(--v-dim);display:flex;align-items:center;gap:7px;}
+.kl::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--kc);}
+.kv{font-family:var(--font-mono);font-size:24px;font-weight:500;margin-top:6px;white-space:nowrap;letter-spacing:-.01em;}
+.ks{font-size:11.5px;color:var(--v-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.spark{display:block;width:100%;height:34px;margin:8px 0 4px;overflow:visible;}
+.kpi .i-btn{opacity:.5;} .kpi:hover .i-btn{opacity:1;}
+.d-wrap{border-radius:18px;}
+
+@media (max-width:1180px){
+  .cols{grid-template-columns:1fr 1fr;gap:14px;}
+  .col-prism{grid-column:1/-1;order:-1;}
+  #rb{display:none;}
+  .card{height:auto!important;}
+  .prism{height:auto!important;}
+  .grp .gpop{right:auto;left:0;top:calc(100% + 8px);}
+}
+@media (max-width:640px){ .cols{grid-template-columns:1fr;} .flow{padding:16px;border-radius:20px;} }
+</style>
+</head>
+<body>
+<div class="page">
+  <a class="back" href="index.html">← Все варианты</a>
+  <header>
+    <div class="eyebrow">Индустриальный пояс · Энергия · Вариант 4</div>
+    <h1>Поток <span>энергии</span></h1>
+    <p class="sub">Инвертор — призма в центре потока. Толщина каждой ленты — мощность прямо сейчас: сразу видно, сколько даёт солнце, что съедает горнодобыча и сколько уходит в аккумуляторы или в сброс.</p>
+  </header>
+  <div id="invCtl"></div>
+  <div id="app"></div>
+</div>
+<script src="inv-core.js"></script>
+<script>
+(function(){
+var I=INV, links=[], NS='http://www.w3.org/2000/svg';
+var stCol={ok:'#4ADE9B',sag:'#F0B93D',black:'#F4557B'};
+function sun(c){
+  return '<div class="card" id="nSun" style="--nc:#FFDD57" data-v="sun"><div class="ch">'+
+    '<svg class="sunico" viewBox="0 0 40 40" aria-hidden="true"><g class="sunrays" data-live="sunRays" opacity="'+Math.max(.1,c.sun).toFixed(2)+'"><path d="M20 2v6M20 32v6M2 20h6M32 20h6M7 7l4 4M29 29l4 4M33 7l-4 4M11 29l-4 4" stroke="#FFDD57" stroke-width="2.4" stroke-linecap="round"/></g>'+
+      '<circle data-live="sunDisc" cx="20" cy="20" r="8.5" fill="'+(c.day?'#FFDD57':'#C9D2EE')+'" opacity="'+Math.max(.3,c.sun).toFixed(2)+'"/><circle data-live="moonCut" cx="24" cy="16.5" r="7.5" fill="#12131B" opacity="'+(c.day?0:1)+'"/></svg>'+
+    '<div style="flex:1;min-width:0"><div class="ch"><h3>Солнце</h3>'+I.infoBtn('sun')+'</div><div class="cv" data-live="sunPct">'+Math.round(c.sun*100)+'%</div></div></div>'+
+    '<div class="cs" data-live="sunTxt">'+(c.day?'День':'Ночь')+' · '+c.clock+'</div>'+I.sunPopHtml()+'</div>';
+}
+function gen(g,c){
+  var k='g_'+g.id, extra='';
+  if(g.isSolar){ var t=''; for(var i=0;i<Math.min(g.count,36);i++) t+='<i></i>';
+    extra='<div class="tiles" data-live="'+k+'_t" style="--to:'+(0.12+0.88*c.sun).toFixed(2)+'">'+t+'</div><div class="cs" data-live="'+k+'_d">прогноз на сутки '+I.kwh(g.daily)+'</div>'; }
+  else extra='<div class="cs" data-live="'+k+'_u">работает '+Math.round(g.pct)+'%</div>';
+  return '<div class="card" id="nGen-'+g.id+'" style="--nc:'+g.color+'" data-v="gen:'+g.id+'"><div class="ch"><h3>'+g.title+'</h3><span class="tag">×'+g.count+'</span>'+(g.isSolar?I.infoBtn('gen',g.id):'')+'</div>'+
+    '<div class="cv" data-live="'+k+'_n">'+I.kw(g.now)+'</div><div class="cs" data-live="'+k+'_o">из '+I.kw(g.nameplate)+' установленных</div>'+
+    '<div class="mini"><i data-live="'+k+'_b" style="width:'+g.pct.toFixed(1)+'%"></i></div>'+extra+I.genPopHtml(g)+'</div>';
+}
+function plan(p){ return '<div class="card plan" id="nPlan-'+p.id+'" style="--nc:'+p.color+'"><div class="ch"><h3>'+p.title+'</h3></div><div class="cv">'+I.kw(0)+'</div><div class="cs">'+p.kind+' · '+p.note+'</div></div>'; }
+function prism(c){
+  var col=stCol[c.state], R=48, C=2*Math.PI*R, pct=c.frac*100;
+  return '<div class="prism" id="nInv" style="--sc:'+col+'"><div class="prism-in"><span class="lbl">Инвертор</span>'+
+    '<svg class="ring" viewBox="0 0 118 118" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A99BFF"/><stop offset="1" stop-color="#4FD1E7"/></linearGradient></defs>'+
+      '<circle cx="59" cy="59" r="'+R+'" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="9"/>'+
+      '<circle data-live="iArc" cx="59" cy="59" r="'+R+'" fill="none" stroke="'+(c.state==='ok'?'url(#rg)':col)+'" stroke-width="9" stroke-linecap="round" transform="rotate(-90 59 59)" stroke-dasharray="'+(C*c.frac).toFixed(1)+' '+C.toFixed(1)+'"/>'+
+      '<text data-live="iPct" x="59" y="60" text-anchor="middle" font-size="22" font-weight="500" fill="#fff">'+(pct<99.5&&pct>0?pct.toFixed(1):Math.round(pct))+'%</text><text x="59" y="77" text-anchor="middle" font-size="10" fill="#8C93B0" font-family="IBM Plex Sans">обеспечено</text></svg>'+
+    '<span class="state" data-live="iState">'+c.stateLabel+'</span>'+
+    '<div class="pl" data-live="iPl"><div><span>Потребность</span><b>'+I.kw(c.demand)+'</b></div><div><span>Получено</span><b>'+I.kw(c.supply)+'</b></div><div><span>Выработка</span><b>'+I.kw(c.gen)+'</b></div>'+
+      '<div><span>Акк. поток</span><b>'+c.flowSigned+'</b></div><div><span>Автономия</span><b>'+c.autonomy+'</b></div></div></div></div>';
+}
+function grp(g){
+  return '<div class="card r grp has-gpop" tabindex="0" id="nGrp-'+g.id+'" style="--nc:'+g.color+'" aria-describedby="gpop-'+g.id+'"><div class="ch"><h3>'+g.name+'</h3><span class="tag" data-live="gl_'+g.id+'">'+Math.round(g.load)+'%</span></div>'+
+    '<div class="cv" data-live="gv_'+g.id+'">'+I.kw(g.sum)+'</div><div class="cs">'+g.kinds+' '+I.plural(g.kinds,'вид','вида','видов')+' · '+g.units+' '+I.plural(g.units,'установка','установки','установок')+'</div>'+
+    '<div class="mini"><i data-live="gb_'+g.id+'" style="width:'+g.load.toFixed(0)+'%"></i></div>'+I.groupPop(g)+'</div>';
+}
+function batt(c){
+  return '<div class="card r" id="nBat" style="--nc:'+(c.flow<-0.01?'#F0B93D':'#4FD1E7')+'"><div class="ch"><h3>Аккумуляторы</h3><span class="tag">'+(c.batteries?'×'+c.batteries:'базовый блок')+'</span></div>'+
+    '<div class="cv" data-live="bJ">'+I.J(c.stored)+'</div><div class="cs" data-live="bOf">'+I.kwh(c.stored)+' из '+I.kwh(c.cap)+' · '+Math.round(c.pct)+'%</div>'+
+    '<div class="mini"><i data-live="bBar" style="width:'+c.pct.toFixed(1)+'%;background:'+(c.pct<15?'#F4557B':'#4FD1E7')+'"></i></div><div class="cs" data-live="bFlow" style="margin-top:4px">'+c.flowTxt+'</div></div>';
+}
+function curt(c){ return '<div class="card r curt'+(c.curtail>0.01?'':' idle')+'" data-live-class="curtC" id="nCurt" style="--nc:#8C93B0"><div class="ch"><h3>Сброс излишка</h3><span class="cv" style="font-size:14px" data-live="curtV">'+(c.curtail>0.01?I.kw(c.curtail):'нет')+'</span></div></div>'; }
+function unmet(c){ var u=Math.max(0,c.demand-c.supply); return '<div class="card r unmet" id="nUnmet" data-live="unCard"'+(u>0.01?'':' hidden')+'><div class="ch"><h3>Не хватает</h3><span class="cv" style="font-size:14px" data-live="unV">'+I.kw(u)+'</span></div><div class="cs">потребители работают на '+Math.round(c.frac*100)+'%</div></div>'; }
+function spark(k,pid){
+  var a=I.series(k.id,pid), n=a.length, mx=0; a.forEach(function(v){ if(v!=null&&v>mx) mx=v; }); if(mx<=0) mx=1;
+  var step=Math.max(1,Math.floor(n/80)), pts=[], area='';
+  for(var i=0;i<n;i+=step){ var v=a[i]; if(v==null) continue; pts.push([(i/(n-1||1)*200).toFixed(1),(32-v/mx*30).toFixed(1)]); }
+  if(!pts.length) return '<svg class="spark" viewBox="0 0 200 34" preserveAspectRatio="none"></svg>';
+  var line=pts.map(function(p){ return p.join(','); }).join(' ');
+  area='M'+pts[0][0]+' 34 L'+line.replace(/ /g,' L')+' L'+pts[pts.length-1][0]+' 34Z';
+  return '<svg class="spark" viewBox="0 0 200 34" preserveAspectRatio="none" aria-hidden="true"><path d="'+area+'" fill="'+k.color+'" opacity=".12"/><polyline points="'+line+'" fill="none" stroke="'+k.color+'" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>';
+}
+function journal(c){
+  var jv=I.journal(I.UI.period);
+  return '<section style="display:flex;flex-direction:column;gap:12px"><div class="sec-h"><h2>Журнал</h2><div class="p-tabs">'+I.periodTabs('data-en-period',I.UI.period)+'</div></div>'+
+    '<div class="live" data-live="jLive"><span>Сейчас: выработка <b>'+I.kw(c.gen)+'</b></span><span>нагрузка <b>'+I.kw(c.demand)+'</b></span><span>обеспечено <b>'+Math.round(c.frac*100)+'%</b></span><span>заряд <b>'+I.J(c.stored)+'</b></span></div>'+
+    '<div class="cov" data-live="jCov">'+jv.covNote+'</div><div class="kpis">'+jv.list.map(function(k){
+      return '<div class="kpi" style="--kc:'+k.color+'" data-live="k_'+k.id+'"><div class="kh"><span class="kl">'+k.l+'</span><button type="button" class="i-btn" data-kpi-chart="'+k.id+'" title="График: '+k.l.toLowerCase()+'">i</button></div>'+
+        '<div class="kv">'+k.v+'</div><div class="ks">'+k.s+'</div>'+spark(k,I.UI.period)+I.deltaHtml(k.d)+'</div>'; }).join('')+'</div></section>';
+}
+function render(c){
+  return '<section class="flow" id="scheme"><div class="flow-h"><b>Распределение мощности</b><span>· толщина ленты = кВт сейчас</span>'+
+      '<div class="legend"><span><i style="background:linear-gradient(90deg,#FFDD57,#A99BFF)"></i>выработка</span><span><i style="background:#4FD1E7"></i>заряд</span><span><i style="background:#F0B93D"></i>разряд</span><span><i style="background:#8C93B0"></i>сброс</span></div></div>'+
+    '<svg id="rb" aria-hidden="true"></svg><div class="cols">'+
+    '<div class="col col-sun">'+sun(c)+'</div>'+
+    '<div class="col col-src">'+c.gens.map(function(g){ return gen(g,c); }).join('')+I.PLANNED.map(plan).join('')+'</div>'+
+    '<div class="col col-prism">'+prism(c)+'</div>'+
+    '<div class="col col-out">'+(c.groups.length?c.groups.map(grp).join(''):'<div class="cs">Пока никто не потребляет энергию.</div>')+batt(c)+curt(c)+unmet(c)+'</div>'+
+  '</div></section>'+journal(c)+'<section class="d-wrap"><table class="d-table" data-live="tbl">'+I.tableRows(c)+'</table></section>';
+}
+/* ---- ленты ---- */
+function build(c){
+  var svg=document.getElementById('rb'); svg.innerHTML='<defs></defs>'; links=[];
+  var defs=svg.firstChild;
+  function add(src,tgt,c0,c1,val,o){
+    o=o||{}; var id='lg'+links.length, g=document.createElementNS(NS,'linearGradient'); g.id=id;
+    g.innerHTML='<stop offset="0" stop-color="'+c0+'"/><stop offset="1" stop-color="'+c1+'"/>'; defs.appendChild(g);
+    var rib=document.createElementNS(NS,'path'); rib.setAttribute('class','rib'); rib.setAttribute('fill','url(#'+id+')'); svg.appendChild(rib);
+    var dots=document.createElementNS(NS,'path'); dots.setAttribute('class','dots'); svg.appendChild(dots);
+    links.push({src:src,tgt:tgt,val:val,rib:rib,dots:dots,grad:g,o:o,last:0});
+  }
+  c.gens.forEach(function(g){
+    if(g.isSolar) add('nSun','nGen-'+g.id,'#FFDD57','#FFDD57',function(c){ var x=c.gens.filter(function(q){ return q.id===g.id; })[0]; return x?x.now:0; },{inA:true});
+    add('nGen-'+g.id,'nInv',g.color,'#A99BFF',function(c){ var x=c.gens.filter(function(q){ return q.id===g.id; })[0]; return x?x.now:0; },{inv:'in'});
+  });
+  I.PLANNED.forEach(function(p){ add('nPlan-'+p.id,'nInv',p.color,'#A99BFF',function(){ return 0; },{inv:'in'}); });
+  c.groups.forEach(function(g){ add('nInv','nGrp-'+g.id,'#A99BFF',g.color,function(c){ var x=c.groups.filter(function(q){ return q.id===g.id; })[0]; return x?x.sum:0; },{inv:'out',load:function(c){ var x=c.groups.filter(function(q){ return q.id===g.id; })[0]; return x&&x.inst>0?x.sum/x.inst:0; }}); });
+  add('nInv','nBat','#A99BFF','#4FD1E7',function(c){ return Math.abs(c.flow); },{inv:'out',bat:true});
+  add('nInv','nCurt','#A99BFF','#8C93B0',function(c){ return c.curtail; },{inv:'out'});
+  layout(c);
+}
+function cardVal(el,c){
+  var v=el.dataset.v; if(!v) return null;
+  if(v==='sun'){ var s=c.gens.filter(function(g){ return g.isSolar; })[0]; return s?s.now:0; }
+  if(v.indexOf('gen:')===0){ var g=c.gens.filter(function(q){ return q.id===v.slice(4); })[0]; return g?g.now:0; }
+  return null;
+}
+function layout(c){
+  var host=document.getElementById('scheme'), svg=document.getElementById('rb'); if(!host||!svg||!links.length) return;
+  if(window.innerWidth<=1180) return;
+  var thr=Math.max(c.gen+Math.max(0,-c.flow),c.supply+Math.abs(c.flow)+c.curtail,1), K=300/thr;
+  // высота карточек ~ их мощности (не меньше содержимого)
+  var setH=function(id,v){ var el=document.getElementById(id); if(!el) return; el.style.height=''; var nat=el.offsetHeight; el.style.height=Math.max(nat,v*K+28)+'px'; };
+  c.gens.forEach(function(g){ setH('nGen-'+g.id,g.now); });
+  var s=c.gens.filter(function(g){ return g.isSolar; })[0]; setH('nSun',s?s.now:0);
+  c.groups.forEach(function(g){ setH('nGrp-'+g.id,g.sum); });
+  setH('nBat',Math.abs(c.flow)); setH('nCurt',c.curtail);
+  var inv=document.getElementById('nInv'); inv.style.height=''; var invNat=inv.offsetHeight; inv.style.height=Math.max(invNat,thr*K+40)+'px';
+  var hr=host.getBoundingClientRect(); svg.setAttribute('viewBox','0 0 '+hr.width+' '+hr.height);
+  var ir=inv.getBoundingClientRect();
+  var vals=links.map(function(l){ return Math.max(0,l.val(c)); });
+  var sumIn=0,sumOut=0; links.forEach(function(l,i){ if(l.o.inv==='in') sumIn+=vals[i]*K; if(l.o.inv==='out') sumOut+=vals[i]*K; });
+  var yIn=ir.top+ir.height/2-sumIn/2-hr.top, yOut=ir.top+ir.height/2-sumOut/2-hr.top;
+  links.forEach(function(l,i){
+    var A=document.getElementById(l.src), B=document.getElementById(l.tgt); if(!A||!B) return;
+    var a=A.getBoundingClientRect(), b=B.getBoundingClientRect(), v=vals[i], t=v*K, on=v>0.01, ya, yb;
+    var x0=a.right-hr.left, x1=b.left-hr.left;
+    if(l.o.inv==='in'){ ya=a.top+a.height/2-t/2-hr.top; yb=yIn; yIn+=t; }
+    else if(l.o.inv==='out'){ ya=yOut; yOut+=t; yb=b.top+b.height/2-t/2-hr.top; }
+    else{ ya=a.top+a.height/2-t/2-hr.top; yb=b.top+b.height/2-t/2-hr.top; if(l.o.inA){ x0=a.left+a.width/2-hr.left; ya=a.bottom-hr.top; x1=b.left+b.width/2-hr.left; yb=b.top-hr.top; } }
+    if(l.o.inA){ // солнце над/рядом с панелями: вертикальная лента
+      var w=Math.max(t,1.5), xm=(x0+x1)/2;
+      if(Math.abs(x0-x1)>4){ var ax=a.right-hr.left, ay=a.top+a.height/2-hr.top, bx=b.left-hr.left, by=b.top+b.height/2-hr.top, mx=(ax+bx)/2;
+        l.rib.setAttribute('d','M'+ax+' '+(ay-w/2)+' C'+mx+' '+(ay-w/2)+' '+mx+' '+(by-w/2)+' '+bx+' '+(by-w/2)+' L'+bx+' '+(by+w/2)+' C'+mx+' '+(by+w/2)+' '+mx+' '+(ay+w/2)+' '+ax+' '+(ay+w/2)+'Z');
+        l.dots.setAttribute('d','M'+ax+' '+ay+' C'+mx+' '+ay+' '+mx+' '+by+' '+bx+' '+by); }
+    }else{
+      var mx2=(x0+x1)/2, tt=Math.max(t,on?1.5:0);
+      if(!on){ l.rib.setAttribute('d','M'+x0+' '+(ya)+' C'+mx2+' '+ya+' '+mx2+' '+yb+' '+x1+' '+yb); }
+      else l.rib.setAttribute('d','M'+x0+' '+ya+' C'+mx2+' '+ya+' '+mx2+' '+yb+' '+x1+' '+yb+' L'+x1+' '+(yb+tt)+' C'+mx2+' '+(yb+tt)+' '+mx2+' '+(ya+tt)+' '+x0+' '+(ya+tt)+'Z');
+      l.dots.setAttribute('d','M'+x0+' '+(ya+tt/2)+' C'+mx2+' '+(ya+tt/2)+' '+mx2+' '+(yb+tt/2)+' '+x1+' '+(yb+tt/2));
+    }
+    l.rib.classList.toggle('zero',!on);
+    var dw=Math.max(2,Math.min(6,t*0.28)); l.dots.setAttribute('stroke-width',dw.toFixed(1)); l.dots.style.strokeDasharray='0.01 13.99'; l.dots.style.opacity=on?'.8':'0';
+    var intensity=l.o.load?l.o.load(c):Math.min(1,v/Math.max(1,c.nameplate)*2), du=Math.max(.35,1.8-1.4*intensity);
+    if(Math.abs(du-l.last)>0.06){ l.dots.style.animationDuration=du.toFixed(2)+'s'; l.last=du; }
+    if(l.o.bat){ var dis=c.flow<-0.01; l.dots.classList.toggle('rev',dis); l.grad.lastChild.setAttribute('stop-color',dis?'#F0B93D':'#4FD1E7'); l.grad.firstChild.setAttribute('stop-color',dis?'#F0B93D':'#A99BFF'); }
+  });
+}
+I.start({root:document.getElementById('app'),render:render,build:build,key:function(c){ return c.state; },tick:layout,layout:function(){ layout(I.now()); }});
+})();
+</script>
+</body>
+</html>

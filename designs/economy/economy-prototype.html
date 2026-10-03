@@ -1,0 +1,501 @@
+<title>Экономика колонии v1</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: одна колонка-«бортовой журнал» — сводка базы сверху, дальше справочник по слоям экономики, в конце — что меняется в коде и вопросы. Единый тёмный вид, как в самой игре. */
+:root{
+  color-scheme:dark;
+  --bg:#0A0D18; --panel:#12172A; --card:#171D33; --border:#293150; --border-strong:#3A4468;
+  --fg:#E9ECF7; --fg2:#9CA6C4; --muted:#6D779A;
+  --accent:#4FD1E7; --good:#4ADE9B; --bad:#F4557B; --warn:#F2A93B;
+  --iron:#9FB0C8; --copper:#E08A4B; --water:#49B8F0; --coal:#8B85A6; --stone:#C2AD82; --oil:#B6A57A;
+  --energy:#FFDD57; --wheat:#E8D078; --potato:#A9865B; --corn:#F0B93D; --tomato:#E1503D; --ration:#6FCF7A;
+  --housing:#E8C15A; --service:#B388FF;
+  --f-display:'Rajdhani',system-ui,sans-serif; --f-body:'IBM Plex Sans',system-ui,sans-serif; --f-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.5;}
+*{box-sizing:border-box}
+.page{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:32px 72px;display:flex;flex-direction:column;gap:28px}
+.eyebrow{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,4vw,40px);line-height:1.05;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:.02em;margin:0;text-wrap:balance;display:flex;align-items:baseline;gap:10px}
+h2 .n{font-family:var(--f-mono);font-size:13px;color:var(--accent);font-weight:500}
+h3{font-family:var(--f-display);font-weight:600;font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--fg2);margin:0}
+p{margin:0;max-width:72ch;color:var(--fg2)}
+p strong{color:var(--fg)}
+.lead{font-size:15px}
+section{display:flex;flex-direction:column;gap:14px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.good{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)} .mut{color:var(--muted)}
+
+/* сводка */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.kpi{background:var(--panel);padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.kpi .l{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font-family:var(--f-mono);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:11.5px;color:var(--fg2)}
+.kpi.hero .v{color:var(--accent);font-size:26px}
+
+/* таблицы */
+.tw{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th{font-weight:500;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:right;padding:9px 10px;border-bottom:1px solid var(--border-strong);white-space:nowrap;background:var(--card);position:sticky;top:0}
+td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+td.t{font-family:var(--f-body);white-space:normal}
+tr:last-child td{border-bottom:0}
+tr.grp td{background:var(--bg);font-family:var(--f-display);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--fg2);font-size:12px;padding-top:12px}
+.rn{display:flex;align-items:center;gap:8px}
+.dot{width:9px;height:9px;border-radius:2px;background:var(--c,var(--accent));flex:none}
+.sub{display:block;font-size:11px;color:var(--muted);font-family:var(--f-body);white-space:normal;max-width:44ch;line-height:1.35;margin-top:2px}
+.pill{display:inline-block;font-family:var(--f-body);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:4px;border:1px solid var(--border-strong);color:var(--fg2);vertical-align:1px}
+.pill.new{border-color:var(--good);color:var(--good)}
+.roi{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}
+.roi i{display:block;height:5px;border-radius:3px;background:var(--c)}
+
+/* двух-колоночные блоки */
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:6px 14px;font-size:13px}
+.kv dt{color:var(--fg2)} .kv dd{margin:0;font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+.kv .tot{border-top:1px solid var(--border-strong);padding-top:6px;color:var(--fg);font-weight:500}
+.note{font-size:12.5px;color:var(--fg2);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;max-width:none}
+.note b{color:var(--fg)}
+
+/* конструктор базы */
+.builder{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:14px}
+@media (max-width:860px){.builder{grid-template-columns:1fr}}
+.slots{display:flex;flex-direction:column;gap:4px}
+.slot{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:6px 8px;border-radius:7px;background:var(--card);border:1px solid var(--border)}
+.slot .nm{display:flex;align-items:center;gap:8px;min-width:0;font-size:13px}
+.slot .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot .meta{font-family:var(--f-mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.step{display:flex;align-items:center;border:1px solid var(--border-strong);border-radius:6px;overflow:hidden}
+.step button{background:var(--panel);color:var(--fg);border:0;width:28px;height:26px;font-size:15px;cursor:pointer;font-family:var(--f-mono)}
+.step button:hover{background:var(--border)}
+.step button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.step output{min-width:26px;text-align:center;font-family:var(--f-mono);font-size:13px}
+.slot.auto{background:transparent;border-style:dashed}
+.areabar{display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--card);border:1px solid var(--border)}
+.areabar i{display:block;height:100%;background:var(--c);border-right:1px solid var(--bg)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11.5px;color:var(--fg2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btn{background:var(--card);color:var(--fg2);border:1px solid var(--border-strong);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:var(--f-body)}
+.btn:hover{color:var(--fg);border-color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent)}
+.flowbar{display:grid;grid-template-columns:minmax(0,110px) minmax(0,1fr) 88px;gap:8px;align-items:center;font-size:12px}
+.flowbar .track{position:relative;height:12px;background:var(--card);border-radius:3px}
+.flowbar .track::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--border-strong)}
+.flowbar .track i{position:absolute;top:0;bottom:0;border-radius:2px;background:var(--c)}
+.flowbar .v{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.flows{display:flex;flex-direction:column;gap:6px}
+.warnbox{border:1px solid var(--bad);color:var(--bad);border-radius:8px;padding:8px 12px;font-size:12.5px}
+
+/* изменения и вопросы */
+ol.q{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px;max-width:80ch;color:var(--fg2)}
+ol.q li::marker{font-family:var(--f-mono);color:var(--accent)}
+ol.q b{color:var(--fg)}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12.5px}
+.chain .node{background:var(--card);border:1px solid var(--border-strong);border-left:3px solid var(--c);border-radius:6px;padding:6px 10px;display:flex;flex-direction:column}
+.chain .node small{font-family:var(--f-mono);color:var(--muted);font-size:11px}
+.chain .arr{color:var(--muted);font-family:var(--f-mono)}
+@media (prefers-reduced-motion:no-preference){.areabar i,.flowbar .track i{transition:width .25s,left .25s}}
+</style>
+
+<div class="page">
+<header style="display:flex;flex-direction:column;gap:10px">
+  <div class="eyebrow">STRATEGY Online · экономика · прототип v1.1 · этап T0</div>
+  <h1>Экономика колонии: цены, циклы, окупаемость</h1>
+  <p class="lead">Модель по образцу Prosperous Universe. Каждое здание требует ремонта. Рабочие потребляют воду и пайки. Без электроэнергии установки стоят. Сырьё имеет цену на бирже. Все числа ниже считаются одной формулой из таблиц на этой странице. Цель калибровки: база на 500 площади окупается примерно за 53 дня, как в примере из PrUn.</p>
+</header>
+
+<section>
+  <h2><span class="n">00</span>Пример базы на 500 площади</h2>
+  <div class="kpis" id="kpis"></div>
+</section>
+
+<section>
+  <h2><span class="n">01</span>Как считаются цены</h2>
+  <div class="cols">
+    <div class="panel">
+      <h3>Правило</h3>
+      <p><strong>Сырьё</strong> имеет базовую биржевую цену: чем реже, тяжелее в добыче и полезнее ресурс, тем дороже. <strong>Произведённые товары</strong> (паёк, электроэнергия) стоят столько, сколько они обходятся: сырьё, еда рабочих, энергия и ремонт. К этому добавляется наценка, которая возвращает стоимость здания примерно за <span class="num" id="pbR"></span> дней.</p>
+      <p>Одна формула для любого здания:</p>
+      <div class="note"><b>Чистый доход/сутки</b> = выпуск × цена − сырьё − рабочие × (3 воды + 1 паёк) − кВт × 24 × цена ⚡ − стоимость здания × 0,667%<br><b>Окупаемость</b> = стоимость здания ÷ чистый доход/сутки</div>
+    </div>
+    <div class="panel">
+      <h3>Цена рабочего и энергии</h3>
+      <dl class="kv" id="kvWorker"></dl>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">02</span>Биржевые цены</h2>
+  <p>Вес влияет на склад: камень дешёвый и тяжёлый, поэтому забивает склад быстрее всех. Жидкости хранятся в резервуарах, а не на весовом складе. Электроэнергию нельзя продать или купить, её можно только выработать на базе.</p>
+  <div class="tw"><table id="tPrices"></table></div>
+</section>
+
+<section>
+  <h2><span class="n">03</span>Здания и рецепты</h2>
+  <p>Циклы и выпуск разные у каждого рецепта, и у каждой разницы есть объяснение в описании. В версии 1.1 циклы сокращены в 2–7 раз, а выпуск за цикл уменьшен в той же пропорции, поэтому за сутки добывается столько же. Добыча идёт мелкими порциями, и склад пополняется равномернее. Себестоимость и доход указаны за сутки при 100% загрузке, богатстве месторождения 1,00 и нулевых навыках.</p>
+  <div class="tw"><table id="tRec"></table></div>
+  <div class="panel">
+    <h3>Производственные цепочки</h3>
+    <div class="chain">
+      <div class="node" style="--c:var(--coal)">Угольная шахта<small id="chCoal"></small></div><span class="arr">→</span>
+      <div class="node" style="--c:var(--energy)">Угольная ТЭС<small id="chTpp"></small></div><span class="arr">→</span>
+      <div class="node" style="--c:var(--iron)">≈ 13 горных установок<small id="chMin"></small></div>
+    </div>
+    <div class="chain">
+      <div class="node" style="--c:var(--water)">Буровая (вода)<small id="chWat"></small></div><span class="arr">→</span>
+      <div class="node" style="--c:var(--wheat)">Ферма пшеница + кукуруза<small id="chFarm"></small></div><span class="arr">→</span>
+      <div class="node" style="--c:var(--ration)">Пищеблок<small id="chKit"></small></div><span class="arr">→</span>
+      <div class="node" style="--c:var(--housing)">≈ 150 рабочих<small>1 паёк на человека в сутки</small></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">04</span>Рабочие, жильё, найм</h2>
+  <div class="cols" id="workers"></div>
+</section>
+
+<section>
+  <h2><span class="n">05</span>Электроэнергия</h2>
+  <div class="cols" id="energy"></div>
+</section>
+
+<section>
+  <h2><span class="n">06</span>Износ и ремонт</h2>
+  <div class="cols" id="wear"></div>
+</section>
+
+<section id="builderSec">
+  <h2><span class="n">07</span>Конструктор базы</h2>
+  <p>Меняйте количество зданий. Жилые блоки добавляются автоматически по числу рабочих. Излишки продаются на бирже, недостающее докупается. Энергию купить нельзя: если выработки не хватает, база встаёт.</p>
+  <div class="builder">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h3>Постройки</h3><div class="btnrow"><button class="btn" id="bReset" type="button">Пример из расчёта</button><button class="btn" id="bClear" type="button">Очистить</button></div></div>
+      <div class="slots" id="slots"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+      <div class="panel">
+        <h3>Площадь <span class="num mut" id="areaTxt" style="text-transform:none;letter-spacing:0"></span></h3>
+        <div class="areabar" id="areaBar"></div>
+        <div class="legend" id="areaLeg"></div>
+      </div>
+      <div class="panel">
+        <h3>Баланс за сутки</h3>
+        <dl class="kv" id="pl"></dl>
+        <div id="warns" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+      <div class="panel">
+        <h3>Потоки ресурсов, ед/сутки</h3>
+        <div class="flows" id="flows"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">08</span>Что меняется в коде</h2>
+  <p>Сравнение с текущими значениями в <span class="num">js/core.js</span>. Навыки и SP не трогаем. Правило износа остаётся прежним.</p>
+  <div class="tw"><table id="tDiff"></table></div>
+</section>
+
+<section>
+  <h2><span class="n">09</span>Вопросы для обсуждения</h2>
+  <ol class="q">
+    <li><b>Рост цены постройки ×1,15 за каждое следующее здание.</b> Сейчас десятая шахта стоит в 4 раза дороже первой, и окупаемость полной базы уходит за сотни дней. Предлагаю убрать рост для производственных зданий, как в PrUn: ограничителем служит площадь 500. Рост можно оставить для отдела кадров и учебного центра.</li>
+    <li><b>Линейный ремонт не заставляет выбирать.</b> Ремонт 1% прочности стоит 1% цены, поэтому затраты в сутки одинаковы при любой частоте ремонта, и выгоднее всего чинить постоянно. В PrUn ремонт дорожает с возрастом здания. Вариант для нас: цена = стоимость × износ<sup>1,4</sup>. Тогда ремонт при 70% прочности дешевле за процент, чем при 20%, но частый ремонт требует внимания игрока. Базовую скорость износа (−30 п.п. за 45 суток, пол 20%) не меняем.</li>
+    <li><b>Жильё занимает площадь</b> (12 за блок на 24 человека). В примере жильё занимает около 20% базы, как в PrUn. Без этого персонал ничего не стоит по площади, и компромисса нет.</li>
+    <li><b>Склад 10 т заполняется примерно за <span class="num" id="qWh"></span> суток</b> излишками из примера. Значит, нужна продажа со склада на биржу, лучше с логистикой (рейс, вес, время доставки). Это следующий большой блок.</li>
+    <li><b>Спред биржи.</b> Сейчас доход считается по средней цене. Предлагаю продажу по −5% и покупку по +5% от базы. Цены плавают в пределах ±15% от спроса и предложения.</li>
+    <li><b>Стартовый пакет.</b> Первая шахта стоит около 105 тыс. монет материалами. Нужен стартовый набор на ядро базы: 2 шахты, 2 буровые, 1 ТЭС, 3 жилых блока, отдел кадров. Это около 520 тыс. материалами плюс запас пайков на 10 суток.</li>
+    <li><b>Картофельный паёк заметно менее выгоден</b> (окупаемость около 67 дней против 39 у зернового). Это задумано как выбор: картофель проще вырастить, но кухня на нём зарабатывает меньше. Можно выровнять, если нужно.</li>
+    <li><b>Масштаб денег условный.</b> У нас около 35 тыс. в сутки против 67 тыс. в PrUn, но окупаемость та же. Все цены можно умножить на один коэффициент, и пропорции не изменятся.</li>
+  </ol>
+</section>
+</div>
+
+<script>
+// Модель экономики — общая для node-проверки и HTML-страницы.
+const ECON=(()=>{
+const RES={
+ iron_ore:{n:'Железная руда',f:'Fe₂O₃',kg:2.0,p:46},
+ copper_ore:{n:'Медная руда',f:'Cu₂S',kg:2.2,p:63},
+ coal:{n:'Уголь',f:'C',kg:1.6,p:38},
+ stone:{n:'Камень',f:'CaCO₃',kg:2.4,p:21},
+ water:{n:'Вода',f:'H₂O',kg:1.0,p:14,liquid:true},
+ oil:{n:'Нефть',f:'CxHy',kg:0.9,p:88,liquid:true},
+ wheat:{n:'Пшеница',f:'Triticum',kg:0.7,p:27},
+ potato:{n:'Картофель',f:'Solanum tub.',kg:1.1,p:19},
+ corn:{n:'Кукуруза',f:'Zea mays',kg:0.9,p:24},
+ tomato:{n:'Томаты',f:'Solanum lyc.',kg:0.6,p:36},
+ ration:{n:'Паёк',f:'Паёк',kg:1.2,p:40,isNew:true},
+ energy:{n:'Электроэнергия',f:'⚡ кВт·ч',kg:0,p:0.8,noTrade:true},
+};
+const NEED={water:3,ration:1}; // на 1 рабочего в сутки
+const WEAR_PER_DAY=0.30/45;
+const RATION_PAYBACK=50, ENERGY_PAYBACK=55; // цена производной продукции = себестоимость + возврат вложений за N дней
+const TYPES={
+ miner:{n:'Горнодобывающая установка',area:25,workers:14,cost:{iron_ore:1150,stone:1200,copper_ore:420}},
+ drill:{n:'Буровая установка',area:12,workers:6,cost:{iron_ore:650,stone:560,copper_ore:240}},
+ farm:{n:'Ферма',area:20,workers:9,cost:{iron_ore:420,stone:1500,water:650,copper_ore:120}},
+ kitchen:{n:'Пищеблок',area:14,workers:6,cost:{iron_ore:500,stone:560,copper_ore:210},isNew:true},
+ tpp:{n:'Угольная ТЭС',area:30,workers:8,cost:{iron_ore:1550,stone:1700,copper_ore:720},isNew:true},
+ solar:{n:'Малая солнечная панель',area:15,workers:0,cost:{iron_ore:240,copper_ore:340}},
+};
+// cyc — секунды, out/in — за цикл, kw — потребляемая мощность (кВт = ⚡/ч)
+const REC=[
+ {id:'iron_ore',t:'miner',cyc:1440,out:{iron_ore:2},in:{},kw:42,why:'Плотный гематит: отбойка идёт медленно, за цикл выходит 2 крупных куска.'},
+ {id:'copper_ore',t:'miner',cyc:1014,out:{copper_ore:1},in:{},kw:48,why:'Бедная жила: руду нужно дробить и сортировать, поэтому всего 1 ед. за цикл.'},
+ {id:'coal',t:'miner',cyc:1211,out:{coal:2},in:{},kw:36,why:'Пласт снимается заходками: 2 ед. за проход.'},
+ {id:'stone',t:'miner',cyc:940,out:{stone:3},in:{},kw:30,why:'Мягкий известняк: быстрый цикл и 3 ед. за раз, но камень дешёвый и тяжёлый.'},
+ {id:'water',t:'drill',cyc:900,out:{water:2},in:{},kw:18,why:'Насос качает непрерывно, цикл — это смена фильтра.'},
+ {id:'oil',t:'drill',cyc:2360,out:{oil:1},in:{},kw:44,why:'Глубокая скважина: 1 бочка за 39 минут, зато нефть самая дорогая.'},
+ {id:'wheat',t:'farm',cyc:15000,out:{wheat:29},in:{water:15},kw:12,why:'Урожай собирается партиями: полив и сбор раз в 4 ч 10 мин.'},
+ {id:'potato',t:'farm',cyc:20700,out:{potato:59},in:{water:23},kw:12,why:'Клубни растут дольше всех, зато урожай самый объёмный.'},
+ {id:'corn',t:'farm',cyc:17550,out:{corn:43},in:{water:26},kw:12,why:'Самая «жаждущая» культура: больше всего воды на единицу урожая.'},
+ {id:'tomato',t:'farm',cyc:10976,out:{tomato:20},in:{water:20},kw:12,why:'Быстрый, но малый урожай; томаты дорогие.'},
+ {id:'ration_a',label:'Паёк «Хлеб и каша»',t:'kitchen',cyc:2293,out:{ration:4},in:{wheat:2,corn:1,water:1},kw:26,why:'Зерновой рацион: готовится быстрее.'},
+ {id:'ration_b',label:'Паёк «Картофельный»',t:'kitchen',cyc:3133,out:{ration:5},in:{potato:4,tomato:1,water:1},kw:26,why:'Овощной рацион: дольше, но картофель дешёвый.'},
+ {id:'coal_power',label:'Сжигание угля',t:'tpp',cyc:1525,out:{energy:255},in:{coal:3},kw:0,why:'1 ед. угля = 85 кВт·ч; 3 ед. за 25 мин 25 с дают стабильные 600 кВт круглосуточно.'},
+ {id:'solar',label:'Солнечная генерация',t:'solar',cyc:60,out:{energy:2.5},in:{},kw:0,peakKw:150,why:'Пик 150 кВт в полдень; в среднем за сутки 37% пика (ночь 10 ч).'},
+];
+const SUN_AVG=(14/24)*(2/Math.PI);
+const HOUSING={n:'Жилой блок',cap:24,area:12,kw:2,cost:{iron_ore:220,stone:650,water:150}};
+const BATTERY={n:'Аккумулятор',cap:2000,area:4,cost:{iron_ore:200,copper_ore:340}};
+const HR={n:'Отдел кадров',area:8,workers:3,kw:6,recruitPerHour:3,rationPerRecruit:3,cost:{iron_ore:400,stone:480,copper_ore:160}};
+
+const price=id=>RES[id].p;
+const val=o=>Object.entries(o).reduce((s,[k,q])=>s+q*price(k),0);
+const perDay=(r,o)=>{const m=r.t==='solar'?SUN_AVG:1;return Object.fromEntries(Object.entries(o).map(([k,q])=>[k,q*86400/r.cyc*m]));};
+const workerDay=()=>NEED.water*price('water')+NEED.ration*price('ration');
+function calc(r){
+ const T=TYPES[r.t], out=perDay(r,r.out), inn=perDay(r,r.in);
+ const capex=val(T.cost), kwh=r.kw*24;
+ const rev=val(out), cin=val(inn), work=T.workers*workerDay(), cen=kwh*price('energy'), rep=capex*WEAR_PER_DAY;
+ const opex=cin+work+cen+rep, net=rev-opex;
+ const outKg=Object.entries(out).reduce((s,[k,q])=>s+q*RES[k].kg,0);
+ return {r,T,out,inn,kwh,capex,rev,cin,work,cen,rep,opex,net,roi:net>0?capex/net:Infinity,netArea:net/T.area,outKg};
+}
+const fair=(id,res,days)=>{const c=calc(REC.find(r=>r.id===id));return (c.opex+c.capex/days)/c.out[res];};
+for(let i=0;i<60;i++){
+ RES.ration.p=Math.round((fair('ration_a','ration',RATION_PAYBACK)+fair('ration_b','ration',RATION_PAYBACK))/2*10)/10;
+ RES.energy.p=Math.round(fair('coal_power','energy',ENERGY_PAYBACK)*1000)/1000;
+}
+// Пример базы: {recipeId:count} + служебные постройки. Излишки продаются, дефицит докупается на бирже.
+function base(L){
+ const flow={},add=(k,q)=>flow[k]=(flow[k]||0)+q;
+ let area=0,workers=0,kw=0,capex=0,rows=[];
+ REC.forEach(r=>{const n=L.rec[r.id]||0;if(!n)return;const c=calc(r),T=TYPES[r.t];
+  area+=T.area*n;workers+=T.workers*n;kw+=r.kw*n;capex+=c.capex*n;
+  Object.entries(c.out).forEach(([k,q])=>add(k,q*n));Object.entries(c.inn).forEach(([k,q])=>add(k,-q*n));
+  rows.push({kind:"rec",r,n,c});});
+ const hr=L.hr||0,bat=L.battery||0;
+ area+=HR.area*hr+BATTERY.area*bat;workers+=HR.workers*hr;kw+=HR.kw*hr;capex+=(val(HR.cost)*hr)+(val(BATTERY.cost)*bat);
+ const houses=Math.ceil(workers/HOUSING.cap);
+ area+=HOUSING.area*houses;kw+=HOUSING.kw*houses;capex+=val(HOUSING.cost)*houses;
+ add("water",-NEED.water*workers);add("ration",-NEED.ration*workers);add("energy",-kw*24);
+ const repair=capex*WEAR_PER_DAY;
+ let sales=0,buys=0;const lines=[];
+ Object.entries(flow).forEach(([k,q])=>{if(k==="energy")return;const v=q*price(k);if(v>=0)sales+=v;else buys+=-v;lines.push({k,q,v});});
+ const net=sales-buys-repair;
+ return {flow,lines,area,workers,houses,kw,capex,repair,sales,buys,net,roi:capex/net,hr,bat,rows,energyNet:flow.energy||0};
+}
+return {base,RES,NEED,WEAR_PER_DAY,TYPES,REC,HOUSING,BATTERY,HR,SUN_AVG,val,calc,workerDay,perDay};
+})();
+
+
+(function(){
+const E=ECON, R=E.RES;
+const $=id=>document.getElementById(id);
+const fmt=(n,d=0)=>(n<0?'−':'')+Math.abs(n).toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d});
+const money=n=>fmt(Math.round(n));
+const COLORS={iron_ore:'iron',copper_ore:'copper',coal:'coal',stone:'stone',water:'water',oil:'oil',wheat:'wheat',potato:'potato',corn:'corn',tomato:'tomato',ration:'ration',energy:'energy'};
+const cv=id=>'var(--'+(COLORS[id]||'accent')+')';
+const dur=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+' ч ':'')+(m?m+' мин ':'')+(x?x+' с':'').trim()||'0 с';};
+const costStr=c=>Object.entries(c).map(([k,q])=>q+' '+R[k].f).join(' · ');
+const ioStr=o=>Object.entries(o).map(([k,q])=>fmt(q,q%1?1:0)+' '+R[k].f).join(' + ')||'—';
+$('pbR').textContent='50–55';
+
+// цена рабочего
+const wd=E.workerDay();
+$('kvWorker').innerHTML=
+ '<dt>Вода, 3 ед/сутки × '+R.water.p+'</dt><dd>'+fmt(3*R.water.p,1)+'</dd>'+
+ '<dt>Паёк, 1 ед/сутки × '+fmt(R.ration.p,1)+'</dt><dd>'+fmt(R.ration.p,1)+'</dd>'+
+ '<dt class="tot">Содержание 1 рабочего</dt><dd class="tot">'+fmt(wd,1)+' мон/сутки</dd>'+
+ '<dt>Цена пайка (себестоимость + возврат за 50 дн)</dt><dd>'+fmt(R.ration.p,1)+'</dd>'+
+ '<dt>Цена 1 кВт·ч (ТЭС, возврат за 55 дн)</dt><dd>'+fmt(R.energy.p,3)+'</dd>';
+
+// биржа
+const order=['water','stone','coal','iron_ore','copper_ore','oil','wheat','potato','corn','tomato','ration','energy'];
+$('tPrices').innerHTML='<tr><th>Ресурс</th><th>Вес, кг</th><th>Цена, мон</th><th>мон / кг</th><th>Хранение</th><th>Как задана цена</th></tr>'+
+ order.map(id=>{const r=R[id];return '<tr><td><span class="rn"><i class="dot" style="--c:'+cv(id)+'"></i>'+r.n+' <span class="mut">'+r.f+'</span>'+(r.isNew?' <span class="pill new">новый</span>':'')+'</span></td>'+
+ '<td>'+(r.kg?fmt(r.kg,1):'—')+'</td><td>'+fmt(r.p,r.p<10?3:(r.p%1?1:0))+'</td><td>'+(r.kg?fmt(r.p/r.kg,1):'—')+'</td>'+
+ '<td class="t">'+(id==='energy'?'аккумуляторы':r.liquid?'резервуар':'склад')+'</td><td class="t">'+(id==='ration'||id==='energy'?'расчётная (себестоимость)':(r.noTrade?'не торгуется':'биржа, база'))+'</td></tr>';}).join('');
+
+// рецепты
+const TYPE_ORDER=['miner','drill','farm','kitchen','tpp','solar'];
+let rows='<tr><th>Рецепт</th><th>Цикл</th><th>Выход / цикл</th><th>Вход / цикл</th><th>Выход / сут</th><th>Раб.</th><th>кВт</th><th>Стоимость</th><th>Выручка</th><th>Сырьё</th><th>Рабочие</th><th>Энергия</th><th>Ремонт</th><th>Чистыми</th><th>Окупаемость</th></tr>';
+TYPE_ORDER.forEach(t=>{const T=E.TYPES[t];
+ rows+='<tr class="grp"><td colspan="15">'+T.n+(T.isNew?' <span class="pill new">новое</span>':'')+' · площадь '+T.area+' · '+T.workers+' раб. · '+costStr(T.cost)+'</td></tr>';
+ E.REC.filter(r=>r.t===t).forEach(r=>{const c=E.calc(r),oid=Object.keys(r.out)[0];
+  const roiW=Math.min(100,c.roi/90*100), rc=c.roi<45?'var(--good)':c.roi<60?'var(--accent)':'var(--warn)';
+  rows+='<tr><td class="t"><span class="rn"><i class="dot" style="--c:'+cv(oid)+'"></i>'+(r.label||R[oid].n)+'</span><span class="sub">'+r.why+'</span></td>'+
+  '<td>'+(r.t==='solar'?'непрерывно':dur(r.cyc))+'</td><td>'+(r.t==='solar'?'пик '+r.peakKw+' кВт':ioStr(r.out))+'</td><td>'+ioStr(r.in)+'</td>'+
+  '<td>'+fmt(c.out[oid],oid==='energy'?0:1)+'</td><td>'+T.workers+'</td><td>'+(r.kw||'—')+'</td><td>'+money(c.capex)+'</td>'+
+  '<td>'+money(c.rev)+'</td><td>'+(c.cin?money(-c.cin):'—')+'</td><td>'+(c.work?money(-c.work):'—')+'</td><td>'+(c.cen?money(-c.cen):'—')+'</td><td>'+money(-c.rep)+'</td>'+
+  '<td class="'+(c.net>0?'good':'bad')+'">'+money(c.net)+'</td><td><span class="roi" style="--c:'+rc+'"><i style="width:'+roiW*0.6+'px"></i>'+fmt(c.roi,1)+' дн</span></td></tr>';});
+});
+$('tRec').innerHTML=rows;
+
+const cRec=id=>E.calc(E.REC.find(r=>r.id===id));
+const coal=cRec('coal'),tpp=cRec('coal_power'),wat=cRec('water'),wh=cRec('wheat'),rA=cRec('ration_a');
+$('chCoal').textContent=fmt(coal.out.coal,0)+' угля/сут';
+$('chTpp').textContent='сжигает '+fmt(tpp.inn.coal,0)+' угля → '+fmt(tpp.out.energy,0)+' кВт·ч/сут';
+$('chMin').textContent='по 30–48 кВт каждая';
+$('chWat').textContent=fmt(wat.out.water,0)+' воды/сут';
+$('chFarm').textContent='поливают '+fmt(wh.inn.water+cRec('corn').inn.water,0)+' воды/сут';
+$('chKit').textContent=fmt(rA.out.ration,0)+' пайков/сут';
+
+// рабочие
+const H=E.HOUSING,HR=E.HR;
+$('workers').innerHTML=
+ '<div class="panel"><h3>Потребности (на 1 человека в сутки)</h3><dl class="kv">'+
+ '<dt>Вода</dt><dd>3 ед (было 1)</dd><dt>Паёк <span class="pill new">новое</span></dt><dd>1 ед</dd>'+
+ '<dt>Если воды или еды не хватает</dt><dd class="warn">производительность ↓</dd></dl>'+
+ '<p>Предлагаю веса нужд: вода 50%, паёк 50% (сейчас вода 100%). Нехватка режет выработку всех установок базы.</p></div>'+
+ '<div class="panel"><h3>'+H.n+'</h3><dl class="kv">'+
+ '<dt>Вместимость</dt><dd>'+H.cap+' чел (было 20)</dd><dt>Площадь</dt><dd>'+H.area+' (было 0)</dd><dt>Потребление</dt><dd>'+H.kw+' кВт</dd>'+
+ '<dt>Стоимость</dt><dd>'+money(E.val(H.cost))+'</dd><dt class="mut" style="grid-column:1/-1">'+costStr(H.cost)+'</dt>'+
+ '<dt>На 1 место площади</dt><dd>'+fmt(H.area/H.cap,2)+'</dd></dl></div>'+
+ '<div class="panel"><h3>'+HR.n+' и найм</h3><dl class="kv">'+
+ '<dt>Площадь / рабочих / кВт</dt><dd>'+HR.area+' / '+HR.workers+' / '+HR.kw+'</dd><dt>Потолок найма</dt><dd>'+HR.recruitPerHour+' чел/ч</dd>'+
+ '<dt>Цена переезда 1 рабочего</dt><dd>'+HR.rationPerRecruit+' пайка = '+money(HR.rationPerRecruit*R.ration.p)+'</dd>'+
+ '<dt>Стоимость отдела кадров</dt><dd>'+money(E.val(HR.cost))+'</dd></dl>'+
+ '<p>Заселение базы на 185 человек при ползунке 100%: около 62 часов и ~555 пайков (≈ '+money(555*R.ration.p)+' мон). Раньше пайком служили сырые овощи, теперь готовый паёк.</p></div>';
+
+// энергия
+const sol=cRec('solar'),B=E.BATTERY;
+$('energy').innerHTML=
+ '<div class="panel"><h3>Угольная ТЭС <span class="pill new">новое</span></h3><dl class="kv">'+
+ '<dt>Мощность</dt><dd>600 кВт круглосуточно</dd><dt>Топливо</dt><dd>3 угля / '+dur(1525)+'</dd><dt>Уголь в сутки</dt><dd>'+fmt(tpp.inn.coal,0)+' ед = '+money(tpp.cin)+'</dd>'+
+ '<dt>Площадь / рабочие</dt><dd>30 / 8</dd><dt>Себестоимость 1 кВт·ч</dt><dd>'+fmt(tpp.opex/tpp.out.energy,3)+'</dd></dl>'+
+ '<p>Дёшево в пересчёте на площадь (20 кВт на 1 клетку), но зависит от угля. Одной угольной шахты почти хватает на одну ТЭС.</p></div>'+
+ '<div class="panel"><h3>Солнечная панель</h3><dl class="kv">'+
+ '<dt>Пик / в среднем</dt><dd>150 / '+fmt(150*E.SUN_AVG,0)+' кВт</dd><dt>Ночью (20:00–06:00)</dt><dd>0 кВт</dd>'+
+ '<dt>Площадь / рабочие</dt><dd>15 / 0</dd><dt>Выработка в сутки</dt><dd>'+fmt(sol.out.energy,0)+' кВт·ч</dd><dt>Окупаемость по цене ⚡</dt><dd>'+fmt(sol.roi,1)+' дн</dd></dl>'+
+ '<p>Без топлива и персонала, но занимает в 5 раз больше площади на кВт, чем ТЭС, и ночью нужны аккумуляторы.</p></div>'+
+ '<div class="panel"><h3>'+B.n+'</h3><dl class="kv">'+
+ '<dt>Ёмкость</dt><dd>'+fmt(B.cap)+' кВт·ч (было 400)</dd><dt>Площадь</dt><dd>'+B.area+' (было 0)</dd><dt>Стоимость</dt><dd>'+money(E.val(B.cost))+'</dd></dl>'+
+ '<p><b style="color:var(--fg)">Правило:</b> при нехватке энергии все потребители работают пропорционально доступной мощности. Излишек заряжает аккумулятор, а когда аккумулятор полон, излишек пропадает, но работу не блокирует (так уже сделано в коде).</p></div>';
+
+// износ
+const mc=cRec('iron_ore');
+$('wear').innerHTML=
+ '<div class="panel"><h3>Правило (без изменений)</h3><dl class="kv">'+
+ '<dt>Скорость износа</dt><dd>−30 п.п. за 45 суток</dd><dt>В сутки</dt><dd>−0,667 п.п.</dd><dt>Нижний предел</dt><dd>20%</dd>'+
+ '<dt>Выработка</dt><dd>= прочность</dd><dt>Ремонт 1 п.п.</dt><dd>1% цены постройки</dd><dt>Снос</dt><dd>возврат 25%</dd></dl></div>'+
+ '<div class="panel"><h3>Пример: железная шахта</h3><dl class="kv">'+
+ '<dt>Цена постройки</dt><dd>'+money(mc.capex)+'</dd><dt>Ремонт в сутки (в среднем)</dt><dd>'+money(mc.rep)+'</dd>'+
+ '<dt>Ремонт за 45 суток (−30 п.п.)</dt><dd>'+money(mc.capex*0.3)+'</dd><dt>Не чинить 45 суток: потери выпуска</dt><dd class="bad">'+money(mc.rev*0.15*45)+'</dd></dl>'+
+ '<p>Ремонт идёт теми же материалами, что и постройка: руда и камень уходят с рынка, поэтому ресурсы нужны постоянно, а не только на старте.</p></div>';
+
+// конструктор
+const DEFAULT={rec:{iron_ore:4,copper_ore:2,coal:2,stone:1,water:4,wheat:1,corn:1,ration_a:1,coal_power:1,solar:2},hr:1,battery:2};
+let L=JSON.parse(JSON.stringify(DEFAULT));
+const AREA=500;
+const slotDefs=E.REC.map(r=>({key:'rec:'+r.id,label:(r.label||R[Object.keys(r.out)[0]].n),type:E.TYPES[r.t].n,area:E.TYPES[r.t].area,c:cv(Object.keys(r.out)[0])}))
+ .concat([{key:'hr',label:'Отдел кадров',type:'служебное',area:E.HR.area,c:'var(--service)'},{key:'battery',label:'Аккумулятор',type:'энергия',area:E.BATTERY.area,c:'var(--energy)'}]);
+const get=k=>k.startsWith('rec:')?(L.rec[k.slice(4)]||0):(L[k]||0);
+const set=(k,v)=>{v=Math.max(0,Math.min(20,v));if(k.startsWith('rec:'))L.rec[k.slice(4)]=v;else L[k]=v;};
+function renderSlots(){
+ $('slots').innerHTML=slotDefs.map(s=>'<div class="slot"><div class="nm"><i class="dot" style="--c:'+s.c+'"></i><span title="'+s.type+'">'+s.label+'</span></div><span class="meta">'+s.area+' пл.</span>'+
+  '<div class="step"><button type="button" data-k="'+s.key+'" data-d="-1" aria-label="Убрать: '+s.label+'">−</button><output>'+get(s.key)+'</output><button type="button" data-k="'+s.key+'" data-d="1" aria-label="Добавить: '+s.label+'">+</button></div></div>').join('')+
+  '<div class="slot auto"><div class="nm"><i class="dot" style="--c:var(--housing)"></i><span>Жилые блоки (авто)</span></div><span class="meta">12 пл.</span><div class="step" style="border-style:dashed"><output id="houseOut" style="min-width:84px">0</output></div></div>';
+}
+$('slots').addEventListener('click',e=>{const b=e.target.closest('button[data-k]');if(!b)return;set(b.dataset.k,get(b.dataset.k)+Number(b.dataset.d));b.parentElement.querySelector('output').textContent=get(b.dataset.k);update();});
+$('bReset').addEventListener('click',()=>{L=JSON.parse(JSON.stringify(DEFAULT));renderSlots();update();});
+$('bClear').addEventListener('click',()=>{L={rec:{},hr:0,battery:0};renderSlots();update();});
+
+function update(){
+ const b=E.base(L);
+ $('houseOut').textContent=b.houses+' × 24 мест';
+ // площадь
+ const segs=[];
+ b.rows.forEach(x=>segs.push({c:cv(Object.keys(x.r.out)[0]),a:x.c.T.area*x.n,l:(x.r.label||R[Object.keys(x.r.out)[0]].n)}));
+ if(b.hr)segs.push({c:'var(--service)',a:E.HR.area*b.hr,l:'Отдел кадров'});
+ if(b.bat)segs.push({c:'var(--energy)',a:E.BATTERY.area*b.bat,l:'Аккумуляторы'});
+ if(b.houses)segs.push({c:'var(--housing)',a:E.HOUSING.area*b.houses,l:'Жильё'});
+ const over=b.area>AREA, scale=Math.max(AREA,b.area);
+ $('areaBar').innerHTML=segs.map(s=>'<i style="--c:'+s.c+';width:'+(s.a/scale*100)+'%" title="'+s.l+': '+s.a+'"></i>').join('');
+ $('areaTxt').innerHTML='· <span class="'+(over?'bad':'')+'">'+b.area+' / '+AREA+'</span>';
+ const hA=E.HOUSING.area*b.houses;
+ $('areaLeg').innerHTML='<span><i class="dot" style="--c:var(--housing)"></i>жильё '+hA+' ('+(b.area?Math.round(hA/b.area*100):0)+'%)</span><span>рабочих '+b.workers+'</span><span>свободно '+Math.max(0,AREA-b.area)+'</span>';
+ // энергия
+ const solarGen=(L.rec.solar||0)*150, tppGen=(L.rec.coal_power||0)*600;
+ const nightOk=tppGen>=b.kw;
+ const eDef=b.energyNet<-0.5;
+ // P&L
+ $('pl').innerHTML=
+  '<dt>Продажа излишков</dt><dd class="good">+'+money(b.sales)+'</dd>'+
+  '<dt>Докупка сырья и пайков</dt><dd class="bad">'+money(-b.buys)+'</dd>'+
+  '<dt>Ремонт (средний, в сутки)</dt><dd class="bad">'+money(-b.repair)+'</dd>'+
+  '<dt class="tot">Чистый доход в сутки</dt><dd class="tot '+(b.net>0?'good':'bad')+'">'+money(b.net)+'</dd>'+
+  '<dt>Вложения в постройки</dt><dd>'+money(b.capex)+'</dd>'+
+  '<dt>Окупаемость</dt><dd>'+(b.net>0?fmt(b.roi,1)+' дн':'—')+'</dd>'+
+  '<dt>Потребление / выработка днём</dt><dd>'+fmt(b.kw)+' / '+fmt(solarGen+tppGen)+' кВт</dd>'+
+  '<dt>Ночью (только ТЭС)</dt><dd class="'+(nightOk?'':'warn')+'">'+fmt(tppGen)+' кВт</dd>';
+ const w=[];
+ if(over)w.push('Площадь превышена на '+(b.area-AREA)+'.');
+ if(eDef)w.push('Энергии не хватает: дефицит '+fmt(-b.energyNet/24,0)+' кВт в среднем. Установки будут работать не на полную мощность, и расчёт дохода завышен.');
+ else if(!nightOk&&b.kw>0)w.push('Ночью ТЭС не покрывает потребление: нужен запас в аккумуляторах около '+fmt((b.kw-tppGen)*10)+' кВт·ч (есть '+fmt(b.bat*E.BATTERY.cap+150)+').');
+ $('warns').innerHTML=w.map(x=>'<div class="warnbox">'+x+'</div>').join('');
+ // потоки
+ const lines=b.lines.slice().sort((a,c)=>Math.abs(c.v)-Math.abs(a.v));
+ const mx=Math.max(1,...lines.map(l=>Math.abs(l.v)));
+ $('flows').innerHTML=lines.map(l=>{const wdt=Math.abs(l.v)/mx*50;return '<div class="flowbar"><span>'+R[l.k].n+'</span><div class="track"><i style="--c:'+(l.v>=0?cv(l.k):'var(--bad)')+';'+(l.v>=0?'left:50%':'left:'+(50-wdt)+'%')+';width:'+wdt+'%"></i></div><span class="v '+(l.q>=0?'':'bad')+'">'+(l.q>=0?'+':'')+fmt(l.q,0)+'</span></div>';}).join('')+
+  '<div class="flowbar"><span>Энергия</span><div class="mut" style="font-size:11.5px">излишек не продаётся</div><span class="v '+(eDef?'bad':'')+'">'+(b.energyNet>=0?'+':'')+fmt(b.energyNet)+'</span></div>';
+ // склад
+ const kg=b.lines.filter(l=>l.q>0&&!R[l.k].liquid).reduce((s,l)=>s+l.q*R[l.k].kg,0);
+ return {b,kg};
+}
+renderSlots();
+const first=update();
+
+// KPI по примеру
+const b0=E.base(DEFAULT), kg0=first.kg;
+$('qWh').textContent=fmt(10000/kg0,1);
+$('kpis').innerHTML=[
+ ['Чистый доход','+'+money(b0.net),'монет в сутки',1],
+ ['Окупаемость',fmt(b0.roi,1)+' дн','в PrUn-примере 53 дня',1],
+ ['Вложения',money(b0.capex),'монет материалами'],
+ ['Площадь',b0.area+' / 500','жильё '+Math.round(E.HOUSING.area*b0.houses/b0.area*100)+'% площади'],
+ ['Рабочие',String(b0.workers),b0.houses+' жилых блоков'],
+ ['Энергия',fmt(b0.kw)+' кВт','ТЭС 600 + солнце 2 × 150'],
+ ['Ремонт',money(b0.repair),'монет в сутки (0,667% вложений)'],
+ ['Склад 10 т',fmt(10000/kg0,1)+' сут','до заполнения излишками']
+].map(k=>'<div class="kpi'+(k[3]?' hero':'')+'"><span class="l">'+k[0]+'</span><span class="v">'+k[1]+'</span><span class="s">'+k[2]+'</span></div>').join('');
+
+// сравнение с кодом
+const OLD={iron_ore:[400,4,3,8],copper_ore:[450,4,3,9],coal:[420,4,3,7],stone:[380,4,3,6],water:[350,3,3,5],oil:[500,3,3,10],wheat:[480,4,3,4],potato:[520,4,3,4],corn:[460,4,3,4],tomato:[400,4,3,4]};
+let d='<tr><th>Рецепт</th><th>Цикл: было → стало</th><th>Выход/цикл</th><th>Выход/сут</th><th>Рабочих</th><th>power в коде (за цикл)</th></tr>';
+E.REC.forEach(r=>{const o=OLD[r.id],oid=Object.keys(r.out)[0],c=E.calc(r),T=E.TYPES[r.t];
+ const pw=r.kw*r.cyc/3600;
+ if(o)d+='<tr><td>'+R[oid].n+'</td><td>'+dur(o[0])+' → '+dur(r.cyc)+'</td><td>'+o[1]+' → '+r.out[oid]+'</td><td>'+fmt(o[1]*86400/o[0])+' → '+fmt(c.out[oid],0)+'</td><td>'+o[2]+' → '+T.workers+'</td><td>'+o[3]+' → '+fmt(pw,1)+'</td></tr>';
+ else d+='<tr><td>'+(r.label||R[oid].n)+' <span class="pill new">новое</span></td><td>'+(r.t==='solar'?'60 с (как было)':dur(r.cyc))+'</td><td>'+(r.t==='solar'?'10 → '+fmt(r.out.energy,1):ioStr(r.out))+'</td><td>'+fmt(c.out[oid],0)+'</td><td>'+(r.t==='solar'?'1 → 0':T.workers)+'</td><td>'+(r.kw?fmt(pw,1):'—')+'</td></tr>';
+});
+d+='<tr class="grp"><td colspan="6">Константы</td></tr>'+
+ '<tr><td class="t">PER_WORKER_RATE</td><td class="t" colspan="5">water: 1/сут → 3/сут; добавить ration: 1/сут и нужду «Паёк» у разнорабочих</td></tr>'+
+ '<tr><td class="t">HR_RATION_COST</td><td class="t" colspan="5">по 1 пшеницы, картофеля, кукурузы и томатов → 3 пайка за одного нанятого</td></tr>'+
+ '<tr><td class="t">HOUSING</td><td class="t" colspan="5">вместимость 20 → 24, площадь 0 → 12, 2 кВт</td></tr>'+
+ '<tr><td class="t">BATTERIES</td><td class="t" colspan="5">ёмкость 400 → 2 000, площадь 0 → 4</td></tr>'+
+ '<tr><td class="t">scaledCost ×1,15ⁿ</td><td class="t" colspan="5">убрать для производственных зданий (см. вопрос 1)</td></tr>'+
+ '<tr><td class="t">Стоимость построек</td><td class="t" colspan="5">все цены выросли примерно в 20 раз, см. таблицу 03 (например, шахта: 60 железа → 1150 железа + 1200 камня + 420 меди)</td></tr>'+
+ '<tr><td class="t">Новое: биржа</td><td class="t" colspan="5">цены из таблицы 02, продажа со склада, спред ±5%</td></tr>';
+$('tDiff').innerHTML=d;
+})();
+</script>

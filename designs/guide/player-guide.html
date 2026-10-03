@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Индустриальный пояс — руководство колониста</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0A0D18; --panel:#12172A; --card:#171D33; --card2:#1B2238;
+  --border:#293150; --border-strong:#3A4468;
+  --text-primary:#E9ECF7; --text-secondary:#9CA6C4; --text-muted:#606A8A;
+  --tier0:#4FD1E7; --tier1:#F2A93B; --tier2:#9C7CF4; --tier3:#F4557B; --tier4:#4ADE9B;
+  --iron:#9FB0C8; --copper:#E08A4B; --water:#49B8F0; --coal:#8B85A6; --stone:#C2AD82; --oil:#B99A5B;
+  --energy:#FFDD57; --miner:#C9A227; --class1:#E8C15A; --skill:#B388FF; --planet:#6E8CFF;
+  --wheat:#E8D078; --potato:#A9865B; --corn:#F0B93D; --tomato:#E1503D; --farm:#8CAF52; --ration:#C9A24B;
+  --good:#4ADE9B; --bad:#F4557B; --ink:#0A0D18; --hi:#FFFFFF;
+  --font-display:'Rajdhani',sans-serif; --font-body:'IBM Plex Sans',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--bg);color:var(--text-primary);font-family:var(--font-body);font-size:14px;line-height:1.55;}
+.sheet{max-width:980px;margin:0 auto;padding:0 28px 60px;}
+h1,h2,h3,h4{font-family:var(--font-display);color:var(--text-primary);margin:0;}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);}
+p{margin:0 0 10px;color:var(--text-secondary);}
+strong{color:var(--text-primary);font-weight:600;}
+a{color:var(--tier0);}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:var(--text-primary);}
+
+/* ---------- Обложка ---------- */
+.cover{min-height:92vh;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:40px 0;page-break-after:always;}
+.cover-badge{width:84px;height:84px;border-radius:20px;background:radial-gradient(70% 70% at 30% 25%,#1e2747,#0b0f1e);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;box-shadow:0 18px 40px rgba(0,0,0,.45);}
+.cover h1{font-size:46px;font-weight:700;letter-spacing:.01em;margin-top:6px;}
+.cover .sub{font-size:16px;color:var(--text-secondary);max-width:62ch;}
+.cover-meta{display:flex;gap:26px;margin-top:18px;flex-wrap:wrap;}
+.cover-meta div{display:flex;flex-direction:column;gap:3px;}
+.cover-meta .l{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);}
+.cover-meta .v{font-family:var(--font-mono);font-size:14px;color:var(--text-primary);}
+.cover-tiers{display:flex;gap:6px;margin-top:22px;}
+.cover-tiers i{display:block;width:40px;height:6px;border-radius:3px;}
+
+/* ---------- Оглавление ---------- */
+.toc{page-break-after:always;padding-top:36px;}
+.toc h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:toc;}
+.toc li{counter-increment:toc;display:flex;align-items:baseline;gap:10px;padding:9px 0;border-bottom:1px dashed var(--border);}
+.toc li::before{content:counter(toc,decimal-leading-zero);font-family:var(--font-mono);color:var(--text-muted);font-size:12px;}
+.toc li a{flex:1;color:var(--text-primary);text-decoration:none;font-family:var(--font-display);font-weight:600;font-size:15px;}
+.toc li span{color:var(--text-muted);font-size:12px;}
+
+/* ---------- Секции ---------- */
+section.chapter{padding-top:34px;page-break-before:always;}
+section.chapter:first-of-type{page-break-before:avoid;}
+.chapter-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;}
+.chapter-num{font-family:var(--font-mono);font-size:13px;color:var(--text-muted);border:1px solid var(--border-strong);border-radius:8px;padding:4px 9px;}
+.chapter-head h2{font-size:25px;font-weight:700;color:var(--cc,var(--tier0));}
+.chapter-sub{color:var(--text-secondary);font-size:13.5px;margin:6px 0 18px;max-width:72ch;}
+h3.h{font-size:15.5px;font-weight:600;color:var(--text-primary);margin:22px 0 10px;padding-left:10px;border-left:3px solid var(--cc,var(--tier0));}
+h3.h:first-of-type{margin-top:4px;}
+
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:14px;page-break-inside:avoid;}
+.panel.flat{background:transparent;border-style:dashed;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+/* чип ресурса */
+.res-row{display:flex;flex-wrap:wrap;gap:8px;}
+.res-chip{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--rc,var(--tier0));border-radius:9px;padding:7px 10px 7px 8px;min-width:168px;flex:1 1 220px;page-break-inside:avoid;}
+.res-chip .ic{width:22px;height:22px;flex:none;color:var(--rc,var(--text-muted));}
+.res-chip .ic svg{width:100%;height:100%;}
+.res-chip .tx{display:flex;flex-direction:column;gap:1px;min-width:0;}
+.res-chip .nm{font-size:12.5px;color:var(--text-primary);font-weight:500;}
+.res-chip .fm{font-size:10.5px;color:var(--text-muted);font-family:var(--font-mono);}
+.res-chip .meta{margin-left:auto;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);}
+
+/* карточка здания */
+.bcard{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--cc,var(--tier0));border-radius:11px;padding:13px 14px;margin-bottom:11px;page-break-inside:avoid;}
+.bcard .bh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px;}
+.bcard .bh h4{font-size:14.5px;font-weight:600;color:var(--text-primary);}
+.bcard .bh .area{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);white-space:nowrap;}
+.bcard .desc{font-size:12.5px;color:var(--text-secondary);margin-bottom:8px;}
+.kv-row{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--text-secondary);margin-bottom:6px;}
+.kv-row b{color:var(--text-primary);font-family:var(--font-mono);font-weight:500;}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.tag{font-family:var(--font-mono);font-size:10.5px;padding:3px 8px;border-radius:999px;background:var(--panel);border:1px solid var(--border);color:var(--text-secondary);}
+.tag.good{color:var(--good);border-color:color-mix(in srgb,var(--good) 40%,var(--border));}
+.tag.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,var(--border));}
+
+/* таблица */
+table.t{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:14px;}
+table.t th{text-align:left;font-family:var(--font-display);font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);padding:7px 10px;border-bottom:1px solid var(--border-strong);}
+table.t td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text-secondary);}
+table.t td.n{color:var(--text-primary);font-family:var(--font-mono);}
+table.t tr:last-child td{border-bottom:none;}
+
+/* подсказка/врезка */
+.callout{display:flex;gap:11px;background:linear-gradient(180deg,#1A2143,#131934);border:1px solid var(--border-strong);border-radius:12px;padding:13px 15px;margin:14px 0;page-break-inside:avoid;}
+.callout .ico{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:14px;background:var(--cc,var(--tier0));color:#0A0D18;}
+.callout.warn{border-color:color-mix(in srgb,var(--tier1) 50%,var(--border-strong));}
+.callout.warn .ico{background:var(--tier1);}
+.callout p{margin:0;font-size:12.5px;color:var(--text-secondary);}
+.callout b{color:var(--text-primary);}
+
+.steps{counter-reset:stp;list-style:none;margin:0;padding:0;}
+.steps li{counter-increment:stp;position:relative;padding:4px 0 14px 34px;border-left:2px solid var(--border);margin-left:13px;}
+.steps li:last-child{border-color:transparent;padding-bottom:0;}
+.steps li::before{content:counter(stp);position:absolute;left:-13px;top:0;width:26px;height:26px;border-radius:50%;background:var(--tier0);color:#0A0D18;font-family:var(--font-mono);font-weight:600;font-size:12px;display:flex;align-items:center;justify-content:center;}
+.steps b{color:var(--text-primary);}
+
+.legend-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.legend-tabs .lt{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:6px 11px;font-size:12px;}
+.legend-tabs .lt i{width:9px;height:9px;border-radius:3px;background:var(--c);}
+
+.reason-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;font-size:12.5px;}
+.reason-grid div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dotted var(--border);padding:5px 0;}
+.reason-grid b{color:var(--text-primary);font-weight:500;}
+.reason-grid span{color:var(--text-muted);text-align:right;}
+
+.footer-note{margin-top:46px;padding-top:16px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text-muted);}
+
+@media print{
+  body{background:#0A0D18;}
+  .sheet{max-width:none;padding:0 26px;}
+  .cover{min-height:0;height:98vh;}
+  a{text-decoration:none;color:var(--text-primary);}
+  @page{size:A4;margin:14mm 12mm;}
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <!-- ================= ОБЛОЖКА ================= -->
+  <section class="cover">
+    <div class="cover-badge">
+      <svg viewBox="0 0 48 48" width="46" height="46" fill="#4FD1E7" aria-hidden="true">
+        <rect x="3" y="41" width="42" height="2.5" rx="1.25" opacity=".3"/>
+        <path d="M4 41V27l7-4.5V27l7-4.5V27l7-4.5V41z" opacity=".6"/>
+        <rect x="26.5" y="11" width="6" height="30" rx="1"/>
+        <rect x="34" y="21" width="10" height="20" rx="1.5" opacity=".82"/>
+      </svg>
+    </div>
+    <div class="eyebrow">Управляющий модуль · Сектор Керберос-9</div>
+    <h1>Индустриальный пояс</h1>
+    <div class="sub">Полное руководство для нового управляющего колонией: как устроена экономика базы, что и из чего добывается, как кормить и нанимать рабочих, как не остаться без электричества ночью — и что делать в первые игровые сутки.</div>
+    <div class="cover-meta">
+      <div><span class="l">Этап разработки</span><span class="v">Этап 1 · Tier 0</span></div>
+      <div><span class="l">Ресурсов в цепочке</span><span class="v">11 + электроэнергия</span></div>
+      <div><span class="l">Типов построек</span><span class="v">8</span></div>
+      <div><span class="l">Вкладок интерфейса</span><span class="v">9</span></div>
+    </div>
+    <div class="cover-tiers">
+      <i style="background:var(--tier0)"></i><i style="background:var(--tier1)"></i><i style="background:var(--tier2)"></i><i style="background:var(--tier3)"></i><i style="background:var(--tier4)"></i>
+    </div>
+  </section>
+
+  <!-- ================= ОГЛАВЛЕНИЕ ================= -->
+  <section class="toc">
+    <h2>Содержание</h2>
+    <ol>
+      <li><a href="#ch1">Что такое «Индустриальный пояс»</a><span>Коротко о цели игры</span></li>
+      <li><a href="#ch2">Вкладки управляющего модуля</a><span>Карта интерфейса</span></li>
+      <li><a href="#ch3">Ресурсы тира 0</a><span>Что вообще бывает на складе</span></li>
+      <li><a href="#ch4">Стройка: здания и площадь участка</a><span>Что можно построить и сколько это стоит</span></li>
+      <li><a href="#ch5">Месторождения, богатство и загрузка</a><span>Почему установка работает не на 100%</span></li>
+      <li><a href="#ch6">Износ, ремонт и снос</a><span>Оборудование стареет само по себе</span></li>
+      <li><a href="#ch7">Энергия: солнце, уголь, аккумулятор</a><span>Мнемосхема и кнопки «i»</span></li>
+      <li><a href="#ch8">Персонал: жильё, быт, набор рабочих</a><span>Откуда берутся рабочие руки</span></li>
+      <li><a href="#ch9">Ферма и пищеблок</a><span>От урожая к пайку</span></li>
+      <li><a href="#ch10">Навыки и учебный центр</a><span>Горное дело и агрономия</span></li>
+      <li><a href="#ch11">Цех: производство вживую</a><span>Конвейеры, переключение руды, вкл/выкл</span></li>
+      <li><a href="#ch12">Склад и резервуары</a><span>Вес, жидкости, перестановка плиток</span></li>
+      <li><a href="#ch13">Планета: административный центр</a><span>Управление временем суток</span></li>
+      <li><a href="#ch14">Памятка: первые игровые сутки</a><span>Чек-лист и расшифровка простоев</span></li>
+    </ol>
+  </section>
+
+  <!-- ================= 1. КОНЦЕПЦИЯ ================= -->
+  <section class="chapter" id="ch1" style="--cc:var(--tier0)">
+    <div class="chapter-head"><span class="chapter-num">01</span><h2>Что такое «Индустриальный пояс»</h2></div>
+    <p class="chapter-sub">Вы — управляющий промышленной базой на орбитальном секторе Керберос-9. Это <b>замкнутая производственная экономика</b>: каждый товар на складе кто-то добыл или произвёл, и каждую фабрику кто-то обслуживает. Ничего не появляется из воздуха — ни ресурс, ни киловатт энергии, ни рабочие руки.</p>
+
+    <div class="panel">
+      <h3 class="h" style="margin-top:0">Главный принцип игры</h3>
+      <p>Всё в колонии — это <b>цепочка зависимостей</b>: руда добывается установками → установки требуют персонал и электричество → персонал требует воду и пайки → паёк готовит пищеблок из урожая фермы → ферма требует воду и площадь участка → площадь участка ограничена (500 делений) → а деньги на всё это — сами добытые ресурсы, которые со временем дорожают с каждой новой постройкой одного типа. Сломать любое звено — значит притормозить всю базу.</p>
+    </div>
+
+    <div class="callout">
+      <div class="ico">!</div>
+      <p><b>Это не «кликер».</b> Симуляция идёт в реальном времени (можно ускорить ×60/×600/×3600 для теста) и продолжается, даже когда вкладка игры закрыта — при следующем заходе колония досчитает прогресс (но не больше 12 часов офлайн за раз).</p>
+    </div>
+  </section>
+
+  <!-- ================= 2. ВКЛАДКИ ================= -->
+  <section class="chapter" id="ch2" style="--cc:var(--tier1)">
+    <div class="chapter-head"><span class="chapter-num">02</span><h2>Вкладки управляющего модуля</h2></div>
+    <p class="chapter-sub">Хотбар наверху экрана — девять разделов базы. Вот что в каждом из них.</p>
+
+    <table class="t">
+      <tr><th>Вкладка</th><th>Что там происходит</th></tr>
+      <tr><td class="n">Штаб</td><td>Общая сводка базы: время работы, построено объектов, занятый персонал, место под академию/обучение, ускорение времени для теста.</td></tr>
+      <tr><td class="n">Здания</td><td>Все уже построенные установки плитками: прочность каждой, кнопки ремонта и сноса.</td></tr>
+      <tr><td class="n">Стройка</td><td>Каталог всего, что можно построить — по категориям (Добыча / Энергия / Ферма / Питание / Хранение жидкостей), с ценой, площадью и тем, что здание производит.</td></tr>
+      <tr><td class="n">Рабочие</td><td>Отдел кадров, приток переселенцев, жильё и бытовые нужды персонала (вода, пайки).</td></tr>
+      <tr><td class="n">Навыки</td><td>Учебный центр и прокачка «Горного дела» и «Агрономии» очками навыка (SP).</td></tr>
+      <tr><td class="n">Цех</td><td>«Производство» — живые конвейерные линии каждой работающей установки: переключение руды, включение/выключение, таймер цикла.</td></tr>
+      <tr><td class="n">Энергия</td><td>Мнемосхема энергосистемы базы: источники, шина, аккумуляторы, потребители, журнал за период.</td></tr>
+      <tr><td class="n">Склад</td><td>Общий грузовой склад (по весу) и отдельные резервуары для жидкостей (вода, нефть).</td></tr>
+      <tr><td class="n">Планета</td><td>Административный центр — пока здесь только ручное управление временем суток.</td></tr>
+    </table>
+  </section>
+
+  <!-- ================= 3. РЕСУРСЫ ================= -->
+  <section class="chapter" id="ch3" style="--cc:var(--tier0)">
+    <div class="chapter-head"><span class="chapter-num">03</span><h2>Ресурсы тира 0</h2></div>
+    <p class="chapter-sub">Пока разработана первая ступень цепочки (тир 0): шесть сырьевых ресурсов из месторождений, четыре культуры фермы, готовый паёк — и отдельно электроэнергия, которая не занимает место на складе.</p>
+
+    <h3 class="h">Сырьё из недр и скважин</h3>
+    <div class="res-row">
+      <div class="res-chip" style="--rc:var(--iron)"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><polygon points="4,13 2,8 6,3 12,2 17,6 18,12 13,17 7,18 3,16" opacity="0.88"/><polygon points="6,8 10,5 14,8 12,12 8,12"/></svg></div><div class="tx"><span class="nm">Железная руда</span><span class="fm">Fe₂O₃ · 2 кг/ед</span></div></div>
+      <div class="res-chip" style="--rc:var(--copper)"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><circle cx="7" cy="8.5" r="4.3" opacity="0.88"/><circle cx="13.2" cy="7.6" r="3.7" opacity="0.88"/><circle cx="10" cy="13.3" r="4.7" opacity="0.88"/></svg></div><div class="tx"><span class="nm">Медная руда</span><span class="fm">Cu₂S · 2.2 кг/ед</span></div></div>
+      <div class="res-chip" style="--rc:var(--water)"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2C10 2 4 10.5 4 14A6 6 0 0 0 16 14C16 10.5 10 2 10 2Z" opacity="0.9"/></svg></div><div class="tx"><span class="nm">Вода</span><span class="fm">H₂O · 1 кг/ед · жидкость</span></div></div>
+      <div class="res-chip" style="--rc:var(--coal)"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><polygon points="6,17 4,13 7,9 12,8 16,10 16,14 13,18 8,18" opacity="0.92"/></svg></div><div class="tx"><span class="nm">Уголь</span><span class="fm">C · 1.6 кг/ед</span></div></div>
+      <div class="res-chip" style="--rc:var(--stone)"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3,13C1,10 1.5,6 5,3.5C8.5,1 13,1 16,3.5C19,6 18.5,11 15,14C11.5,17 5,16.5 3,13Z" opacity="0.85"/></svg></div><div class="tx"><span class="nm">Камень</span><span class="fm">CaCO₃ · 2.4 кг/ед</span></div></div>
+      <div class="res-chip" style="--rc:var(--oil)"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2C10 2 3.5 10 3.5 14.2A6.5 5.6 0 0 0 16.5 14.2C16.5 10 10 2 10 2Z" opacity="0.92"/></svg></div><div class="tx"><span class="nm">Нефть</span><span class="fm">CₓHᵧ · 0.9 кг/ед · жидкость</span></div></div>
+    </div>
+
+    <h3 class="h">Урожай фермы и готовый паёк</h3>
+    <div class="res-row">
+      <div class="res-chip" style="--rc:var(--wheat)"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><ellipse cx="8.3" cy="7" rx="1.3" ry="2" transform="rotate(-30 8.3 7)"/><ellipse cx="11.7" cy="7" rx="1.3" ry="2" transform="rotate(30 11.7 7)"/><ellipse cx="7" cy="13.4" rx="1.3" ry="2" transform="rotate(-30 7 13.4)"/></svg></div><div class="tx"><span class="nm">Пшеница</span><span class="fm">0.7 кг/ед</span></div></div>
+      <div class="res-chip" style="--rc:var(--potato)"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 9c-1-3 1.5-6 5-6.3C13 2.3 16 5 16 9c0 4-3.5 7-7 6.8C5 15.6 3 13 4 9Z"/></svg></div><div class="tx"><span class="nm">Картофель</span><span class="fm">1.1 кг/ед</span></div></div>
+      <div class="res-chip" style="--rc:var(--corn)"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 18c-2.2 0-3.6-4-3.6-8.5S7.8 2 10 2s3.6 3 3.6 7.5S12.2 18 10 18Z"/></svg></div><div class="tx"><span class="nm">Кукуруза</span><span class="fm">0.9 кг/ед</span></div></div>
+      <div class="res-chip" style="--rc:var(--tomato)"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="11.5" r="6.3"/></svg></div><div class="tx"><span class="nm">Томаты</span><span class="fm">0.6 кг/ед</span></div></div>
+      <div class="res-chip" style="--rc:var(--ration)"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><rect x="3" y="7" width="14" height="10" rx="1.3" opacity="0.9"/><circle cx="10" cy="13.3" r="1.6" style="fill:#0A0D18" opacity="0.35"/></svg></div><div class="tx"><span class="nm">Паёк</span><span class="fm">готовое блюдо · 1.2 кг/ед</span></div></div>
+      <div class="res-chip" style="--rc:var(--energy)"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M11.3 1 2.8 12.3h5.1l-1 6.7 8.8-11h-5z" opacity="0.92"/></svg></div><div class="tx"><span class="nm">Электроэнергия</span><span class="fm">вес 0 · не хранится на складе</span></div></div>
+    </div>
+
+    <div class="callout">
+      <div class="ico">⚖</div>
+      <p>Склад (вкладка «Склад») считает вместимость <b>по весу, а не по штукам</b> — лимит <b>40&nbsp;000&nbsp;кг</b> на всё твёрдое сырьё сразу. Вода и нефть в этот лимит не входят — у каждой жидкости свой отдельный резервуар (см. главу 12).</p>
+    </div>
+  </section>
+
+  <!-- ================= 4. СТРОЙКА ================= -->
+  <section class="chapter" id="ch4" style="--cc:var(--tier1)">
+    <div class="chapter-head"><span class="chapter-num">04</span><h2>Стройка: здания и площадь участка</h2></div>
+    <p class="chapter-sub">У базы есть участок на <b>500 делений площади</b>. Любая постройка — производственная установка, жильё, аккумулятор, отдел кадров — отнимает от него свой кусок навсегда, пока её не снесут. Учебный центр — единственное исключение, площади не занимает.</p>
+
+    <h3 class="h">Добыча и бурение</h3>
+    <div class="bcard" style="--cc:var(--miner)">
+      <div class="bh"><h4>Горнодобывающая установка</h4><span class="area">площадь 25</span></div>
+      <div class="desc">Универсальная установка под твёрдую руду. Строится «вслепую», а какую руду добывать — железо, медь, уголь или камень — выбирается позже, во вкладке «Цех», и можно переключать позже (цикл начнётся заново).</div>
+      <div class="kv-row"><span>Цена: <b>1150 Fe₂O₃ · 1200 CaCO₃ · 420 Cu₂S</b></span></div>
+      <div class="tag-row"><span class="tag">Fe₂O₃: 2 ед / 24 мин</span><span class="tag">Cu₂S: 1 ед / 16:54</span><span class="tag">C: 2 ед / 20:11</span><span class="tag">CaCO₃: 3 ед / 15:40</span></div>
+    </div>
+    <div class="bcard" style="--cc:var(--water)">
+      <div class="bh"><h4>Буровая установка</h4><span class="area">площадь 12</span></div>
+      <div class="desc">Та же логика, что и у горнодобывающей, но для жидкостей — вода или нефть.</div>
+      <div class="kv-row"><span>Цена: <b>650 Fe₂O₃ · 560 CaCO₃ · 240 Cu₂S</b></span></div>
+      <div class="tag-row"><span class="tag">H₂O: 2 ед / 15:00</span><span class="tag">Нефть: 1 ед / 39:20</span></div>
+    </div>
+
+    <h3 class="h">Энергетика</h3>
+    <div class="grid2">
+      <div class="bcard" style="--cc:var(--energy)">
+        <div class="bh"><h4>Малая солнечная панель</h4><span class="area">площадь 15</span></div>
+        <div class="desc">Работает только днём (06:00–20:00), пик — в полдень. Ночью выработка строго 0, сколько панелей ни построй.</div>
+        <div class="kv-row"><span>Цена: <b>240 Fe₂O₃ · 340 Cu₂S</b></span></div>
+        <div class="tag-row"><span class="tag good">до 2.5 кВт с установки</span></div>
+      </div>
+      <div class="bcard" style="--cc:var(--tier1)">
+        <div class="bh"><h4>Угольная ТЭС</h4><span class="area">площадь 30</span></div>
+        <div class="desc">Жжёт уголь и даёт энергию круглые сутки — стабильность в обмен на топливо и персонал.</div>
+        <div class="kv-row"><span>Цена: <b>1550 Fe₂O₃ · 1700 CaCO₃ · 720 Cu₂S</b></span></div>
+        <div class="tag-row"><span class="tag good">255 кВт с установки</span><span class="tag">ест 3 угля / 25:25</span></div>
+      </div>
+    </div>
+
+    <h3 class="h">Ферма и пищеблок</h3>
+    <div class="grid2">
+      <div class="bcard" style="--cc:var(--farm)">
+        <div class="bh"><h4>Ферма</h4><span class="area">площадь 20</span></div>
+        <div class="desc">Выбирает одну из четырёх культур (во вкладке «Цех»): пшеница, картофель, кукуруза, томаты. Поливается водой.</div>
+        <div class="kv-row"><span>Цена: <b>420 Fe₂O₃ · 1500 CaCO₃ · 650 H₂O · 120 Cu₂S</b></span></div>
+      </div>
+      <div class="bcard" style="--cc:var(--ration)">
+        <div class="bh"><h4>Пищеблок</h4><span class="area">площадь 14</span></div>
+        <div class="desc">Готовит паёк по одному из двух рецептов из урожая фермы — см. главу 9.</div>
+        <div class="kv-row"><span>Цена: <b>500 Fe₂O₃ · 560 CaCO₃ · 210 Cu₂S</b></span></div>
+      </div>
+    </div>
+
+    <h3 class="h">Хранение и энергозапас</h3>
+    <div class="grid2">
+      <div class="bcard" style="--cc:var(--energy)">
+        <div class="bh"><h4>Малый аккумулятор</h4><span class="area">площадь 4</span></div>
+        <div class="desc">Увеличивает ёмкость энергосистемы базы. Без единого аккумулятора у базы всё равно есть небольшой стартовый запас — 150 кВт·ч.</div>
+        <div class="kv-row"><span>Цена: <b>200 Fe₂O₃ · 340 Cu₂S</b></span><span>Ёмкость: <b>+2000 кВт·ч (7.2 ГДж)</b></span></div>
+      </div>
+      <div class="bcard" style="--cc:var(--water)">
+        <div class="bh"><h4>Резервуары для жидкостей</h4><span class="area">площади не занимают</span></div>
+        <div class="desc">Не отдельное здание, а апгрейд уже стоящего бака каждой жидкости — делается со вкладки «Склад» или «Стройка». Три уровня.</div>
+        <div class="tag-row"><span class="tag">Малый: 1500</span><span class="tag">Средний: 4000</span><span class="tag">Большой: 10&nbsp;000</span></div>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="ico">₴</div>
+      <p><b>Цена растёт с каждой постройкой.</b> Каждое следующее здание одного типа дороже предыдущего на <b>15%</b> (по всем видам сырья сразу), по формуле сложного процента — 10-я установка обойдётся заметно дороже первой. Это касается количества построек именно этого <i>типа</i> (например, все горнодобывающие установки считаются вместе, независимо от того, какую руду они сейчас копают).</p>
+    </div>
+  </section>
+
+  <!-- ================= 5. МЕСТОРОЖДЕНИЯ ================= -->
+  <section class="chapter" id="ch5" style="--cc:var(--miner)">
+    <div class="chapter-head"><span class="chapter-num">05</span><h2>Месторождения, богатство и загрузка</h2></div>
+    <p class="chapter-sub">Одна и та же установка на разных базах добывает по-разному — и это не баг. У каждого месторождения своё «богатство», и реальный выпуск установки почти никогда не равен паспортному.</p>
+
+    <h3 class="h">Богатство месторождения</h3>
+    <p>При основании колонии для каждого сырья (железо, медь, уголь, камень, нефть — у воды и солнца свои правила) случайно определяется богатство в диапазоне <b>80%–130%</b>. Оно не меняется само по себе — расти ему помогает только профильный навык (см. главу 10, бонус до +100% на максимальном уровне). У солнечной панели вместо богатства — текущая <b>освещённость</b> (дневной цикл), у фермы — «плодородие почвы», у пищеблока — «слаженность кухни», у ТЭС — «настройка топки».</p>
+
+    <h3 class="h">Из чего складывается реальная загрузка</h3>
+    <p>Фактический выпуск установки за час — это паспортная ставка, умноженная на четыре независимых множителя. Самый строгий из них и определяет текущую причину простоя:</p>
+    <div class="reason-grid">
+      <div><b>Персонал</b><span>хватает ли рабочих на все установки класса</span></div>
+      <div><b>Быт персонала</b><span>обеспечены ли рабочие водой и пайком (пол 20%)</span></div>
+      <div><b>Сырьё на входе</b><span>хватает ли входных ресурсов (вода для фермы и т.д.)</span></div>
+      <div><b>Место на складе</b><span>есть ли куда положить результат</span></div>
+      <div><b>Электроэнергия</b><span>хватает ли текущей выработки + запаса</span></div>
+      <div><b>Износ оборудования</b><span>прочность установки ниже 100%</span></div>
+    </div>
+    <p>Все эти факторы перемножаются, а не складываются — отсюда ощущение «всё вроде есть, а добывается мало»: даже лёгкая нехватка персонала (90% штата) и лёгкий износ (90% прочности) вместе дадут не 90%, а 81% от паспорта.</p>
+
+    <div class="callout">
+      <div class="ico">%</div>
+      <p>Текущую причину простоя каждой установки видно прямо в <b>«Цехе»</b> — наведите курсор на конвейер или на знак тревоги вместо продукта на выходе.</p>
+    </div>
+  </section>
+
+  <!-- ================= 6. ИЗНОС ================= -->
+  <section class="chapter" id="ch6" style="--cc:var(--tier3)">
+    <div class="chapter-head"><span class="chapter-num">06</span><h2>Износ, ремонт и снос</h2></div>
+    <p class="chapter-sub">Оборудование стареет само по себе — работает оно или простаивает.</p>
+
+    <div class="grid3">
+      <div class="panel"><div class="eyebrow">Скорость износа</div><div style="font-family:var(--font-mono);font-size:20px;margin-top:4px">−30 п.п. / 45 суток</div><p style="margin-top:6px">непрерывного существования установки, независимо от загрузки</p></div>
+      <div class="panel"><div class="eyebrow">Предел износа</div><div style="font-family:var(--font-mono);font-size:20px;margin-top:4px">20% прочности</div><p style="margin-top:6px">сама по себе установка не ломается полностью — ниже пола можно работать, но с низкой отдачей</p></div>
+      <div class="panel"><div class="eyebrow">Снос — возврат</div><div style="font-family:var(--font-mono);font-size:20px;margin-top:4px">25% ресурсов</div><p style="margin-top:6px">от цены последней построенной установки этого типа</p></div>
+    </div>
+
+    <h3 class="h">Ремонт</h3>
+    <p>На вкладке «Здания» у каждой плитки-установки есть полоса прочности и кнопка гаечного ключа. Ремонт <b>всегда возвращает установку к 100%</b>, а стоит пропорционально тому, насколько она изношена: почувствовать это можно так — <b>полный ремонт (от 0% до 100%) стоит столько же, сколько постройка такой установки заново</b>; ремонт от 90% до 100% — лишь в десять раз дешевле. Чинить выгоднее понемногу и часто, чем ждать, пока установка просядет совсем.</p>
+
+    <div class="callout warn">
+      <div class="ico">⚠</div>
+      <p>Если ресурсов на ремонт не хватает — кнопка просто неактивна, изношенная установка продолжает работать с пониженной отдачей, это не авария.</p>
+    </div>
+  </section>
+
+  <!-- ================= 7. ЭНЕРГИЯ ================= -->
+  <section class="chapter" id="ch7" style="--cc:var(--energy)">
+    <div class="chapter-head"><span class="chapter-num">07</span><h2>Энергия: солнце, уголь, аккумулятор</h2></div>
+    <p class="chapter-sub">Вкладка «Энергия» — мнемосхема всей энергосистемы базы: слева источники, по центру шина, справа — кто сколько потребляет. Единицы — настоящие физические: потоки в <b>кВт</b>, запас в аккумуляторах — в <b>джоулях</b> (кДж/МДж/ГДж по масштабу).</p>
+
+    <h3 class="h">Как база распределяет энергию каждую секунду</h3>
+    <ol class="steps">
+      <li><b>Выработка идёт в общий пул.</b> Солнечные панели (днём) и угольные ТЭС (круглосуточно) складывают всё, что произвели, в один «котёл» вместе с уже накопленным зарядом аккумуляторов.</li>
+      <li><b>Производство забирает своё первым.</b> Все установки, которым нужна энергия, получают её из этого пула. Если на всех не хватает — выработка делится пропорционально между всеми потребителями (никто не отключается полностью, все просто работают медленнее).</li>
+      <li><b>Остаток заряжает аккумулятор.</b> То, что осталось после производства, запасается — но не больше, чем позволяет свободная ёмкость.</li>
+      <li><b>Излишек сверх ёмкости — просто пропадает.</b> Полный аккумулятор никогда не тормозит добычу или выработку: если девать энергию уже некуда, она сбрасывается («Сброс излишка» на схеме), а не блокирует панели.</li>
+    </ol>
+
+    <h3 class="h">Кнопки «i» — расчётные прогнозы, не история</h3>
+    <div class="grid2">
+      <div class="panel"><b>«i» у Солнца → Профиль суток.</b> Круговая диаграмма: сколько дадут именно ваши текущие панели в каждый час суток, и штрихом — сколько сейчас потребляется. Это расчёт по текущему парку панелей, а не записанный журнал.</div>
+      <div class="panel"><b>«i» у солнечной панели → Выработка по часам.</b> Тепловая шкала суток с подсветкой текущего часа — та же идея, прицельно для одного источника.</div>
+    </div>
+    <p>Ниже схемы — настоящий <b>журнал</b> с историей (периоды от «1 час» до «3 месяца») и девятью карточками показателей (выработано, потреблено, не хватило, сброшено, обеспеченность, время дефицита, пики, заряд). У каждой карточки своя кнопка «i» — открывает подробный график с почасовой/посуточной разбивкой.</p>
+
+    <h3 class="h">Практический итог</h3>
+    <div class="callout">
+      <div class="ico">⚡</div>
+      <p>Солнечная панель ночью даёт строго 0 — на одном солнце база не продержится до утра без аккумуляторов или угольной ТЭС. ТЭС дороже и требует персонал и уголь, зато не зависит от времени суток. Разумная база сочетает оба источника плюс запас в аккумуляторах на пиковые нагрузки.</p>
+    </div>
+  </section>
+
+  <!-- ================= 8. ПЕРСОНАЛ ================= -->
+  <section class="chapter" id="ch8" style="--cc:var(--class1)">
+    <div class="chapter-head"><span class="chapter-num">08</span><h2>Персонал: жильё, быт, набор рабочих</h2></div>
+    <p class="chapter-sub">Пока в игре один класс персонала — <b>разнорабочие</b>. Они нужны почти всем производственным установкам (кроме солнечных панелей — те автоматические).</p>
+
+    <h3 class="h">Жильё задаёт потолок</h3>
+    <div class="bcard" style="--cc:var(--class1)">
+      <div class="bh"><h4>Жилой блок: разнорабочие</h4><span class="area">площадь 12</span></div>
+      <div class="desc">Жильё занимает площадь участка, как и любая другая постройка — за место на базе персонал конкурирует с производством.</div>
+      <div class="kv-row"><span>Цена: <b>220 Fe₂O₃ · 650 CaCO₃ · 150 H₂O</b></span><span>Вместимость: <b>24 чел. за блок</b></span></div>
+    </div>
+
+    <h3 class="h">Набор не мгновенный</h3>
+    <p>Построить жильё — не значит сразу получить рабочих: они <b>постепенно прибывают с других планет</b>. Скорость набора зависит от количества жилых блоков (каждый блок — до 10 человек в сутки на полном ходу) и от ползунка <b>«Бонусные пайки»</b> на вкладке «Рабочие»: чем он правее, тем быстрее едут переселенцы, но тем больше воды и пайков тратится на переезд (2-дневная норма на человека — 6 воды + 2 пайка). Набор никогда не превышает текущую жилую ёмкость.</p>
+
+    <h3 class="h">Быт: вода и паёк пополам</h3>
+    <p>Каждый работающий разнорабочий тратит воду и паёк, и обе нужды весят в формуле <b>довольства поровну (по 50%)</b>. Если воды или пайков не хватает — падает не только довольство, но и выработка всех установок класса (через множитель «быт», см. главу 5). Даже при полном нуле быта производство не остановится насмерть — есть защитный пол в <b>20%</b>, иначе колонии неоткуда было бы взять воду, чтобы восстановиться.</p>
+
+    <div class="callout">
+      <div class="ico">🏠</div>
+      <p><b>Отдел кадров</b> (площадь 8, цена 400 Fe₂O₃ · 480 CaCO₃ · 160 Cu₂S) — здание, отвечающее за управление набором персонала колонии.</p>
+    </div>
+  </section>
+
+  <!-- ================= 9. ФЕРМА ================= -->
+  <section class="chapter" id="ch9" style="--cc:var(--farm)">
+    <div class="chapter-head"><span class="chapter-num">09</span><h2>Ферма и пищеблок</h2></div>
+    <p class="chapter-sub">Паёк не падает с неба — его нужно вырастить и приготовить. Цепочка «ферма → пищеблок → паёк» отдельная от добычи руды, но использует ту же площадь участка и тот же персонал (разнорабочие).</p>
+
+    <h3 class="h">Четыре культуры на выбор фермы</h3>
+    <table class="t">
+      <tr><th>Культура</th><th>Вода на цикл</th><th>Выход</th><th>Цикл</th></tr>
+      <tr><td class="n">Пшеница</td><td>15</td><td class="n">29 ед</td><td>4 ч 10 мин</td></tr>
+      <tr><td class="n">Картофель</td><td>23</td><td class="n">59 ед</td><td>5 ч 45 мин</td></tr>
+      <tr><td class="n">Кукуруза</td><td>26</td><td class="n">43 ед</td><td>4 ч 52 мин</td></tr>
+      <tr><td class="n">Томаты</td><td>20</td><td class="n">20 ед</td><td>3 ч 03 мин</td></tr>
+    </table>
+
+    <h3 class="h">Два рецепта пищеблока</h3>
+    <div class="grid2">
+      <div class="bcard" style="--cc:var(--ration)">
+        <div class="bh"><h4>Паёк «Хлеб и каша»</h4></div>
+        <div class="desc">Быстрее готовится, но требует две культуры сразу.</div>
+        <div class="kv-row"><span>Вход: <b>2 пшеницы · 1 кукуруза · 1 вода</b></span></div>
+        <div class="tag-row"><span class="tag good">4 пайка / 38:13</span></div>
+      </div>
+      <div class="bcard" style="--cc:var(--ration)">
+        <div class="bh"><h4>Паёк «Картофельный»</h4></div>
+        <div class="desc">Дольше готовится, но сырьё дешевле в пересчёте на паёк.</div>
+        <div class="kv-row"><span>Вход: <b>4 картофеля · 1 томат · 1 вода</b></span></div>
+        <div class="tag-row"><span class="tag good">5 пайков / 52:13</span></div>
+      </div>
+    </div>
+    <p>Выбор рецепта — во вкладке «Цех», как и выбор руды для горнодобывающей установки.</p>
+  </section>
+
+  <!-- ================= 10. НАВЫКИ ================= -->
+  <section class="chapter" id="ch10" style="--cc:var(--skill)">
+    <div class="chapter-head"><span class="chapter-num">10</span><h2>Навыки и учебный центр</h2></div>
+    <p class="chapter-sub">Два навыка тира 0, до 150 уровней каждый. Прокачка небыстрая — но даёт постоянный, накопительный буст всей цепочке.</p>
+
+    <div class="grid2">
+      <div class="panel"><h4 style="margin-bottom:6px">Горное дело</h4><p>Ускоряет и удешевляет по персоналу всю добычу, бурение, солнечные панели и угольную ТЭС; дополнительно повышает богатство месторождений руды/нефти.</p></div>
+      <div class="panel"><h4 style="margin-bottom:6px">Агрономия</h4><p>То же самое, но для фермы и пищеблока — плюс плодородие почвы и слаженность кухни вместо богатства руды.</p></div>
+    </div>
+
+    <h3 class="h">Что даёт один уровень</h3>
+    <table class="t">
+      <tr><th>Эффект</th><th>За уровень</th><th>На максимуме (150 ур.)</th></tr>
+      <tr><td>Скорость цикла</td><td class="n">+0.27%</td><td class="n">+40%</td></tr>
+      <tr><td>Требуемый персонал</td><td class="n">−0.17%</td><td class="n">−25%</td></tr>
+      <tr><td>Богатство / плодородие</td><td class="n">+0.67%</td><td class="n">+100%</td></tr>
+    </table>
+
+    <h3 class="h">Как копятся очки навыка (SP)</h3>
+    <p>На этом этапе SP не начисляются «просто за факт существования здания» — они равны <b>реально добытым единицам ресурса</b> (1 единица = 1 SP, уже с учётом загрузки, богатства и текущей скорости). Простаивающая установка не приносит очков. Дополнительный плоский доход даёт <b>Учебный центр</b> (90 SP/ч за блок, цена 80 Fe₂O₃ + 40 Cu₂S, тоже дорожает на 15% за штуку) — он не занимает площадь участка.</p>
+    <p>Стоимость каждого следующего уровня навыка растёт в <b>1.7 раза</b>: 1-й уровень — 20 SP, 2-й — 34, а к 20-му уровню счёт идёт на сотни тысяч. Прокачка рассчитана на долгую дистанцию, а не на быстрый проход до максимума.</p>
+  </section>
+
+  <!-- ================= 11. ЦЕХ ================= -->
+  <section class="chapter" id="ch11" style="--cc:var(--tier2)">
+    <div class="chapter-head"><span class="chapter-num">11</span><h2>Цех: производство вживую</h2></div>
+    <p class="chapter-sub">«Цех» — это не каталог построек, а пульт управления уже построенными установками. Каждый тип установки — сворачиваемая группа, внутри — отдельная конвейерная линия на каждую физическую установку.</p>
+
+    <ul style="color:var(--text-secondary);font-size:13px;padding-left:18px;margin:0 0 10px">
+      <li style="margin-bottom:7px"><b style="color:var(--text-primary)">Переключатель руды/культуры/рецепта</b> — кружки слева на линии: если у установки несколько рецептов (горнодобывающая, буровая, ферма, пищеблок), можно в любой момент перенастроить её на другой. Цикл при этом начинается заново.</li>
+      <li style="margin-bottom:7px"><b style="color:var(--text-primary)">Кнопка питания</b> — вручную отключает конкретную установку: она перестаёт тратить сырьё, персонал и энергию, но остаётся на месте и включается обратно одним кликом.</li>
+      <li style="margin-bottom:7px"><b style="color:var(--text-primary)">Лента и таймер</b> — заполняется по ходу цикла, по завершении — «+N» готового продукта и отсчёт следующего цикла.</li>
+      <li><b style="color:var(--text-primary)">Сводка персонала</b> наверху цеха: сколько рабочих всего нанято, сколько реально занято и сколько свободно или не хватает.</li>
+    </ul>
+    <div class="callout">
+      <div class="ico">⚙</div>
+      <p>Если вместо продукта на выходе горит значок тревоги — наведите курсор: подсказка назовёт точную причину простоя (нет сырья, нет персонала, полон склад, не хватает энергии и т.д., см. таблицу в главе 14).</p>
+    </div>
+  </section>
+
+  <!-- ================= 12. СКЛАД ================= -->
+  <section class="chapter" id="ch12" style="--cc:var(--tier4)">
+    <div class="chapter-head"><span class="chapter-num">12</span><h2>Склад и резервуары</h2></div>
+    <p class="chapter-sub">Склад — голографическая сетка плиток, одна на ресурс. Плитки можно перетаскивать мышью, чтобы расставить по своему вкусу — порядок запоминается.</p>
+
+    <div class="grid2">
+      <div class="panel"><div class="eyebrow">Общий грузовой склад</div><div style="font-family:var(--font-mono);font-size:20px;margin-top:4px">40 000 кг</div><p style="margin-top:6px">на всё твёрдое сырьё сразу — лимит по суммарному весу, а не по штукам каждого ресурса отдельно.</p></div>
+      <div class="panel"><div class="eyebrow">Резервуары жидкостей</div><div style="font-family:var(--font-mono);font-size:20px;margin-top:4px">1500 → 4000 → 10 000</div><p style="margin-top:6px">у воды и нефти отдельный лимит каждая — апгрейд в три уровня, за ресурсы.</p></div>
+    </div>
+    <p>Если склад заполнен, установки, производящие тот самый ресурс, останавливаются («Склад заполнен» в качестве причины простоя) — это тоже множитель загрузки, как персонал или сырьё (см. главу 5). При сносе установки, если на складе не хватает места под возврат ресурсов, возврат уменьшается пропорционально свободному месту.</p>
+  </section>
+
+  <!-- ================= 13. ПЛАНЕТА ================= -->
+  <section class="chapter" id="ch13" style="--cc:var(--planet)">
+    <div class="chapter-head"><span class="chapter-num">13</span><h2>Планета: административный центр</h2></div>
+    <p class="chapter-sub">Самый молодой раздел базы. Пока здесь только один инструмент — и тот административный, не часть обычного игрового цикла.</p>
+    <div class="panel">
+      <h4 style="margin-bottom:6px">Управление временем суток</h4>
+      <p>Кнопки-пресеты (полночь, рассвет, полдень, вечер, закат) и шаг «±1 час» мгновенно переводят игровые часы — а вместе с ними и освещённость солнечных панелей, — не трогая скорость самой симуляции. Удобно, чтобы быстро посмотреть, как база переживёт ночь, не дожидаясь её по-настоящему.</p>
+    </div>
+    <div class="callout warn"><div class="ico">⏱</div><p>Остальные полномочия административного центра появятся в игре позже — раздел пока активно развивается.</p></div>
+  </section>
+
+  <!-- ================= 14. ПАМЯТКА ================= -->
+  <section class="chapter" id="ch14" style="--cc:var(--tier0)">
+    <div class="chapter-head"><span class="chapter-num">14</span><h2>Памятка: первые игровые сутки</h2></div>
+    <p class="chapter-sub">Если не знаете, с чего начать — вот разумный порядок действий для новой колонии.</p>
+
+    <ol class="steps">
+      <li><b>Осмотритесь на «Штабе»</b> — проверьте, сколько ресурсов и персонала уже есть на старте.</li>
+      <li><b>Постройте пару горнодобывающих и буровых установок</b> во вкладке «Стройка» — без них склад не пополняется. Выберите руду под ту постройку, которую собираетесь развивать дальше.</li>
+      <li><b>Поставьте источник энергии</b> — солнечная панель дешевле, но бесполезна ночью; угольная ТЭС дороже, но работает всегда. Лучше по одному источнику каждого вида, и сразу хотя бы один аккумулятор.</li>
+      <li><b>Проверьте жильё и быт</b> во вкладке «Рабочие» — без воды и пайка персонал быстро теряет продуктивность, а без жилья новые рабочие просто не приедут.</li>
+      <li><b>Запустите ферму и пищеблок</b>, если паёк проседает — выбирайте рецепт по тому, какого урожая хватает с избытком.</li>
+      <li><b>Начните качать навык</b>, соответствующий вашей основной цепочке (горное дело или агрономия) — очки копятся автоматически от самого факта добычи.</li>
+      <li><b>Следите за «Цехом» и «Энергией»</b> каждые несколько минут игрового времени — именно там видно первопричину любого простоя.</li>
+      <li><b>Чините установки заранее</b>, не дожидаясь, пока прочность упадёт совсем низко — ремонт дешевле, пока износ небольшой.</li>
+    </ol>
+
+    <h3 class="h">Расшифровка причин простоя</h3>
+    <div class="reason-grid">
+      <div><b>Работает на полную мощность</b><span>всё в порядке</span></div>
+      <div><b>Не хватает сырья</b><span>нет нужных ресурсов на входе</span></div>
+      <div><b>Склад заполнен</b><span>некуда девать готовый продукт</span></div>
+      <div><b>Не хватает персонала</b><span>рабочих меньше, чем нужно классу</span></div>
+      <div><b>Персонал недоволен бытом</b><span>не хватает воды/пайка</span></div>
+      <div><b>Изношено оборудование</b><span>прочность установки ниже 100%</span></div>
+      <div><b>Не хватает электроэнергии</b><span>выработка + запас меньше спроса</span></div>
+      <div><b>Ночь — нет солнца</b><span>только для солнечных панелей</span></div>
+      <div><b>Отключено вручную</b><span>нажата кнопка питания в «Цехе»</span></div>
+    </div>
+  </section>
+
+  <div class="footer-note">Индустриальный пояс · управляющий модуль · Сектор Керберос-9 — руководство составлено по текущей игровой механике этапа 1 (тир 0) и будет обновляться по мере развития цепочки.</div>
+</div>
+</body>
+</html>

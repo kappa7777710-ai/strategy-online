@@ -1,0 +1,116 @@
+/* Вкладка «Стройка». */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:0;}
+.tab-btn{font-family:var(--font-display);font-weight:600;font-size:13.5px;letter-spacing:.03em;text-transform:uppercase;background:none;border:none;color:var(--text-muted);padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s;}
+.tab-btn:hover{color:var(--text-secondary);}
+.tab-btn.active{color:var(--tab-color,var(--tier0));border-bottom-color:var(--tab-color,var(--tier0));}
+.tab-badge{font-family:var(--font-mono);font-size:10.5px;color:var(--text-muted);margin-left:5px;}
+
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:13px;}
+.locked-banner{grid-column:1/-1;padding:14px 16px;border:1px dashed var(--border-strong);border-radius:10px;color:var(--text-secondary);font-size:13px;}
+.build-cat-head{grid-column:1/-1;font-family:var(--font-display);font-weight:600;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-secondary);margin:6px 0 -3px;border-left:3px solid var(--border-strong);padding-left:9px;}
+.build-cat-head:first-of-type{margin-top:0;}
+.build-cat-grid{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:13px;}
+.bcard{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--tier-color,var(--tier0));border-radius:10px;padding:10px 10px 14px;display:flex;flex-direction:column;gap:10px;transition:opacity .3s;}
+.bcard.dim{opacity:.6;}
+.bcard-info{display:flex;flex-direction:column;gap:9px;padding:0 5px;}
+.bcard-head{display:flex;gap:10px;align-items:flex-start;}
+.bcard-head h3{font-family:var(--font-display);font-weight:600;font-size:15px;margin:0;color:var(--text-primary);}
+.bcard-recipe{font-size:11.5px;color:var(--text-secondary);margin-top:2px;line-height:1.4;}
+.bcard-richness{font-size:10.5px;color:var(--tier-color,var(--tier0));margin-top:2px;}
+.bcard-staff{font-size:10.5px;color:var(--text-muted);margin-top:1px;}
+.bcard-stats{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-secondary);}
+.bcard-stats strong{color:var(--text-primary);font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+.util-bar{height:5px;border-radius:3px;background:var(--border);overflow:hidden;}
+.util-fill{height:100%;transition:width .3s;}
+.util-bar.full .util-fill{background:var(--good);}
+.util-bar.partial .util-fill{background:var(--tier1);}
+.util-bar.blocked .util-fill{background:var(--bad);}
+.util-bar.idle .util-fill{background:var(--text-muted);}
+.util-label{font-size:10.5px;color:var(--text-muted);}
+.bcard-section-label{font-family:var(--font-display);font-weight:600;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin:2px 0 -3px;}
+.bcard-cost{display:flex;flex-direction:column;gap:5px;}
+.output-chip.ok .cost-qty strong{color:var(--good);}
+.area-chip .cost-icon{color:var(--rc,var(--text-muted));}
+.area-chip.bad .cost-qty strong{color:var(--bad);}
+.area-chip.ok .cost-qty strong{color:var(--text-primary);}
+.cost-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;background:var(--panel);border:1px solid var(--border);border-left:2px solid var(--rc,var(--border));}
+.cost-icon{flex:none;width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--rc,var(--text-muted));}
+.cost-icon svg{width:18px;height:18px;}
+.cost-text{flex:1;display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;}
+.cost-name{font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cost-qty{font-family:var(--font-mono);font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--text-muted);}
+.cost-qty strong{font-size:12.5px;}
+.cost-item.ok .cost-qty strong{color:var(--good);}
+.cost-item.bad .cost-qty strong{color:var(--bad);}
+.build-btn{margin-top:2px;font-family:var(--font-display);font-weight:600;font-size:13px;letter-spacing:.03em;text-transform:uppercase;background:var(--tier-color,var(--tier0));color:#0A0D18;border:none;border-radius:7px;padding:9px 10px;cursor:pointer;}
+.build-btn:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed;}
+.area-summary{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12px;color:var(--text-secondary);margin-bottom:13px;grid-column:1/-1;}
+
+.bcard.locked{opacity:.6;}
+.bcard-lock{font-size:11px;color:var(--tier1);}
+
+/* Полноразмерные сцены зданий (js/pages/3-build-art.js). Всё движение — CSS, картинка строится
+   один раз; «живые» значения приходят через --sun (солнце 0–1) и --chg (заряд 0–1). */
+.bart{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:224/184;
+  background:radial-gradient(90% 90% at 50% 20%,color-mix(in srgb,var(--tier-color) 12%,transparent),transparent 70%),
+    repeating-linear-gradient(0deg,rgba(79,209,231,.05) 0 1px,transparent 1px 16px),repeating-linear-gradient(90deg,rgba(79,209,231,.05) 0 1px,transparent 1px 16px),#070B18;
+  border:1px solid #173A4A;}
+.bart-svg{display:block;width:100%;height:100%;}
+.bart .ba-m{fill:#3A4468;} .bart .ba-m2{fill:#232B4E;} .bart .ba-m3{fill:#4B5680;}
+.bart .ba-rv{fill:#7A84A6;}
+.bart .ba-st{stroke:#3A4468;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.bart .ba-rope{stroke:#9CA6C4;stroke-width:1;fill:none;opacity:.7;}
+.bart .ba-win{fill:var(--tier-color);opacity:.55;animation:ba-blink 4s ease-in-out infinite;}
+.bart .ba-glass{fill:color-mix(in srgb,var(--tier-color) 8%,#0B1022);}
+.bart .ba-rib{stroke:color-mix(in srgb,var(--tier-color) 40%,#3A4468);stroke-width:1.2;fill:none;opacity:.5;}
+.bart .ba-outline{stroke:color-mix(in srgb,var(--tier-color) 55%,#9CA6C4);stroke-width:2;fill:none;}
+.bart .ba-beacon{fill:#F4557B;animation:ba-blink 1.8s ease-in-out infinite;}
+.bart .ba-led{fill:var(--good);animation:ba-blink 2.2s ease-in-out infinite;}
+@keyframes ba-blink{0%,100%{opacity:.3;}50%{opacity:1;}}
+
+/* Вращение вокруг собственного центра (шкив, маховик, вентилятор, лучи солнца). */
+.bart .ba-spin{transform-box:fill-box;transform-origin:center;animation:ba-spin var(--spd,3s) linear infinite;}
+@keyframes ba-spin{to{transform:rotate(360deg);}}
+/* Частицы по прямой: руда на конвейере, капли, импульсы тока, жидкость в трубе. */
+.bart .ba-flow{animation:ba-flow var(--dur,3s) linear infinite;}
+@keyframes ba-flow{0%{translate:0 0;opacity:0;}10%{opacity:1;}88%{opacity:1;}100%{translate:var(--tx) var(--ty);opacity:0;}}
+.bart .ba-drop{stroke:var(--water);stroke-width:1.4;stroke-linecap:round;fill:none;}
+
+/* Клеть шахты и талевый блок вышки: ходят вверх-вниз на --tr пикселей. */
+.bart .ba-skip{animation:ba-skip 6s ease-in-out infinite;}
+@keyframes ba-skip{0%,12%{translate:0 0;}45%,58%{translate:0 var(--tr,-40px);}92%,100%{translate:0 0;}}
+.bart .ba-smoke{fill:#C9D2EE;fill-opacity:.4;}
+
+/* Солнечная панель: всё, что зависит от освещённости, смешивается по --sun. */
+.bart .ba-sunwrap{opacity:var(--sun,1);transition:opacity 1s;}
+.bart .ba-moon{opacity:calc(1 - var(--sun,1));transition:opacity 1s;}
+.bart .ba-star{fill:#E9ECF7;opacity:calc((1 - var(--sun,1)) * .8);}
+.bart .ba-glare{fill:var(--energy);opacity:calc(var(--sun,1) * .14);transition:opacity 1s;}
+.bart .ba-ray{stroke:var(--energy);stroke-width:1.4;stroke-dasharray:4 7;fill:none;opacity:calc(var(--sun,1) * .7);animation:ba-ray 1.2s linear infinite;}
+@keyframes ba-ray{to{stroke-dashoffset:-22;}}
+.bart .ba-sunonly{opacity:var(--sun,1);}
+.bcard[data-card="rec-solar"] .ba-led{fill:var(--energy);}
+
+/* Ферма: растения покачиваются от основания. */
+.bart .ba-sway{transform-box:fill-box;transform-origin:50% 100%;animation:ba-sway 3s ease-in-out infinite;}
+@keyframes ba-sway{0%,100%{transform:rotate(-3deg);}50%{transform:rotate(3deg);}}
+
+/* Аккумулятор: ячейки заполнены по реальному заряду базы. */
+.bart .ba-cell{fill:var(--energy);opacity:.85;transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(var(--chg,.5));transition:transform .8s;}
+.bart .ba-bolt{fill:var(--energy);animation:ba-blink 1.6s ease-in-out infinite;}
+
+/* Резервуар в «Стройке»: деления уровня, как на складе. */
+.bcard-pips{display:inline-flex;gap:3px;margin-right:7px;vertical-align:middle;}
+.bcard-pips i{width:14px;height:5px;border-radius:2px;background:var(--border);}
+.bcard-pips i.on{background:var(--lqt);}
+.bcard-pips i.next{background:transparent;outline:1px dashed var(--lqt);outline-offset:-1px;animation:ba-blink 1.6s ease-in-out infinite;}
+.bcard-max{font-size:11.5px;color:var(--text-muted);padding:8px 0 2px;}
+.bcard[data-card^="tank-"] .build-btn{background:var(--lqt);}
+.bcard[data-card^="tank-"] .build-btn:disabled{background:var(--border);}
+
+@media (prefers-reduced-motion:reduce){
+  .bart *{animation:none!important;}
+}
+@media (max-width:560px){
+  .bgrid,.build-cat-grid{grid-template-columns:1fr;}
+}

@@ -1,0 +1,840 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Здания — изометрические образцы</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>/* Общее: цвета (:root), шрифты, каркас страницы, фишки ресурсов, материал «bevel»,
+   тиры, тестовая панель, окно «Пока вас не было». */
+:root{
+  color-scheme:dark;
+  --bg:#0A0D18;
+  --panel:#12172A;
+  --card:#171D33;
+  --card-hover:#1E2640;
+  --border:#293150;
+  --border-strong:#3A4468;
+  --text-primary:#E9ECF7;
+  --text-secondary:#9CA6C4;
+  --text-muted:#606A8A;
+  --tier0:#4FD1E7;
+  --tier1:#F2A93B;
+  --tier2:#9C7CF4;
+  --tier3:#F4557B;
+  --tier4:#4ADE9B;
+  --iron:#9FB0C8;
+  --copper:#E08A4B;
+  --water:#49B8F0;
+  --coal:#8B85A6;
+  --stone:#C2AD82;
+  --oil:#544E3D;
+  --energy:#FFDD57;
+  --miner:#C9A227;
+  --class1:#E8C15A;
+  --class2:#6FCF7A;
+  --class3:#7C9CF4;
+  --class4:#E07CE0;
+  --skill:#B388FF;
+  --planet:#6E8CFF;
+  --wheat:#E8D078;
+  --potato:#A9865B;
+  --corn:#F0B93D;
+  --tomato:#E1503D;
+  --farm:#8CAF52;
+  --good:#4ADE9B;
+  --bad:#F4557B;
+  --ink:#0A0D18;
+  --hi:#FFFFFF;
+  --radius:10px;
+  --font-display:'Rajdhani',sans-serif;
+  --font-body:'IBM Plex Sans',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+body{background:var(--bg);color:var(--text-primary);font-family:var(--font-body);}
+*{box-sizing:border-box;}
+[hidden]{display:none!important;}
+.page{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:28px 60px;display:flex;flex-direction:column;gap:22px;}
+.eyebrow{font-family:var(--font-body);font-size:11px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--text-muted);}
+h1{font-family:var(--font-display);font-weight:700;font-size:30px;letter-spacing:.01em;margin:2px 0 0;text-wrap:balance;color:var(--text-primary);}
+.sub{font-size:13px;color:var(--text-secondary);margin-top:4px;max-width:60ch;}
+.stats-row{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;}
+.stat{display:flex;flex-direction:column;gap:2px;}
+.stat-label{font-size:10.5px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;}
+.stat-value{font-family:var(--font-mono);font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;}
+
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px 18px 20px;}
+.panel h2{font-family:var(--font-display);font-weight:600;font-size:15px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-secondary);margin:0 0 12px;}
+.ledger-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;}
+.chip{display:flex;gap:9px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--chip-color,var(--tier0));border-radius:8px;padding:9px 10px;}
+.chip-body{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1;}
+.chip-name{font-size:11.5px;color:var(--text-secondary);line-height:1.25;}
+.chip-amt{font-family:var(--font-mono);font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;}
+.chip-cap{color:var(--text-muted);font-weight:400;font-size:11px;}
+.chip-bar{height:3px;border-radius:2px;background:var(--border);overflow:hidden;}
+.chip-bar-fill{height:100%;background:var(--chip-color,var(--tier0));}
+.chip-rate{font-family:var(--font-mono);font-size:10.5px;font-variant-numeric:tabular-nums;}
+.chip-rate.pos{color:var(--good);}
+.chip-rate.neg{color:var(--bad);}
+.chip-rate.zero{color:var(--text-muted);}
+
+.t0{--chip-color:var(--tier0);--tier-color:var(--tier0);--tab-color:var(--tier0);}
+.t1{--chip-color:var(--tier1);--tier-color:var(--tier1);--tab-color:var(--tier1);}
+.t2{--chip-color:var(--tier2);--tier-color:var(--tier2);--tab-color:var(--tier2);}
+.t3{--chip-color:var(--tier3);--tier-color:var(--tier3);--tab-color:var(--tier3);}
+.t4{--chip-color:var(--tier4);--tier-color:var(--tier4);--tab-color:var(--tier4);}
+.tpop{--tab-color:var(--class1);}
+.tskill{--tab-color:var(--skill);}
+
+.devbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);}
+.devbar button{font-family:var(--font-mono);font-size:12px;background:var(--card);color:var(--text-secondary);border:1px solid var(--border);border-radius:7px;padding:6px 10px;cursor:pointer;}
+.devbar button.active{background:var(--skill);border-color:var(--skill);color:#0A0D18;}
+.bevel-frame{border-radius:16px;background:linear-gradient(180deg,#1A2143,#0E1328);border:2px solid #2B3563;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.4);}
+.bevel{background:linear-gradient(180deg,#2A3360 0%,#1A2142 55%,#141A34 100%);border:1px solid #0B0F20;border-radius:12px;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.10),inset 0 -3px 0 rgba(0,0,0,.35),0 2px 0 rgba(0,0,0,.35);}
+.sunk{background:#0B1022;border:1px solid #070A16;border-radius:10px;box-shadow:inset 0 2px 6px rgba(0,0,0,.6);}
+.res-f{white-space:nowrap;}
+.warehouse-summary{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:14px;}
+.warehouse-bar{flex:1;min-width:180px;height:10px;border-radius:5px;background:var(--border);overflow:hidden;}
+.warehouse-bar-fill{height:100%;background:var(--tier1);transition:width .3s;}
+.warehouse-bar.full .warehouse-bar-fill{background:var(--bad);}
+.warehouse-value{font-family:var(--font-mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--text-secondary);white-space:nowrap;}
+.footnote{font-size:12px;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border);padding-top:16px;}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(6,8,14,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10;}
+.modal-backdrop[hidden]{display:none;}
+.modal{background:var(--panel);border:1px solid var(--border-strong);border-radius:14px;padding:22px 22px 20px;max-width:380px;width:100%;}
+.modal h2{font-family:var(--font-display);font-size:17px;margin:0 0 4px;}
+.modal-time{font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;}
+.modal-rows{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;margin-bottom:12px;}
+.delta-row{display:flex;align-items:center;gap:8px;font-size:12.5px;}
+.delta-row.muted{color:var(--text-muted);}
+.delta-name{flex:1;color:var(--text-secondary);}
+.delta-val{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-weight:500;}
+.delta-val.pos{color:var(--good);}
+.delta-val.neg{color:var(--bad);}
+.modal-cap-note{display:none;font-size:11px;color:var(--tier1);margin-bottom:10px;}
+.modal-close{width:100%;font-family:var(--font-display);font-weight:600;font-size:13px;letter-spacing:.03em;text-transform:uppercase;background:var(--tier0);color:#0A0D18;border:none;border-radius:8px;padding:10px;cursor:pointer;}
+
+@media (max-width:480px){
+  h1{font-size:24px;}
+  .stats-row{gap:12px;}
+  .ledger-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));}
+}
+/* Вкладка «Склад». */
+.wh-cap{display:flex;align-items:center;gap:12px;padding:10px 14px;margin-bottom:12px;}
+.wh-cap-icon{width:40px;height:40px;color:var(--tier4);flex-shrink:0;}
+.wh-cap-bar{flex:1;height:14px;padding:0;overflow:hidden;}
+.wh-cap-fill{display:block;height:100%;background:linear-gradient(90deg,color-mix(in srgb,var(--tier4) 55%,transparent),var(--tier4));transition:width .3s;}
+.wh-cap-bar.full .wh-cap-fill{background:var(--bad);}
+.wh-cap-val{font-family:var(--font-mono);font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.wh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:8px;padding:14px;
+  background:radial-gradient(120% 80% at 50% 0%,rgba(79,209,231,.10),transparent 60%),#070B18;border:1px solid #173A4A;border-radius:16px;}
+/* Плитки специально компактные, а не в полный масштаб исходной иконки — склад рассчитан
+   на десятки видов ресурсов (со временем — от 50), и сетка должна оставаться читаемой. */
+.wh-tile{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:grab;user-select:none;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--rc) 10%,transparent),transparent);border:1px solid color-mix(in srgb,var(--rc) 35%,transparent);
+  transition:transform .12s,opacity .12s,background .2s;}
+.wh-tile:hover{background:linear-gradient(180deg,color-mix(in srgb,var(--rc) 20%,transparent),transparent);}
+.wh-tile::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px);pointer-events:none;animation:wh-scan 6s linear infinite;}
+@keyframes wh-scan{to{background-position:0 60px;}}
+.wh-tile::after{content:"";position:absolute;inset:-1px;pointer-events:none;
+  background:linear-gradient(var(--rc),var(--rc)) 0 0/8px 2px,linear-gradient(var(--rc),var(--rc)) 0 0/2px 8px,
+  linear-gradient(var(--rc),var(--rc)) 100% 0/8px 2px,linear-gradient(var(--rc),var(--rc)) 100% 0/2px 8px,
+  linear-gradient(var(--rc),var(--rc)) 0 100%/8px 2px,linear-gradient(var(--rc),var(--rc)) 0 100%/2px 8px,
+  linear-gradient(var(--rc),var(--rc)) 100% 100%/8px 2px,linear-gradient(var(--rc),var(--rc)) 100% 100%/2px 8px;background-repeat:no-repeat;}
+.wh-tile svg{width:34%;height:34%;opacity:.9;filter:drop-shadow(0 0 4px var(--rc));animation:wh-flick 5s infinite;animation-delay:var(--dl,0s);}
+@keyframes wh-flick{0%,93%,100%{opacity:.9;}94%{opacity:.45;}96%{opacity:.85;}97%{opacity:.5;}}
+.wh-amt{font-family:var(--font-mono);font-size:12px;font-variant-numeric:tabular-nums;color:var(--rc);text-shadow:0 0 6px var(--rc);}
+.wh-name{font-family:var(--font-display);font-weight:700;font-size:9px;letter-spacing:.03em;color:color-mix(in srgb,var(--rc) 70%,#fff);opacity:.75;text-align:center;line-height:1.15;padding:0 2px;}
+.wh-tile.empty{opacity:.4;}
+.wh-tile:active{cursor:grabbing;}
+.wh-tile.dragging{opacity:.35;}
+.wh-tile.drag-over{outline:2px dashed var(--rc);outline-offset:3px;transform:scale(1.04);}
+.wh-empty{aspect-ratio:1;border:1px dashed rgba(79,209,231,.18);}
+@media (prefers-reduced-motion:reduce){ .wh-tile::before,.wh-tile svg{animation:none;} }
+@media (max-width:560px){ .wh-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:8px;} .wh-amt{font-size:10.5px;} .wh-name{font-size:8px;letter-spacing:.01em;} .wh-cap{padding:8px 10px;gap:8px;} .wh-cap-icon{width:30px;height:30px;} }
+
+/* Резервуары для жидкостей — отдельная секция под основным складом: стеклянные капсулы
+   трёх размеров (по уровню резервуара) с анимированной волной, в той же голографической гамме. */
+.wh-sub-head{font-family:var(--font-display);font-weight:600;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-secondary);margin:0 0 10px;border-left:3px solid var(--water);padding-left:9px;}
+.wh-tanks{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:12px;padding:14px;
+  background:radial-gradient(120% 80% at 50% 0%,rgba(73,184,240,.10),transparent 60%),#070B18;border:1px solid #173A4A;border-radius:16px;}
+.wh-tank{--lq:var(--rc);--lqt:color-mix(in srgb,var(--rc) 75%,#fff);display:flex;align-items:stretch;gap:14px;padding:12px 14px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--rc) 9%,transparent),transparent);border:1px solid color-mix(in srgb,var(--rc) 35%,transparent);border-radius:12px;transition:border-color .3s;}
+/* Нефть по палитре почти чёрная (--oil): в баке делаем её тёмно-бурой с янтарным бликом,
+   а подписи — светлее, иначе на тёмном фоне не читается. */
+.wh-tank[data-res="oil"]{--lq:#6E5A33;--lqt:#C4A66A;}
+.wh-tank-view{position:relative;width:128px;flex-shrink:0;align-self:center;}
+.wh-tank-view svg{display:block;width:100%;height:auto;overflow:visible;}
+.tk-glass{fill:color-mix(in srgb,var(--lq) 7%,#0B1022);}
+.tk-outline{fill:none;stroke:color-mix(in srgb,var(--lqt) 45%,#9CA6C4);stroke-width:2.2;stroke-linejoin:round;}
+.tk-liquid{transition:transform .8s cubic-bezier(.3,.7,.3,1);}
+.tk-wave{animation:tk-wave 3.2s linear infinite;}
+.tk-wave.back{fill:color-mix(in srgb,var(--lq) 55%,#000);animation-duration:4.8s;animation-direction:reverse;transform:translateY(-3px);}
+.tk-wave.front{fill:var(--lq);opacity:.93;}
+@keyframes tk-wave{from{translate:0 0;}to{translate:-40px 0;}}
+.tk-sheen{fill:var(--lqt);opacity:.35;}
+.tk-bub{fill:#fff;opacity:0;animation:tk-bub var(--dur,3s) ease-in infinite;animation-delay:var(--dl,0s);}
+@keyframes tk-bub{0%{translate:0 0;opacity:0;}15%{opacity:.5;}85%{opacity:.35;}100%{translate:0 calc(var(--d) * -1px);opacity:0;}}
+.tk-mark{stroke:#fff;stroke-width:1;stroke-dasharray:3 4;opacity:.15;}
+.tk-metal{fill:#3A4468;}
+.tk-metal2{fill:#4B5680;}
+.tk-rivet{fill:#7A84A6;}
+.tk-strut{stroke:#3A4468;stroke-width:3;fill:none;stroke-linecap:round;}
+.tk-scale{stroke:#606A8A;stroke-width:1.4;fill:none;}
+.tk-gloss{stroke:#fff;stroke-width:3.5;stroke-linecap:round;fill:none;opacity:.2;}
+.tk-beacon{fill:var(--lqt);animation:tk-beacon 2.4s ease-in-out infinite;}
+@keyframes tk-beacon{0%,60%,100%{opacity:.35;}70%{opacity:1;}}
+.wh-tank-pct{position:absolute;left:0;right:0;top:58%;text-align:center;font-family:var(--font-mono);font-size:14px;font-weight:500;
+  color:#fff;text-shadow:0 0 4px #000,0 0 8px #000;pointer-events:none;font-variant-numeric:tabular-nums;}
+.wh-tank.lvl3 .wh-tank-pct{top:50%;font-size:16px;}
+.wh-tank-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;justify-content:center;}
+.wh-tank-name{font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:.02em;color:var(--lqt);line-height:1.1;}
+.wh-tank-f{font-family:var(--font-mono);font-weight:400;font-size:11px;color:var(--text-muted);letter-spacing:0;margin-left:4px;}
+.wh-tank-lvl{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--text-secondary);}
+.wh-tank-pips{display:inline-flex;gap:3px;}
+.wh-tank-pips i{width:14px;height:5px;border-radius:2px;background:var(--border);}
+.wh-tank-pips i.on{background:var(--lqt);box-shadow:0 0 5px color-mix(in srgb,var(--lqt) 60%,transparent);}
+.wh-tank-bar{height:6px;padding:0;overflow:hidden;}
+.wh-tank-bar i{display:block;height:100%;background:var(--lqt);transition:width .4s;}
+.wh-tank-val{font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);font-variant-numeric:tabular-nums;}
+.wh-tank-val b{font-size:16px;font-weight:500;color:var(--text-primary);}
+.wh-tank-flow{font-family:var(--font-mono);font-size:11px;font-variant-numeric:tabular-nums;line-height:1.4;}
+.wh-tank-flow.pos{color:var(--good);} .wh-tank-flow.neg{color:var(--bad);} .wh-tank-flow.zero{color:var(--text-muted);}
+.wh-tank-upwrap{margin-top:2px;}
+.wh-tank-up{display:flex;flex-direction:column;gap:6px;padding-top:8px;border-top:1px dashed var(--border);}
+.wh-tank-cost{display:flex;flex-wrap:wrap;gap:5px;font-family:var(--font-mono);font-size:11px;font-variant-numeric:tabular-nums;}
+.wh-tank-cost span{padding:2px 6px;border-radius:5px;background:var(--panel);border:1px solid var(--border);}
+.wh-tank-cost span.ok{color:var(--good);} .wh-tank-cost span.bad{color:var(--bad);}
+.wh-tank-btn{font-family:var(--font-display);font-weight:600;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;background:var(--lqt);color:#0A0D18;border:none;border-radius:7px;padding:7px 10px;cursor:pointer;text-align:center;line-height:1.2;}
+.wh-tank-btn small{display:block;font-family:var(--font-mono);font-weight:500;font-size:10.5px;letter-spacing:0;text-transform:none;opacity:.75;margin-top:2px;}
+.wh-tank-btn:hover{filter:brightness(1.1);}
+.wh-tank-btn:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed;filter:none;}
+.wh-tank-btn:focus-visible{outline:2px solid var(--lqt);outline-offset:2px;}
+.wh-tank-max{padding-top:8px;border-top:1px dashed var(--border);font-size:11.5px;color:var(--text-muted);}
+/* Низкий уровень — контур красный и пульсирует прозрачностью; полный бак — производство этой
+   жидкости встаёт (лимит резервуара), поэтому рамка карточки тоже красная. */
+.wh-tank.low .tk-outline{stroke:var(--bad);animation:tk-low 1.6s ease-in-out infinite;}
+@keyframes tk-low{50%{opacity:.35;}}
+.wh-tank.full{border-color:var(--bad);}
+.wh-tank.full .tk-outline{stroke:var(--bad);}
+.wh-tank.full .wh-tank-pct{color:var(--bad);}
+@media (prefers-reduced-motion:reduce){ .tk-wave,.tk-bub,.tk-beacon,.wh-tank.low .tk-outline{animation:none;} .tk-liquid{transition:none;} }
+@media (max-width:560px){ .wh-tanks{grid-template-columns:1fr;gap:8px;padding:8px;} .wh-tank{padding:10px;gap:10px;}
+  .wh-tank-view{width:108px;} .wh-tank-name{font-size:16px;} .wh-tank-val b{font-size:14px;} }
+/* Вкладка «Стройка». */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:0;}
+.tab-btn{font-family:var(--font-display);font-weight:600;font-size:13.5px;letter-spacing:.03em;text-transform:uppercase;background:none;border:none;color:var(--text-muted);padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s;}
+.tab-btn:hover{color:var(--text-secondary);}
+.tab-btn.active{color:var(--tab-color,var(--tier0));border-bottom-color:var(--tab-color,var(--tier0));}
+.tab-badge{font-family:var(--font-mono);font-size:10.5px;color:var(--text-muted);margin-left:5px;}
+
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:13px;}
+.locked-banner{grid-column:1/-1;padding:14px 16px;border:1px dashed var(--border-strong);border-radius:10px;color:var(--text-secondary);font-size:13px;}
+.build-cat-head{grid-column:1/-1;font-family:var(--font-display);font-weight:600;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-secondary);margin:6px 0 -3px;border-left:3px solid var(--border-strong);padding-left:9px;}
+.build-cat-head:first-of-type{margin-top:0;}
+.build-cat-grid{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:13px;}
+.bcard{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--tier-color,var(--tier0));border-radius:10px;padding:10px 10px 14px;display:flex;flex-direction:column;gap:10px;transition:opacity .3s;}
+.bcard.dim{opacity:.6;}
+.bcard-info{display:flex;flex-direction:column;gap:9px;padding:0 5px;}
+.bcard-head{display:flex;gap:10px;align-items:flex-start;}
+.bcard-head h3{font-family:var(--font-display);font-weight:600;font-size:15px;margin:0;color:var(--text-primary);}
+.bcard-recipe{font-size:11.5px;color:var(--text-secondary);margin-top:2px;line-height:1.4;}
+.bcard-richness{font-size:10.5px;color:var(--tier-color,var(--tier0));margin-top:2px;}
+.bcard-staff{font-size:10.5px;color:var(--text-muted);margin-top:1px;}
+.bcard-stats{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-secondary);}
+.bcard-stats strong{color:var(--text-primary);font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+.util-bar{height:5px;border-radius:3px;background:var(--border);overflow:hidden;}
+.util-fill{height:100%;transition:width .3s;}
+.util-bar.full .util-fill{background:var(--good);}
+.util-bar.partial .util-fill{background:var(--tier1);}
+.util-bar.blocked .util-fill{background:var(--bad);}
+.util-bar.idle .util-fill{background:var(--text-muted);}
+.util-label{font-size:10.5px;color:var(--text-muted);}
+.bcard-cost{display:flex;flex-wrap:wrap;gap:6px;font-family:var(--font-mono);font-size:11px;font-variant-numeric:tabular-nums;}
+.bcard-cost span{padding:2px 6px;border-radius:5px;background:var(--panel);border:1px solid var(--border);}
+.bcard-cost span.ok{color:var(--good);}
+.bcard-cost span.bad{color:var(--bad);}
+.build-btn{margin-top:2px;font-family:var(--font-display);font-weight:600;font-size:13px;letter-spacing:.03em;text-transform:uppercase;background:var(--tier-color,var(--tier0));color:#0A0D18;border:none;border-radius:7px;padding:9px 10px;cursor:pointer;}
+.build-btn:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed;}
+.area-summary{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12px;color:var(--text-secondary);margin-bottom:13px;grid-column:1/-1;}
+
+.bcard.locked{opacity:.6;}
+.bcard-lock{font-size:11px;color:var(--tier1);}
+
+/* Полноразмерные сцены зданий (js/pages/3-build-art.js). Всё движение — CSS, картинка строится
+   один раз; «живые» значения приходят через --sun (солнце 0–1) и --chg (заряд 0–1). */
+.bart{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:224/184;
+  background:radial-gradient(90% 90% at 50% 20%,color-mix(in srgb,var(--tier-color) 12%,transparent),transparent 70%),
+    repeating-linear-gradient(0deg,rgba(79,209,231,.05) 0 1px,transparent 1px 16px),repeating-linear-gradient(90deg,rgba(79,209,231,.05) 0 1px,transparent 1px 16px),#070B18;
+  border:1px solid #173A4A;}
+.bart-svg{display:block;width:100%;height:100%;}
+.bart .ba-m{fill:#3A4468;} .bart .ba-m2{fill:#232B4E;} .bart .ba-m3{fill:#4B5680;}
+.bart .ba-rv{fill:#7A84A6;}
+.bart .ba-st{stroke:#3A4468;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.bart .ba-rope{stroke:#9CA6C4;stroke-width:1;fill:none;opacity:.7;}
+.bart .ba-win{fill:var(--tier-color);opacity:.55;animation:ba-blink 4s ease-in-out infinite;}
+.bart .ba-glass{fill:color-mix(in srgb,var(--tier-color) 8%,#0B1022);}
+.bart .ba-rib{stroke:color-mix(in srgb,var(--tier-color) 40%,#3A4468);stroke-width:1.2;fill:none;opacity:.5;}
+.bart .ba-outline{stroke:color-mix(in srgb,var(--tier-color) 55%,#9CA6C4);stroke-width:2;fill:none;}
+.bart .ba-beacon{fill:#F4557B;animation:ba-blink 1.8s ease-in-out infinite;}
+.bart .ba-led{fill:var(--good);animation:ba-blink 2.2s ease-in-out infinite;}
+@keyframes ba-blink{0%,100%{opacity:.3;}50%{opacity:1;}}
+
+/* Вращение вокруг собственного центра (шкив, маховик, вентилятор, лучи солнца). */
+.bart .ba-spin{transform-box:fill-box;transform-origin:center;animation:ba-spin var(--spd,3s) linear infinite;}
+@keyframes ba-spin{to{transform:rotate(360deg);}}
+/* Частицы по прямой: руда на конвейере, капли, импульсы тока, жидкость в трубе. */
+.bart .ba-flow{animation:ba-flow var(--dur,3s) linear infinite;}
+@keyframes ba-flow{0%{translate:0 0;opacity:0;}10%{opacity:1;}88%{opacity:1;}100%{translate:var(--tx) var(--ty);opacity:0;}}
+.bart .ba-drop{stroke:var(--water);stroke-width:1.4;stroke-linecap:round;fill:none;}
+
+/* Клеть шахты и талевый блок вышки: ходят вверх-вниз на --tr пикселей. */
+.bart .ba-skip{animation:ba-skip 6s ease-in-out infinite;}
+@keyframes ba-skip{0%,12%{translate:0 0;}45%,58%{translate:0 var(--tr,-40px);}92%,100%{translate:0 0;}}
+.bart .ba-smoke{fill:#C9D2EE;fill-opacity:.4;}
+
+/* Солнечная панель: всё, что зависит от освещённости, смешивается по --sun. */
+.bart .ba-sunwrap{opacity:var(--sun,1);transition:opacity 1s;}
+.bart .ba-moon{opacity:calc(1 - var(--sun,1));transition:opacity 1s;}
+.bart .ba-star{fill:#E9ECF7;opacity:calc((1 - var(--sun,1)) * .8);}
+.bart .ba-glare{fill:var(--energy);opacity:calc(var(--sun,1) * .14);transition:opacity 1s;}
+.bart .ba-ray{stroke:var(--energy);stroke-width:1.4;stroke-dasharray:4 7;fill:none;opacity:calc(var(--sun,1) * .7);animation:ba-ray 1.2s linear infinite;}
+@keyframes ba-ray{to{stroke-dashoffset:-22;}}
+.bart .ba-sunonly{opacity:var(--sun,1);}
+.bcard[data-card="rec-solar"] .ba-led{fill:var(--energy);}
+
+/* Ферма: растения покачиваются от основания. */
+.bart .ba-sway{transform-box:fill-box;transform-origin:50% 100%;animation:ba-sway 3s ease-in-out infinite;}
+@keyframes ba-sway{0%,100%{transform:rotate(-3deg);}50%{transform:rotate(3deg);}}
+
+/* Аккумулятор: ячейки заполнены по реальному заряду базы. */
+.bart .ba-cell{fill:var(--energy);opacity:.85;transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(var(--chg,.5));transition:transform .8s;}
+.bart .ba-bolt{fill:var(--energy);animation:ba-blink 1.6s ease-in-out infinite;}
+
+/* Резервуар в «Стройке»: деления уровня, как на складе. */
+.bcard-pips{display:inline-flex;gap:3px;margin-right:7px;vertical-align:middle;}
+.bcard-pips i{width:14px;height:5px;border-radius:2px;background:var(--border);}
+.bcard-pips i.on{background:var(--lqt);}
+.bcard-pips i.next{background:transparent;outline:1px dashed var(--lqt);outline-offset:-1px;animation:ba-blink 1.6s ease-in-out infinite;}
+.bcard-max{font-size:11.5px;color:var(--text-muted);padding:8px 0 2px;}
+.bcard[data-card^="tank-"] .build-btn{background:var(--lqt);}
+.bcard[data-card^="tank-"] .build-btn:disabled{background:var(--border);}
+
+@media (prefers-reduced-motion:reduce){
+  .bart *{animation:none!important;}
+}
+@media (max-width:560px){
+  .bgrid,.build-cat-grid{grid-template-columns:1fr;}
+}
+
+body{margin:0;padding:22px 20px 40px;}
+.wrap{max-width:1180px;margin:0 auto;}
+.sub{color:var(--text-secondary);font-size:13.5px;margin:6px 0 16px;max-width:760px;line-height:1.5;}
+.ctl{display:flex;flex-wrap:wrap;gap:18px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:12.5px;color:var(--text-secondary);}
+.ctl label{display:flex;align-items:center;gap:9px;}
+.ctl input{accent-color:#4FD1E7;width:150px;}
+.ctl b{font-family:var(--font-mono);color:var(--text-primary);font-weight:500;min-width:38px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;}
+.bcard h3{margin:0;font-size:17px;} .bcard p{margin:4px 0 0;font-size:12px;color:var(--text-secondary);}
+</style></head><body><div class="wrap">
+<div class="eyebrow">Индустриальный пояс · Вкладка «Стройка»</div>
+<h1>Здания в изометрии</h1>
+<p class="sub">Образцы новых картинок для меню строительства. Всё нарисовано кодом (SVG + CSS), анимация живая. Ползунки ниже показывают, как картинки реагируют на состояние базы.</p>
+<div class="ctl">
+<label>Солнце <input id="sun" type="range" min="0" max="100" value="100"><b id="sunv">100%</b></label>
+<label>Заряд батареи <input id="chg" type="range" min="0" max="100" value="65"><b id="chgv">65%</b></label>
+<label>Уровень жидкости <input id="liq" type="range" min="0" max="100" value="55"><b id="liqv">55%</b></label>
+</div>
+<div class="grid" id="g"></div></div>
+<script>
+function capsulePath(x0,x1,top,bot){
+  const r=(x1-x0)/2;
+  return 'M'+x0+' '+(top+r)+' A'+r+' '+r+' 0 0 1 '+x1+' '+(top+r)+' V'+(bot-r)+' A'+r+' '+r+' 0 0 1 '+x0+' '+(bot-r)+' Z';
+}
+function rivetRow(xs,y,r){ return xs.map(x=>'<circle class="tk-rivet" cx="'+x+'" cy="'+y+'" r="'+(r||1.5)+'"/>').join(''); }
+// top/bottom — y уровня 100% и 0%; w — ширина, в пределах которой всплывают пузырьки.
+const CAPSULE_SIZES={
+  1:{x0:50,x1:90,top:64,bottom:150,
+    back:'<rect class="tk-metal" x="56" y="154" width="28" height="6" rx="2"/>',
+    front:'<rect class="tk-metal" x="45" y="57" width="50" height="9" rx="3"/><rect class="tk-metal" x="45" y="146" width="50" height="9" rx="3"/>'+
+      '<path class="tk-gloss" d="M58 80 V132"/>'},
+  2:{x0:42,x1:98,top:38,bottom:150,
+    back:'<rect class="tk-metal" x="40" y="155" width="60" height="6" rx="2"/>',
+    front:'<rect class="tk-metal" x="36" y="30" width="68" height="10" rx="3"/><rect class="tk-metal" x="36" y="146" width="68" height="10" rx="3"/>'+
+      rivetRow([43,56,70,84,97],35)+rivetRow([43,56,70,84,97],151)+
+      '<rect class="tk-metal" x="42" y="92" width="56" height="4" opacity=".8"/>'+
+      '<rect class="tk-metal" x="98" y="126" width="9" height="6"/><rect class="tk-metal2" x="105" y="122" width="6" height="14" rx="1.5"/>'+
+      '<path class="tk-gloss" d="M53 56 V132"/>'},
+  3:{x0:32,x1:108,top:14,bottom:150,
+    back:'<rect class="tk-metal" x="18" y="12" width="6" height="146"/><rect class="tk-metal" x="116" y="12" width="6" height="146"/>'+
+      '<path class="tk-strut" d="M24 40 L32 46 M24 124 L32 118 M116 40 L108 46 M116 124 L108 118"/>'+
+      '<rect class="tk-metal" x="12" y="156" width="116" height="7" rx="2"/>',
+    front:'<rect class="tk-metal" x="26" y="6" width="88" height="11" rx="3"/><rect class="tk-metal" x="26" y="146" width="88" height="11" rx="3"/>'+
+      rivetRow([33,47,61,79,93,107],11.5)+rivetRow([33,47,61,79,93,107],151.5)+
+      '<rect class="tk-metal" x="32" y="58" width="76" height="5"/><rect class="tk-metal" x="32" y="104" width="76" height="5"/>'+
+      rivetRow([40,55,70,85,100],60.5,1.3)+rivetRow([40,55,70,85,100],106.5,1.3)+
+      '<path class="tk-scale" d="M18 36 H14 M18 57 H15 M18 78 H14 M18 99 H15 M18 120 H14"/>'+
+      '<rect class="tk-metal2" x="66" y="0" width="8" height="6" rx="1"/><circle class="tk-beacon" cx="70" cy="2" r="2.6"/>'+
+      '<path class="tk-gloss" d="M44 40 V124"/>'},
+};
+Object.values(CAPSULE_SIZES).forEach(sz=>{ sz.path=capsulePath(sz.x0,sz.x1,sz.top,sz.bottom); sz.w=sz.x1-sz.x0; });
+// Волна шириной 280 с периодом 20: CSS сдвигает её на 40 по кругу — шов не виден.
+const TANK_WAVE=(function(){ let d='M-60 0'; for(let x=-60;x<=210;x+=10) d+=' Q'+(x+5)+' '+((x/10)%2===0?-3:3)+' '+(x+10)+' 0'; return d+' V220 H-60 Z'; })();
+function tankState(r){
+  const amt=state.resources[r.id]||0, cap=liquidCapacity(r.id);
+  const pct=cap>0?Math.max(0,Math.min(100,(amt/cap)*100)):0;
+  return {amt,cap,pct,rate:netRate(r.id)*3600};
+}
+function tankLevelY(sz,pct){
+  // При пустом баке прячем и гребни волны, иначе на дне оставалась бы «рябь».
+  return pct<0.5 ? sz.bottom+6 : sz.bottom-(sz.bottom-sz.top)*pct/100;
+}
+function fmtEtaH(h){
+  if(!isFinite(h) || h<=0) return '';
+  if(h>=48) return Math.round(h/24)+' д';
+  const m=Math.round(h*60);
+  return m>=60 ? Math.floor(m/60)+' ч'+(m%60?' '+m%60+' м':'') : Math.max(1,m)+' м';
+}
+function tankFlowText(t){
+  if(Math.abs(t.rate)<0.05) return {cls:'zero',txt:'без изменений'};
+  const sign=t.rate>0?'+':'−';
+  let eta='';
+  if(t.rate>0 && t.pct<99.5) eta=' · полон через '+fmtEtaH((t.cap-t.amt)/t.rate);
+  if(t.rate<0 && t.amt>0.5) eta=' · пуст через '+fmtEtaH(t.amt/-t.rate);
+  return {cls:t.rate>0?'pos':'neg',txt:sign+fmtRate(Math.abs(t.rate))+'/ч'+eta};
+}
+// idPrefix разводит id маски, когда одна и та же жидкость нарисована и на складе, и в «Стройке».
+function capsuleSvg(resId,lvl,pct,idPrefix){
+  const sz=CAPSULE_SIZES[lvl], cid='tk'+(idPrefix||'c')+'-'+resId, H=sz.bottom-sz.top;
+  const marks=[25,50,75].map(p=>'<path class="tk-mark" d="M0 '+(sz.bottom-H*p/100).toFixed(1)+' H140"/>').join('');
+  // Пузырьки: позиция стабильна для жидкости и уровня (псевдослучайно от индекса), чтобы при
+  // перестройке DOM они не «прыгали».
+  let bub='';
+  const n=2+lvl*2;
+  for(let i=0;i<n;i++){
+    const f=((i*0.618+resId.length*0.13)%1);
+    const x=(sz.x0+6+f*(sz.w-12)).toFixed(1), depth=Math.min(H-4,18+((i*37)%70)*H/100);
+    bub+='<circle class="tk-bub" cx="'+x+'" cy="'+depth.toFixed(1)+'" r="'+(1+(i%3)*0.5)+'" style="--d:'+Math.round(depth-3)+';--dur:'+(2.6+(i%4)*0.7).toFixed(1)+'s;--dl:-'+(i*0.9).toFixed(1)+'s"/>';
+  }
+  return '<svg viewBox="0 0 140 166" aria-hidden="true">'+
+    '<defs><clipPath id="'+cid+'"><path d="'+sz.path+'"/></clipPath></defs>'+
+    sz.back+
+    '<path class="tk-glass" d="'+sz.path+'"/>'+
+    '<g clip-path="url(#'+cid+')">'+
+      '<g class="tk-liquid" style="transform:translateY('+tankLevelY(sz,pct).toFixed(1)+'px)">'+
+        '<path class="tk-wave back" d="'+TANK_WAVE+'"/><path class="tk-wave front" d="'+TANK_WAVE+'"/>'+
+        '<rect class="tk-sheen" x="-60" y="3" width="280" height="1.6"/>'+bub+
+      '</g>'+marks+
+    '</g>'+
+    '<path class="tk-outline" d="'+sz.path+'"/>'+sz.front+
+  '</svg>';
+}
+// Вкладка 3 · «Стройка» — изометрические анимированные сцены зданий для карточек строительства.
+// Каждая сцена — SVG 260×190: плита-основание 7×7 клеток, на ней здание с тремя гранями
+// разной освещённости (свет слева-сверху). Движение — только CSS (вращение, качание, потоки),
+// поэтому карточку достаточно построить один раз: 3-build.js не пересоздаёт картинку каждый
+// тик, а лишь подставляет «живые» значения через CSS-переменные (--sun, --chg) и уровень жидкости.
+// Акцентный цвет берётся из --tier-color карточки.
+//
+// Проекция: экран = (X + (x−y)·0.866·U, Y + (x+y)·0.5·U − z·U), U = 13 px на клетку.
+// Порядок рисования — «от дальнего к ближнему» (по возрастанию x+y), вручную.
+
+const IU=13, IOX=130, IOY=84;
+let bartUid=0, _bp='';
+function f1(n){ return (Math.round(n*10)/10).toString(); }
+function ip(x,y,z){ return [IOX+(x-y)*IU*0.866, IOY+(x+y)*IU*0.5-(z||0)*IU]; }
+function ipts(a){ return a.map(p=>{ const q=ip(p[0],p[1],p[2]); return f1(q[0])+','+f1(q[1]); }).join(' '); }
+function dl(a,b){ const p=ip(a[0],a[1],a[2]), q=ip(b[0],b[1],b[2]); return [Math.round(q[0]-p[0]),Math.round(q[1]-p[1])]; }
+
+// Материалы: [верх, левая грань, правая грань]
+const MAT={
+  steel:['#8794BA','#5B6893','#3D4772'],
+  dark:['#4A5580','#333C63','#232A49'],
+  concrete:['#A7AFC4','#7A839F','#59627F'],
+  roof:['#59627F','#414A6B','#2F3755'],
+  accent:['color-mix(in srgb,var(--tier-color) 80%,#fff)','var(--tier-color)','color-mix(in srgb,var(--tier-color) 55%,#000)'],
+  wood:['#A3805A','#7C5E3D','#5A4229'],
+  pipe:['#B5BFDB','#7E8BB2','#535F88'],
+  water:['#9FDDFF','#3FA8DC','#24709A'],
+  oil:['#B49A62','#6E5A33','#443619'],
+  plate:['#26305A','#1C2445','#141A33'],
+};
+function bartBegin(){ _bp='b'+(++bartUid)+'-'; }
+function matDefs(){
+  let s='<defs><radialGradient id="'+_bp+'glow" cx=".5" cy=".5" r=".5"><stop offset="0" style="stop-color:color-mix(in srgb,var(--tier-color) 38%,transparent)"/><stop offset="1" style="stop-color:transparent"/></radialGradient>';
+  Object.keys(MAT).forEach(k=>{
+    const m=MAT[k];
+    ['t','l','r'].forEach((fc,i)=>{
+      s+='<linearGradient id="'+_bp+k+fc+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:'+m[i]+'"/><stop offset="1" style="stop-color:color-mix(in srgb,'+m[i]+' '+(fc==='t'?88:70)+'%,#000)"/></linearGradient>';
+    });
+    s+='<linearGradient id="'+_bp+k+'c" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:'+m[0]+'"/><stop offset=".35" style="stop-color:'+m[1]+'"/><stop offset="1" style="stop-color:'+m[2]+'"/></linearGradient>';
+  });
+  return s+'</defs>';
+}
+function ipoly(a,fill,stroke,extra){
+  return '<polygon points="'+ipts(a)+'" style="fill:'+fill+';stroke:'+(stroke||'rgba(0,0,0,.35)')+';stroke-width:.6;stroke-linejoin:round"'+(extra?' '+extra:'')+'/>';
+}
+function ibox(x,y,z,w,d,h,mat,o){
+  o=o||{};
+  const g=fc=>'url(#'+_bp+mat+fc+')';
+  return ipoly([[x,y+d,z],[x+w,y+d,z],[x+w,y+d,z+h],[x,y+d,z+h]],g('l'))+
+    ipoly([[x+w,y,z],[x+w,y+d,z],[x+w,y+d,z+h],[x+w,y,z+h]],g('r'))+
+    (o.nt?'':ipoly([[x,y,z+h],[x+w,y,z+h],[x+w,y+d,z+h],[x,y+d,z+h]],g('t'),'rgba(255,255,255,.25)'));
+}
+function icyl(cx,cy,z,r,h,mat){
+  const p=ip(cx,cy,z), rx=r*IU*1.2247, ry=r*IU*0.7071, H=h*IU;
+  return '<path d="M'+f1(p[0]-rx)+' '+f1(p[1]-H)+' V'+f1(p[1])+' A'+f1(rx)+' '+f1(ry)+' 0 0 0 '+f1(p[0]+rx)+' '+f1(p[1])+' V'+f1(p[1]-H)+' Z" style="fill:url(#'+_bp+mat+'c);stroke:rgba(0,0,0,.3);stroke-width:.6"/>'+
+    '<ellipse cx="'+f1(p[0])+'" cy="'+f1(p[1]-H)+'" rx="'+f1(rx)+'" ry="'+f1(ry)+'" style="fill:url(#'+_bp+mat+'t);stroke:rgba(255,255,255,.25);stroke-width:.6"/>';
+}
+function iln(a,b,stroke,w,extra){
+  const p=ip(a[0],a[1],a[2]), q=ip(b[0],b[1],b[2]);
+  return '<line x1="'+f1(p[0])+'" y1="'+f1(p[1])+'" x2="'+f1(q[0])+'" y2="'+f1(q[1])+'" style="stroke:'+stroke+';stroke-width:'+w+';stroke-linecap:round"'+(extra?' '+extra:'')+'/>';
+}
+function iquadY(y,x0,x1,z0,z1,fill,cls){ return ipoly([[x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1]],fill,'rgba(0,0,0,.4)',cls?'class="'+cls+'"':''); }
+function iquadX(x,y0,y1,z0,z1,fill,cls){ return ipoly([[x,y0,z0],[x,y1,z0],[x,y1,z1],[x,y0,z1]],fill,'rgba(0,0,0,.4)',cls?'class="'+cls+'"':''); }
+// Группа в плоскости стены y=const (грань, обращённая влево-вниз): u — вдоль x, v — вниз от z.
+function gWallY(y,x0,zTop,inner){ const p=ip(x0,y,zTop); return '<g transform="matrix(.866 .5 0 1 '+f1(p[0])+' '+f1(p[1])+')">'+inner+'</g>'; }
+// Группа в плоскости стены x=const (грань, обращённая вправо-вниз): u — вдоль y.
+function gWallX(x,y0,zTop,inner){ const p=ip(x,y0,zTop); return '<g transform="matrix(-.866 .5 0 1 '+f1(p[0])+' '+f1(p[1])+')">'+inner+'</g>'; }
+// Группа-«пол»: круг, лежащий на горизонтальной плоскости (вращение внутри — ba-spin).
+function gFloor(x,y,z,inner){ const p=ip(x,y,z); return '<g transform="translate('+f1(p[0])+' '+f1(p[1])+') scale(1 .577)">'+inner+'</g>'; }
+
+// Частица, бегущая по прямой (dx,dy) в экранных пикселях; переменные анимации вливаются в style.
+function bartFlow(cls,shape,dx,dy,dur,delay,extra){
+  const vars='--tx:'+dx+'px;--ty:'+dy+'px;--dur:'+dur+'s;animation-delay:-'+delay+'s;'+(extra||'');
+  const s=shape.replace(/\/>$/,' class="'+cls+'"/>');
+  if(/style="/.test(s)) return s.replace('style="','style="'+vars);
+  return s.replace(/\/>$/,' style="'+vars+'"/>');
+}
+function smoke(x,y,z,n){
+  const p=ip(x,y,z); let s='';
+  for(let i=0;i<n;i++) s+=bartFlow('ba-flow ba-smoke','<circle cx="'+f1(p[0])+'" cy="'+f1(p[1])+'" r="3" style="fill:#C9D2EE"/>',6,-24,3.6,i*3.6/n);
+  return s;
+}
+
+// Плита-основание 7×7 с сеткой и уголками акцентного цвета.
+function ibase(){
+  let g='';
+  for(let i=1;i<7;i++) g+=iln([i,0,0.02],[i,7,0.02],'rgba(120,160,220,.13)',.6)+iln([0,i,0.02],[7,i,0.02],'rgba(120,160,220,.13)',.6);
+  let c='';
+  [[0,0,1,1],[7,0,-1,1],[0,7,1,-1],[7,7,-1,-1]].forEach(([x,y,dx,dy])=>{
+    c+='<polyline points="'+ipts([[x+dx*0.9,y,0.03],[x,y,0.03],[x,y+dy*0.9,0.03]])+'" style="fill:none;stroke:var(--tier-color);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round"/>';
+  });
+  return '<ellipse cx="130" cy="150" rx="122" ry="46" style="fill:url(#'+_bp+'glow)"/>'+
+    ibox(-0.4,-0.4,-0.6,7.8,7.8,0.6,'dark',{nt:true})+
+    ipoly([[-0.4,-0.4,0],[7.4,-0.4,0],[7.4,7.4,0],[-0.4,7.4,0]],'url(#'+_bp+'darkt)','rgba(255,255,255,.2)')+
+    ipoly([[0,0,0.01],[7,0,0.01],[7,7,0.01],[0,7,0.01]],'url(#'+_bp+'platet)','rgba(0,0,0,.4)')+g+c;
+}
+function bartFrame(inner){
+  return '<svg class="bart-svg" viewBox="18 4 224 184" aria-hidden="true">'+matDefs()+ibase()+inner+'</svg>';
+}
+// Ферма-опора: башня с четырьмя ногами и перекладинами.
+function itower(cx,cy,r0,r1,z0,z1,levels,leg,brace){
+  const at=(sx,sy,z)=>{ const t=(z-z0)/(z1-z0), r=r0+(r1-r0)*t; return [cx+sx*r,cy+sy*r,z]; };
+  let br='';
+  levels.forEach(z=>{
+    const a=at(-1,-1,z),b=at(1,-1,z),c=at(1,1,z),d=at(-1,1,z);
+    br+='<polyline points="'+ipts([a,b,c,d,a])+'" style="fill:none;stroke:'+brace+';stroke-width:1.3"/>';
+  });
+  for(let i=0;i<levels.length-1;i++){
+    const za=levels[i], zb=levels[i+1], flip=i%2;
+    [[[-1,1],[1,1]],[[1,1],[1,-1]],[[-1,-1],[1,-1]],[[-1,-1],[-1,1]]].forEach(([p,q],k)=>{
+      const A=at(p[0],p[1],flip?zb:za), B=at(q[0],q[1],flip?za:zb);
+      br+=iln(A,B,brace,1.1,k>1?'opacity=".55"':'');
+    });
+  }
+  const legs=[[-1,-1],[1,-1],[-1,1],[1,1]].map(([sx,sy])=>iln(at(sx,sy,z0),at(sx,sy,z1),leg,2.6));
+  return {back:legs[0]+br, mid:legs[1]+legs[2], front:legs[3]};
+}
+function isoPlant(P,kind,delay,s){
+  const leaf='#4E8A3A', leaf2='#3B6D2E'; let b='';
+  if(kind==='wheat'){
+    b='<path d="M-3 0 Q-3 -10 -4 -17 M0 0 V-20 M3 0 Q3 -10 4 -16" stroke="'+leaf+'" stroke-width="1.5" fill="none"/>'+
+      '<ellipse cx="-4" cy="-19" rx="1.9" ry="4.5" style="fill:var(--wheat)"/><ellipse cx="0" cy="-22" rx="2" ry="5" style="fill:var(--wheat)"/><ellipse cx="4" cy="-18" rx="1.9" ry="4.5" style="fill:var(--wheat)"/>';
+  }else if(kind==='potato'){
+    b='<circle cx="-4" cy="-4" r="4.2" fill="'+leaf+'"/><circle cx="4" cy="-5" r="4.6" fill="'+leaf2+'"/><circle cx="0" cy="-9" r="4.2" fill="'+leaf+'"/><circle cx="1" cy="-11" r="1.3" fill="#E9ECF7"/><circle cx="-4" cy="-7" r="1.1" fill="#E9ECF7"/>';
+  }else if(kind==='corn'){
+    b='<path d="M0 0 V-27" stroke="'+leaf+'" stroke-width="2"/><path d="M0 -6 Q-9 -10 -11 -18 M0 -14 Q9 -18 10 -26" stroke="'+leaf+'" stroke-width="1.8" fill="none"/>'+
+      '<ellipse cx="3" cy="-14" rx="2.6" ry="6" style="fill:var(--corn)"/><path d="M0 -27 L-3 -32 M0 -27 L3 -32" stroke="var(--wheat)" stroke-width="1"/>';
+  }else{
+    b='<circle cx="-5" cy="-5" r="4.5" fill="'+leaf2+'"/><circle cx="5" cy="-8" r="4.5" fill="'+leaf+'"/><circle cx="0" cy="-12" r="4.2" fill="'+leaf2+'"/>'+
+      '<circle cx="-4" cy="-2" r="2.6" style="fill:var(--tomato)"/><circle cx="5" cy="-6" r="2.5" style="fill:var(--tomato)"/><circle cx="1" cy="-10" r="2.2" style="fill:var(--tomato)"/>';
+  }
+  return '<g transform="translate('+f1(P[0])+' '+f1(P[1])+') scale('+(s||1)+')"><g class="ba-sway" style="animation-delay:-'+delay+'s">'+b+'</g></g>';
+}
+
+// ---------- Горнодобывающая установка: копёр над стволом, подъёмная машина, конвейер, отвал ----------
+function bartMiner(){
+  bartBegin();
+  const ores=['iron','copper','coal','stone'];
+  let s='';
+  // Машинное здание
+  s+=ibox(0.5,0.5,0,2.1,2.3,1.5,'concrete');
+  s+=ibox(0.35,0.35,1.5,2.4,2.6,0.28,'roof');
+  s+=iquadY(2.8,0.85,1.5,0.55,1.15,'var(--tier-color)','ba-win');
+  s+=iquadY(2.8,1.85,2.3,0,1.0,'#161B30');
+  s+=iquadX(2.6,0.9,1.5,0.55,1.15,'var(--tier-color)','ba-win');
+  s+=ibox(0.75,0.7,1.78,0.4,0.4,0.9,'dark');
+  s+=smoke(0.95,0.9,2.7,3);
+  // Устье ствола
+  s+=ibox(3.0,2.5,0,2.4,2.4,0.4,'concrete');
+  s+=ipoly([[3.3,2.8,0.4],[5.1,2.8,0.4],[5.1,4.6,0.4],[3.3,4.6,0.4]],'#04060D','rgba(0,0,0,.7)');
+  // Конвейер: лента поднимается от устья к бункеру над отвалом
+  const bx0=5.4,bx1=6.7,by0=3.3,by1=3.85,bz0=0.5,bz1=1.9;
+  s+=iln([5.9,by1,0],[5.9,by1,0.9],'#4A5580',1.6)+iln([6.35,by1,0],[6.35,by1,1.35],'#4A5580',1.6);
+  s+=ipoly([[bx0,by1,bz0-0.3],[bx1,by1,bz1-0.3],[bx1,by1,bz1],[bx0,by1,bz0]],'url(#'+_bp+'steell)');
+  s+=ipoly([[bx0,by0,bz0],[bx1,by0,bz1],[bx1,by1,bz1],[bx0,by1,bz0]],'#232B4E','rgba(255,255,255,.2)');
+  s+=ipoly([[bx1,by0,bz1-0.3],[bx1,by1,bz1-0.3],[bx1,by1,bz1],[bx1,by0,bz1]],'url(#'+_bp+'steelr)');
+  const cs=ip(bx0,(by0+by1)/2,bz0), cd=dl([bx0,0,bz0],[bx1,0,bz1]);
+  for(let i=0;i<5;i++) s+=bartFlow('ba-flow','<rect x="'+f1(cs[0]-2.5)+'" y="'+f1(cs[1]-5)+'" width="5" height="4" rx="1.3" style="fill:var(--'+ores[i%4]+')"/>',cd[0],cd[1],4,i*0.8);
+  // Отвал руды под концом ленты
+  const pp=ip(6.2,4.7,0), pr=17;
+  s+='<path d="M'+f1(pp[0]-pr)+' '+f1(pp[1])+' Q'+f1(pp[0]-pr*0.45)+' '+f1(pp[1]-22)+' '+f1(pp[0])+' '+f1(pp[1]-24)+' Q'+f1(pp[0]+pr*0.45)+' '+f1(pp[1]-22)+' '+f1(pp[0]+pr)+' '+f1(pp[1])+' A'+pr+' 9.5 0 0 1 '+f1(pp[0]-pr)+' '+f1(pp[1])+' Z" style="fill:color-mix(in srgb,var(--tier-color) 25%,#222A4A);stroke:rgba(0,0,0,.4);stroke-width:.6"/>';
+  [[-8,-3,'iron'],[0,-8,'copper'],[8,-3,'coal'],[-2,1,'stone'],[5,3,'iron'],[-9,2,'copper'],[2,-15,'coal'],[-4,-13,'stone']]
+    .forEach(([dx,dy,c])=>{ s+='<circle cx="'+f1(pp[0]+dx)+'" cy="'+f1(pp[1]+dy)+'" r="3.4" style="fill:var(--'+c+');stroke:rgba(0,0,0,.35);stroke-width:.5"/>'; });
+  const pe=ip(bx1,(by0+by1)/2,bz1);
+  for(let i=0;i<3;i++) s+=bartFlow('ba-flow','<rect x="'+f1(pe[0]-2)+'" y="'+f1(pe[1])+'" width="4" height="4" rx="1" style="fill:var(--'+ores[i]+')"/>',3,Math.round(pp[1]-pe[1]-20),1.2,i*0.4);
+  // Копёр: ноги, распорки, шкив, клеть
+  const T=itower(4.2,3.7,0.9,0.2,0.4,6.2,[0.4,2.3,4.2,6.2],'#8794BA','#5B6893');
+  s+=T.back+T.mid;
+  s+=iln([4.2,3.7,6.2],[4.2,3.7,0.4],'rgba(180,190,220,.5)',1);
+  s+='<g class="ba-skip" style="--tr:-46px">'+ibox(4.05,3.55,0.6,0.3,0.3,0.55,'accent')+'</g>';
+  const w=ip(4.2,3.7,6.6);
+  s+='<g transform="matrix(.866 .5 0 1 '+f1(w[0])+' '+f1(w[1])+')"><g class="ba-spin" style="--spd:3s"><circle r="10" fill="#1A2142" stroke="#8794BA" stroke-width="2.6"/><path d="M-10 0H10M0 -10V10M-7 -7L7 7M7 -7L-7 7" stroke="#B5BFDB" stroke-width="1.3"/></g><circle r="2.6" fill="#B5BFDB"/></g>';
+  s+=T.front;
+  s+=ibox(3.85,3.35,6.2,0.7,0.7,0.2,'dark');
+  const bc=ip(4.2,3.7,7.5);
+  s+='<line x1="'+f1(bc[0])+'" y1="'+f1(bc[1]+10)+'" x2="'+f1(bc[0])+'" y2="'+f1(bc[1]+2)+'" style="stroke:#8794BA;stroke-width:1.6"/><circle class="ba-beacon" cx="'+f1(bc[0])+'" cy="'+f1(bc[1])+'" r="2.6"/>';
+  // Ящики и прожектор
+  s+=ibox(0.7,5.5,0,0.8,0.8,0.7,'wood')+ibox(1.7,5.9,0,0.7,0.7,0.5,'wood');
+  const lp=ip(6.5,6.5,0);
+  s+='<line x1="'+f1(lp[0])+'" y1="'+f1(lp[1])+'" x2="'+f1(lp[0])+'" y2="'+f1(lp[1]-40)+'" style="stroke:#8794BA;stroke-width:2"/><rect class="ba-win" x="'+f1(lp[0]-6)+'" y="'+f1(lp[1]-46)+'" width="12" height="6" rx="2" style="fill:var(--tier-color)"/>';
+  return bartFrame(s);
+}
+
+// ---------- Буровая установка: вышка, ротор, талевый блок, баки с водой и нефтью ----------
+function bartDrill(){
+  bartBegin();
+  let s='';
+  // Машинный дом с дымящей трубой
+  s+=ibox(0.5,2.6,0,1.6,1.7,1.2,'steel');
+  s+=ibox(0.4,2.5,1.2,1.8,1.9,0.2,'roof');
+  s+=iquadY(4.3,0.8,1.4,0.5,0.95,'var(--tier-color)','ba-win');
+  s+=ibox(1.55,2.7,1.4,0.3,0.3,1.3,'dark');
+  s+=smoke(1.7,2.85,2.8,3);
+  // Вышка
+  s+=ibox(2.6,1.4,0,2.4,2.4,0.4,'concrete');
+  const T=itower(3.8,2.6,1.0,0.28,0.4,7.2,[0.4,2.2,4.2,6.0,7.2],'#8794BA','#5B6893');
+  s+=T.back+T.mid;
+  // Ротор на полу вышки
+  s+=gFloor(3.8,2.6,0.45,'<circle r="15" fill="#1A2142" stroke="#8794BA" stroke-width="2"/><g class="ba-spin" style="--spd:2s"><path d="M-14 0H14M0 -14V14M-10 -10L10 10M10 -10L-10 10" stroke="#B5BFDB" stroke-width="1.6"/></g><circle r="4" fill="#04060D"/>');
+  // Бурильная колонна и талевый блок
+  s+=iln([3.8,2.6,7.0],[3.8,2.6,0.5],'#B5BFDB',2.2);
+  s+='<g class="ba-skip" style="--tr:-40px">'+ibox(3.55,2.35,1.6,0.5,0.5,0.6,'accent')+iln([3.8,2.6,2.2],[3.8,2.6,2.9],'#B5BFDB',1.4)+'</g>';
+  const cb=ip(3.8,2.6,7.4);
+  s+=T.front;
+  s+=ibox(3.45,2.25,7.2,0.7,0.7,0.35,'dark');
+  s+='<circle class="ba-beacon" cx="'+f1(cb[0])+'" cy="'+f1(cb[1]-14)+'" r="2.6"/>';
+  // Баки: вода (справа-сзади) и нефть (справа-спереди), трубы с течением
+  s+=ibox(4.9,2.4,0.2,1.7,0.22,0.22,'pipe')+ibox(3.6,3.8,0.2,0.22,1.7,0.22,'pipe')+ibox(3.6,5.3,0.2,2.0,0.22,0.22,'pipe');
+  const wa=[4.9,2.5,0.31], wb=[6.1,2.5,0.31];
+  const wd=dl(wa,wb), wp=ip(wa[0],wa[1],wa[2]);
+  for(let i=0;i<4;i++) s+=bartFlow('ba-flow','<circle cx="'+f1(wp[0])+'" cy="'+f1(wp[1]-1)+'" r="2" style="fill:var(--water)"/>',wd[0],wd[1],2.2,i*0.55);
+  const oa=[3.7,5.4,0.31], ob=[3.7,3.9,0.31];
+  const od=dl(oa,ob), op=ip(oa[0],oa[1],oa[2]);
+  for(let i=0;i<4;i++) s+=bartFlow('ba-flow','<circle cx="'+f1(op[0])+'" cy="'+f1(op[1]-1)+'" r="2" style="fill:#C4A66A"/>',od[0],od[1],2.2,i*0.55);
+  s+=icyl(6.0,2.5,0,0.85,2.3,'water');
+  s+=icyl(5.2,5.5,0,1.0,1.7,'oil');
+  s+=iln([6.0,3.1,0.2],[6.0,3.1,1.9],'rgba(255,255,255,.3)',1.6)+iln([5.2,6.1,0.2],[5.2,6.1,1.4],'rgba(255,255,255,.22)',1.6);
+  const vl=ip(6.0,2.5,2.3);
+  s+='<circle class="ba-led" cx="'+f1(vl[0])+'" cy="'+f1(vl[1]-2)+'" r="2.2"/>';
+  return bartFrame(s);
+}
+
+// ---------- Солнечная панель: два ряда панелей на стойках, инвертор, солнце/луна по игровому времени ----------
+function bartSolar(){
+  bartBegin();
+  let s='';
+  s+='<g class="ba-moon"><circle cx="216" cy="34" r="11" fill="#C9D2EE"/><circle cx="221" cy="30" r="10" fill="#0A0D18"/></g>';
+  [[24,18],[60,10],[102,24],[150,8],[80,42],[20,50],[176,44]].forEach(([x,y])=>{ s+='<circle class="ba-star" cx="'+x+'" cy="'+y+'" r="1.1"/>'; });
+  s+='<g class="ba-sunwrap"><circle cx="216" cy="34" r="22" style="fill:var(--energy);opacity:.18"/><g class="ba-spin" style="--spd:24s">'+
+    [0,45,90,135,180,225,270,315].map(a=>{ const r=a*Math.PI/180; return '<path d="M'+f1(216+15*Math.cos(r))+' '+f1(34+15*Math.sin(r))+' L'+f1(216+21*Math.cos(r))+' '+f1(34+21*Math.sin(r))+'" stroke="var(--energy)" stroke-width="2.4" stroke-linecap="round"/>'; }).join('')+
+    '</g><circle cx="216" cy="34" r="11" style="fill:var(--energy)"/></g>';
+  const panel=(x,y0,w,d,zb,zf)=>{
+    let g='';
+    g+=iln([x+0.2,y0+0.1,0],[x+0.2,y0+0.1,zb],'#4A5580',2)+iln([x+w-0.2,y0+0.1,0],[x+w-0.2,y0+0.1,zb],'#4A5580',2);
+    g+=iln([x+0.2,y0+d-0.1,0],[x+0.2,y0+d-0.1,zf],'#4A5580',2)+iln([x+w-0.2,y0+d-0.1,0],[x+w-0.2,y0+d-0.1,zf],'#4A5580',2);
+    const A=[x,y0,zb],B=[x+w,y0,zb],C=[x+w,y0+d,zf],D=[x,y0+d,zf];
+    g+=ipoly([[x,y0+d,zf-0.12],[x+w,y0+d,zf-0.12],C,D],'url(#'+_bp+'steell)');
+    g+=ipoly([A,B,C,D],'#1B3070','#9AA5C6');
+    for(let i=1;i<4;i++){ const t=i/4; g+=iln([x+w*t,y0,zb],[x+w*t,y0+d,zf],'#2F4690',.8); }
+    for(let i=1;i<3;i++){ const t=i/3, z=zb+(zf-zb)*t; g+=iln([x,y0+d*t,z],[x+w,y0+d*t,z],'#2F4690',.8); }
+    g+=ipoly([A,B,C,D],'var(--energy)','none','class="ba-glare"');
+    return g;
+  };
+  s+=panel(0.4,0.6,2.0,1.7,1.9,1.0)+panel(2.5,0.6,2.0,1.7,1.9,1.0)+panel(4.6,0.6,2.0,1.7,1.9,1.0);
+  s+=panel(0.4,3.0,2.0,1.7,1.9,1.0)+panel(2.5,3.0,2.0,1.7,1.9,1.0)+panel(4.6,3.0,2.0,1.7,1.9,1.0);
+  // Кабель и импульсы
+  const c0=[0.15,2.5,0.05], c1=[0.15,5.6,0.05];
+  s+=iln(c0,c1,'#3A4468',2.4)+iln([0.15,0.9,0.05],c0,'#3A4468',2.4);
+  const cd=dl(c0,c1), cp=ip(c0[0],c0[1],c0[2]);
+  for(let i=0;i<4;i++) s+=bartFlow('ba-flow ba-sunonly','<circle cx="'+f1(cp[0])+'" cy="'+f1(cp[1])+'" r="2" style="fill:var(--energy)"/>',cd[0],cd[1],2.6,i*0.65);
+  // Инвертор
+  s+=ibox(0.5,5.4,0,1.5,1.2,1.4,'steel');
+  s+=iquadY(6.6,0.7,1.8,0.85,1.2,'#0B1022');
+  const lp=ip(0.9,6.6,1.0);
+  s+='<circle class="ba-led" cx="'+f1(lp[0])+'" cy="'+f1(lp[1])+'" r="2" style="fill:var(--energy)"/>';
+  return bartFrame(s);
+}
+
+// ---------- Ферма: теплица с грядками внутри, четыре грядки снаружи, водонапорный бак и полив ----------
+function bartFarm(){
+  bartBegin();
+  let s='';
+  const GL='rgba(150,220,255,.14)', GD='rgba(150,220,255,.08)';
+  s+=ibox(0.2,0.2,0,4.7,3.4,0.25,'concrete');
+  s+=ipoly([[0.35,0.35,0.26],[4.75,0.35,0.26],[4.75,3.45,0.26],[0.35,3.45,0.26]],'#3B2E20','rgba(0,0,0,.4)');
+  s+=iquadY(0.3,0.3,4.7,0.25,1.6,GD)+iquadX(0.3,0.3,3.5,0.25,1.6,GD);
+  const inner=[];
+  [[0.8,'wheat'],[1.5,'potato'],[2.2,'corn'],[2.9,'tomato']].forEach(([y,k])=>{
+    s+=ibox(0.6,y-0.2,0.25,4.0,0.4,0.12,'wood');
+    for(let x=0.9;x<4.4;x+=0.75) inner.push([x+y,x,y,k]);
+  });
+  inner.sort((a,b)=>a[0]-b[0]).forEach(([,x,y,k],i)=>{ s+=isoPlant(ip(x,y,0.42),k,(i*0.6)%3,0.95); });
+  s+=iquadY(3.5,0.3,4.7,0.25,1.6,GL);
+  s+=ipoly([[4.7,0.3,0.25],[4.7,3.5,0.25],[4.7,3.5,1.6],[4.7,1.9,2.6],[4.7,0.3,1.6]],GL);
+  s+=ipoly([[0.3,1.9,2.6],[4.7,1.9,2.6],[4.7,3.5,1.6],[0.3,3.5,1.6]],'rgba(150,220,255,.18)');
+  let rib='';
+  for(let x=0.3;x<=4.71;x+=1.1) rib+=iln([x,3.5,0.25],[x,3.5,1.6],'rgba(200,230,255,.55)',1)+iln([x,3.5,1.6],[x,1.9,2.6],'rgba(200,230,255,.55)',1);
+  rib+=iln([4.7,3.5,0.25],[4.7,3.5,1.6],'rgba(220,240,255,.8)',1.4)+iln([4.7,0.3,1.6],[4.7,1.9,2.6],'rgba(220,240,255,.7)',1.2)+iln([4.7,1.9,2.6],[4.7,3.5,1.6],'rgba(220,240,255,.8)',1.4)+iln([4.7,3.5,1.6],[4.7,0.3,1.6],'rgba(220,240,255,.5)',1)+
+    iln([0.3,1.9,2.6],[4.7,1.9,2.6],'rgba(220,240,255,.9)',1.6)+iln([0.3,3.5,1.6],[4.7,3.5,1.6],'rgba(220,240,255,.8)',1.4)+iln([0.3,3.5,0.25],[4.7,3.5,0.25],'rgba(220,240,255,.6)',1);
+  s+=rib;
+  // водонапорная башня
+  s+=iln([5.5,0.7,0],[5.6,0.8,2.2],'#5B6893',2)+iln([6.3,0.7,0],[6.2,0.8,2.2],'#5B6893',2)+iln([5.5,1.5,0],[5.6,1.4,2.2],'#5B6893',2)+iln([6.3,1.5,0],[6.2,1.4,2.2],'#5B6893',2);
+  s+=icyl(5.9,1.1,2.2,0.75,1.0,'water');
+  const tp=ip(5.9,1.1,3.2);
+  s+='<path d="M'+f1(tp[0]-9.2)+' '+f1(tp[1])+' L'+f1(tp[0])+' '+f1(tp[1]-9)+' L'+f1(tp[0]+9.2)+' '+f1(tp[1])+' Z" style="fill:#5B6893;stroke:rgba(0,0,0,.3);stroke-width:.6"/>';
+  // труба и полив
+  s+=ibox(6.5,1.0,0,0.2,3.3,0.2,'pipe')+ibox(6.5,4.0,0,0.2,0.2,2.6,'pipe');
+  s+=ibox(0.4,4.0,2.5,6.3,0.16,0.16,'pipe');
+  // грядки снаружи
+  const beds=[[0.5,'wheat'],[1.95,'potato'],[3.4,'corn'],[4.85,'tomato']];
+  beds.forEach(([x])=>{
+    s+=ibox(x,4.4,0,1.3,2.3,0.3,'wood');
+    s+=ipoly([[x+0.12,4.52,0.3],[x+1.18,4.52,0.3],[x+1.18,6.58,0.3],[x+0.12,6.58,0.3]],'#3B2E20','rgba(0,0,0,.4)');
+  });
+  const outp=[];
+  beds.forEach(([x,k])=>{ [4.95,5.55,6.15].forEach(y=>[x+0.38,x+0.92].forEach(px=>outp.push([px+y,px,y,k]))); });
+  outp.sort((a,b)=>a[0]-b[0]).forEach(([,x,y,k],i)=>{ s+=isoPlant(ip(x,y,0.3),k,(i*0.45)%3,1); });
+  beds.forEach(([x],i)=>{
+    const n=ip(x+0.65,4.08,2.5);
+    for(let j=0;j<3;j++) s+=bartFlow('ba-flow ba-drop','<path d="M'+f1(n[0]+(j-1)*4)+' '+f1(n[1]+3)+' v4"/>',(j-1)*2,32,1.4,(i*0.35+j*0.47)%1.4);
+  });
+  return bartFrame(s);
+}
+
+// ---------- Аккумулятор: шкаф с четырьмя ячейками (заряд — живой, --chg), вентиляторы, ЛЭП ----------
+function bartBattery(){
+  bartBegin();
+  let s='';
+  const mast=[6.4,0.7];
+  s+=iln([mast[0]-0.3,mast[1]-0.3,0],[mast[0],mast[1],5.2],'#6E7AA3',2)+iln([mast[0]+0.3,mast[1]-0.3,0],[mast[0],mast[1],5.2],'#6E7AA3',2)+
+     iln([mast[0]-0.3,mast[1]+0.3,0],[mast[0],mast[1],5.2],'#6E7AA3',2)+iln([mast[0]+0.3,mast[1]+0.3,0],[mast[0],mast[1],5.2],'#6E7AA3',2);
+  s+=iln([mast[0]-0.35,mast[1]-0.35,2.0],[mast[0]+0.35,mast[1]+0.35,2.0],'#5B6893',1.2)+iln([mast[0]-0.25,mast[1]-0.25,3.6],[mast[0]+0.25,mast[1]+0.25,3.6],'#5B6893',1.2);
+  s+=iln([mast[0]-0.9,mast[1]-0.9,5.0],[mast[0]+0.9,mast[1]+0.9,5.0],'#B5BFDB',2.4);
+  s+=iln([mast[0],mast[1],5.0],[6.1,2.3,1.4],'#3A4468',1.6);
+  const cd=dl([mast[0],mast[1],5.0],[6.1,2.3,1.4]), cp=ip(mast[0],mast[1],5.0);
+  for(let i=0;i<3;i++) s+=bartFlow('ba-flow','<circle cx="'+f1(cp[0])+'" cy="'+f1(cp[1])+'" r="2" style="fill:var(--energy)"/>',cd[0],cd[1],1.8,i*0.6);
+  s+=ibox(5.5,2.3,0,1.2,1.1,1.4,'accent');
+  [0.25,0.6,0.95].forEach(x=>{ s+=iln([5.5+x,3.4,0.2],[5.5+x,3.4,1.2],'rgba(0,0,0,.35)',1.4); });
+  s+=iln([5.5,3.0,0.12],[4.9,3.0,0.12],'#3A4468',2.4);
+  const g0=dl([5.5,3.0,0.12],[4.9,3.0,0.12]), gp=ip(5.5,3.0,0.12);
+  for(let i=0;i<3;i++) s+=bartFlow('ba-flow','<circle cx="'+f1(gp[0])+'" cy="'+f1(gp[1])+'" r="1.8" style="fill:var(--energy)"/>',g0[0],g0[1],1.2,i*0.4);
+  s+=ibox(0.3,1.1,0,4.7,3.1,0.25,'dark');
+  s+=ibox(0.5,1.3,0.25,4.3,2.7,2.8,'steel');
+  let win='<rect x="'+f1(0.3*IU)+'" y="'+f1(0.3*IU)+'" width="'+f1(3.7*IU)+'" height="'+f1(2.0*IU)+'" rx="2" fill="#0B1022" stroke="#232B4E" stroke-width="1.2"/>';
+  for(let i=0;i<4;i++){
+    const cx=(0.42+i*0.9)*IU;
+    win+='<rect x="'+f1(cx)+'" y="'+f1(0.4*IU)+'" width="'+f1(0.78*IU)+'" height="'+f1(1.8*IU)+'" rx="1.5" fill="#141A33"/>'+
+      '<rect class="ba-cell" x="'+f1(cx+1)+'" y="'+f1(0.4*IU+1)+'" width="'+f1(0.78*IU-2)+'" height="'+f1(1.8*IU-2)+'" rx="1"/>'+
+      '<path d="M'+f1(cx)+' '+f1(0.85*IU)+'h'+f1(0.78*IU)+'M'+f1(cx)+' '+f1(1.3*IU)+'h'+f1(0.78*IU)+'M'+f1(cx)+' '+f1(1.75*IU)+'h'+f1(0.78*IU)+'" stroke="#0B1022" stroke-width="1.6"/>';
+  }
+  win+='<rect x="'+f1(0.3*IU)+'" y="'+f1(2.45*IU)+'" width="'+f1(1.2*IU)+'" height="'+f1(0.18*IU)+'" rx="1" style="fill:var(--tier-color)"/>';
+  s+=gWallY(4.0,0.5,3.05,win);
+  let rf='';
+  for(let i=0;i<6;i++) rf+='<path d="M'+f1(0.25*IU)+' '+f1((0.35+i*0.28)*IU)+'h'+f1(1.0*IU)+'" stroke="#232B4E" stroke-width="1.6"/>';
+  rf+='<path class="ba-bolt" d="M'+f1(1.9*IU)+' '+f1(0.35*IU)+' l'+f1(-0.4*IU)+' '+f1(0.75*IU)+' h'+f1(0.3*IU)+' l'+f1(-0.2*IU)+' '+f1(0.85*IU)+' l'+f1(0.6*IU)+' '+f1(-1.0*IU)+' h'+f1(-0.3*IU)+' l'+f1(0.2*IU)+' '+f1(-0.6*IU)+' Z"/>';
+  rf+='<circle class="ba-led" cx="'+f1(2.4*IU)+'" cy="'+f1(2.3*IU)+'" r="2.2"/>';
+  s+=gWallX(4.8,1.3,3.05,rf);
+  [[1.7,2.65],[3.5,2.65]].forEach(([x,y])=>{
+    const R=0.7*IU*1.2247, R2=R-2;
+    s+=gFloor(x,y,3.05,'<circle r="'+f1(R)+'" fill="#0B1022" stroke="#B5BFDB" stroke-width="1.6"/><g class="ba-spin" style="--spd:.8s"><path d="M0 0 L0 -'+f1(R2)+' Q'+f1(R*0.5)+' -'+f1(R*0.8)+' 0 0 M0 0 L'+f1(R2)+' 0 Q'+f1(R*0.8)+' '+f1(R*0.5)+' 0 0 M0 0 L0 '+f1(R2)+' Q-'+f1(R*0.5)+' '+f1(R*0.8)+' 0 0 M0 0 L-'+f1(R2)+' 0 Q-'+f1(R*0.8)+' -'+f1(R*0.5)+' 0 0" fill="#6E7AA3"/></g><circle r="2.4" fill="#B5BFDB"/>');
+  });
+  s+=ibox(0.8,1.5,3.05,0.5,0.4,0.25,'dark')+ibox(4.1,1.5,3.05,0.5,0.4,0.25,'dark');
+  return bartFrame(s);
+}
+
+// ---------- Резервуар: стеклянная капсула (та же, что на складе) на опоре, трубы с течением ----------
+function bartCapsule(resId,lvl,pct){
+  if(typeof capsuleSvg==='function') return capsuleSvg(resId,lvl,pct,'b'+bartUid).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'');
+  return '<rect x="40" y="10" width="60" height="140" rx="30" fill="rgba(150,220,255,.15)" stroke="var(--lqt)" stroke-width="3"/>';
+}
+function bartTank(resId,lvl,pct){
+  bartBegin();
+  let s='';
+  s+=ibox(0,3.2,0.2,2.5,0.4,0.4,'pipe')+ibox(3.2,4.6,0.2,0.4,2.4,0.4,'pipe');
+  const a=[0,3.4,0.6], b=[2.6,3.4,0.6];
+  const d1=dl(a,b), p1=ip(a[0],a[1],a[2]);
+  for(let i=0;i<4;i++) s+=bartFlow('ba-flow','<circle cx="'+f1(p1[0])+'" cy="'+f1(p1[1]-1)+'" r="2" style="fill:var(--lqt)"/>',d1[0],d1[1],2.4,i*0.6);
+  const c=[3.4,4.6,0.6], e=[3.4,7,0.6];
+  const d2=dl(c,e), p2=ip(c[0],c[1],c[2]);
+  for(let i=0;i<4;i++) s+=bartFlow('ba-flow','<circle cx="'+f1(p2[0])+'" cy="'+f1(p2[1]-1)+'" r="2" style="fill:var(--lqt)"/>',d2[0],d2[1],2.4,i*0.6);
+  s+=ibox(2.3,2.3,0,2.4,2.4,0.4,'steel');
+  s+=iln([1.0,3.4,0.6],[1.0,3.4,1.2],'#8794BA',1.8);
+  const v=ip(1.0,3.4,1.2);
+  s+='<circle cx="'+f1(v[0])+'" cy="'+f1(v[1])+'" r="4" fill="none" stroke="#B5BFDB" stroke-width="2"/>';
+  s+='<svg x="80" y="15" width="100" height="119" viewBox="0 0 140 166">'+bartCapsule(resId,lvl,pct)+'</svg>';
+  return bartFrame(s);
+}
+
+// Сцена по ключу типа здания; неизвестный тип — крупная версия его обычной иконки на плите.
+function buildArtFor(key,iconKey,colorVar){
+  if(key==='miner') return bartMiner();
+  if(key==='drill') return bartDrill();
+  if(key==='solar') return bartSolar();
+  if(key==='farm') return bartFarm();
+  if(key==='battery') return bartBattery();
+  bartBegin();
+  const inner=(typeof ICONS!=='undefined' && ICONS[iconKey]) || '<circle cx="10" cy="10" r="7"/>';
+  return bartFrame('<g transform="translate(94 40) scale(3.6)" style="color:var(--'+colorVar+')" fill="currentColor">'+inner+'</g>');
+}
+
+const CARDS=[
+ {k:'miner',n:'Горнодобывающая установка',d:'Копёр над стволом, клеть, конвейер и отвал руды.',c:'--miner'},
+ {k:'drill',n:'Буровая установка',d:'Вышка с ротором, баки с водой и нефтью.',c:'--water'},
+ {k:'solar',n:'Малая солнечная панель',d:'Два ряда панелей, инвертор. Днём светит солнце, ночью луна.',c:'--energy'},
+ {k:'farm',n:'Ферма',d:'Теплица, грядки четырёх культур, водонапорный бак и полив.',c:'--farm'},
+ {k:'battery',n:'Малый аккумулятор',d:'Шкаф с ячейками, заряд виден на окне, вентиляторы и ЛЭП.',c:'--energy'},
+ {k:'tank1',n:'Резервуар · малый (вода)',d:'Стеклянная капсула на опоре.',c:'--water',res:'water',lvl:1},
+ {k:'tank2',n:'Резервуар · средний (нефть)',d:'Капсула побольше, с заклёпками и мерной шкалой.',c:'--oil',res:'oil',lvl:2},
+ {k:'tank3',n:'Резервуар · большой (вода)',d:'Капсула в раме, с маяком.',c:'--water',res:'water',lvl:3},
+];
+const LQ={water:['#2F86B8','#8FD6FF'],oil:['#6E5A33','#C4A66A']};
+const g=document.getElementById('g');
+g.innerHTML=CARDS.map(c=>{
+  const lq=c.res?LQ[c.res]:null;
+  const art=c.res?bartTank(c.res,c.lvl,55):buildArtFor(c.k,c.k,c.c.slice(2));
+  return '<div class="bcard" data-k="'+c.k+'" style="--tier-color:var('+c.c+');'+(lq?'--lq:'+lq[0]+';--lqt:'+lq[1]:'')+'"><div class="bart">'+art+'</div><div class="bcard-info"><h3>'+c.n+'</h3><p>'+c.d+'</p></div></div>';
+}).join('');
+function upd(){
+  const s=+sun.value/100, ch=+chg.value/100, lv=+liq.value;
+  sunv.textContent=sun.value+'%'; chgv.textContent=chg.value+'%'; liqv.textContent=liq.value+'%';
+  document.querySelectorAll('.bcard').forEach(el=>{
+    el.style.setProperty('--sun',s); el.style.setProperty('--chg',ch);
+    const c=CARDS.find(x=>x.k===el.dataset.k);
+    const liqEl=el.querySelector('.tk-liquid');
+    if(liqEl&&c.lvl) liqEl.style.transform='translateY('+tankLevelY(CAPSULE_SIZES[c.lvl],lv).toFixed(1)+'px)';
+  });
+}
+['sun','chg','liq'].forEach(id=>document.getElementById(id).addEventListener('input',upd));
+upd();
+</script></body></html>

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Энергоядро</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="inv-base.css">
+<style>
+/* Вариант 1 · «Энергоядро»: инвертор — светящееся ядро в центре, всё остальное — стеклянные модули вокруг. */
+:root{
+  --v-bg:#04060F;--v-card:rgba(20,28,56,.55);--v-panel:rgba(14,20,42,.6);--v-line:rgba(120,190,255,.13);--v-line2:rgba(120,190,255,.28);
+  --v-accent:#4FD1E7;--v-accent2:#4FD1E7;--v-radius:16px;
+  --v-pop:linear-gradient(180deg,rgba(24,32,64,.97),rgba(12,17,36,.98));
+  --glass:linear-gradient(180deg,rgba(28,38,76,.55),rgba(12,18,40,.55));
+  --st:#4ADE9B;
+}
+body{background:
+  radial-gradient(60% 45% at 50% 32%,rgba(79,209,231,.10),transparent 70%),
+  radial-gradient(40% 40% at 85% 10%,rgba(179,136,255,.08),transparent 70%),
+  radial-gradient(40% 40% at 10% 90%,rgba(255,221,87,.05),transparent 70%),#04060F;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(1px 1px at 12% 18%,#fff8,transparent),radial-gradient(1px 1px at 72% 8%,#fff6,transparent),radial-gradient(1px 1px at 38% 62%,#fff5,transparent),radial-gradient(1px 1px at 88% 54%,#fff6,transparent),radial-gradient(1px 1px at 22% 84%,#fff4,transparent),radial-gradient(1px 1px at 58% 92%,#fff5,transparent);}
+.hd{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--v-mute);}
+h1{margin:2px 0 0;font-family:var(--font-display);font-weight:700;font-size:34px;letter-spacing:.04em;
+  background:linear-gradient(90deg,#E9ECF7,#9FE8F4 60%,#4FD1E7);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.sub{margin:4px 0 0;color:var(--v-dim);font-size:13px;max-width:70ch;}
+
+/* ---------- схема ---------- */
+.scheme{position:relative;border-radius:24px;padding:26px 24px;border:1px solid var(--v-line);
+  background:radial-gradient(50% 60% at 50% 40%,rgba(79,209,231,.07),transparent 70%),rgba(6,10,24,.6);}
+.scheme::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:repeating-radial-gradient(circle at 50% 40%,transparent 0 46px,rgba(79,209,231,.035) 46px 47px);}
+.grid{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) 372px minmax(0,1fr);grid-template-areas:'src core cons' 'src store cons';gap:22px 64px;}
+.col-src{grid-area:src;display:flex;flex-direction:column;gap:22px;justify-content:center;}
+.col-cons{grid-area:cons;display:flex;flex-direction:column;gap:12px;justify-content:center;min-width:0;}
+.col-core{grid-area:core;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.col-store{grid-area:store;display:flex;flex-direction:column;gap:26px;align-items:stretch;}
+#fl{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible;}
+.fl-base{opacity:.14;}
+.fl-dash{filter:drop-shadow(0 0 4px currentColor);}
+
+.mod{position:relative;background:var(--glass);border:1px solid var(--v-line);border-radius:16px;padding:12px 14px;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.25);transition:border-color .2s,box-shadow .2s;}
+.mod:hover{border-color:color-mix(in srgb,var(--nc,#4FD1E7) 55%,transparent);}
+.mod.on{border-color:color-mix(in srgb,var(--nc) 45%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 0 0 1px color-mix(in srgb,var(--nc) 20%,transparent),0 0 32px color-mix(in srgb,var(--nc) 18%,transparent);}
+.mh{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.mh h3{margin:0;flex:1;min-width:0;font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--v-dim);}
+.tag{font-family:var(--font-mono);font-size:11px;color:var(--v-mute);white-space:nowrap;padding:1px 7px;border-radius:999px;border:1px solid var(--v-line);}
+.big{font-family:var(--font-mono);font-size:24px;font-weight:500;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.big small{font-size:13px;color:var(--v-dim);margin-left:4px;}
+.of{font-family:var(--font-mono);font-size:11.5px;color:var(--v-dim);}
+.line{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--v-dim);padding:1px 0;}
+.line b{font-family:var(--font-mono);font-weight:500;color:var(--v-text);white-space:nowrap;}
+.bar{height:5px;border-radius:999px;background:rgba(0,0,0,.45);overflow:hidden;margin:8px 0 5px;}
+.bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,color-mix(in srgb,var(--nc) 50%,transparent),var(--nc));box-shadow:0 0 10px var(--nc);transition:width .4s;}
+.sunrow{display:flex;align-items:center;gap:12px;}
+.sunico{width:56px;height:56px;flex-shrink:0;}
+.sunrays{transform-origin:28px 28px;animation:spin 30s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(13px,1fr));gap:3px;margin:8px 0 4px;}
+.tiles i{aspect-ratio:1.4;border-radius:2px;background:linear-gradient(135deg,#FFE88A,#E2B92E);opacity:var(--to,1);transition:opacity .5s;box-shadow:0 0 6px rgba(255,221,87,calc(var(--to,1)*.6));}
+.plan{border-style:dashed;opacity:.55;padding:9px 12px;}
+.plan .big{font-size:16px;}
+.planrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* ---------- ядро-инвертор ---------- */
+.core-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;}
+.cs{background:var(--glass);border:1px solid var(--v-line);border-radius:12px;padding:6px 10px;min-width:0;}
+.cs span{display:block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--v-mute);white-space:nowrap;}
+.cs b{display:block;font-family:var(--font-mono);font-weight:500;font-size:13.5px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.cs.wide{grid-column:span 1;}
+#nCore{position:relative;width:340px;height:340px;}
+#nCore svg{width:100%;height:100%;display:block;overflow:visible;}
+.core-spin{transform-origin:170px 170px;animation:spin 40s linear infinite;}
+.core-spin2{transform-origin:170px 170px;animation:spin 18s linear infinite reverse;}
+.core-pulse{transform-origin:170px 170px;animation:pulse 3.2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:.55;transform:scale(.97);}50%{opacity:.95;transform:scale(1.02);}}
+.core-txt{font-family:var(--font-mono);fill:#E9ECF7;}
+.core-lbl{font-family:var(--font-display);font-weight:700;letter-spacing:.3em;fill:#9CA6C4;}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-family:var(--font-display);font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;border:1px solid currentColor;}
+.pill::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;animation:blink 1.6s ease-in-out infinite;}
+@keyframes blink{50%{opacity:.35;}}
+.core-state{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);}
+
+/* аккумуляторы */
+.batt{--nc:#4FD1E7;}
+.cells{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:10px 0 6px;}
+.cells i{height:24px;border-radius:4px;background:rgba(79,209,231,.08);border:1px solid rgba(79,209,231,.18);position:relative;overflow:hidden;}
+.cells i b{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,#2CB5CC,#7BE6F5);box-shadow:0 0 10px rgba(79,209,231,.7);transition:height .4s;}
+.cells.low i b{background:linear-gradient(0deg,#C23A5D,#F4557B);box-shadow:0 0 10px rgba(244,85,123,.7);}
+.curt{--nc:#8C93B0;border-style:dashed;padding:8px 14px;display:flex;align-items:center;gap:10px;}
+.curt h3{margin:0;flex:1;font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--v-dim);}
+.curt.idle{opacity:.5;}
+
+/* группы потребителей */
+.grp{--nc:#4FD1E7;cursor:help;outline:none;padding:11px 14px 11px 18px;}
+.grp::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0;background:var(--nc);box-shadow:0 0 12px var(--nc);}
+.grp:hover,.grp:focus-visible{border-color:color-mix(in srgb,var(--nc) 60%,transparent);box-shadow:0 0 28px color-mix(in srgb,var(--nc) 22%,transparent);}
+.gh{display:flex;align-items:baseline;gap:8px;}
+.gh h3{margin:0;flex:1;font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:.04em;}
+.gh b{font-family:var(--font-mono);font-weight:500;font-size:15px;}
+.gsub{display:flex;justify-content:space-between;gap:8px;font-family:var(--font-mono);font-size:11px;color:var(--v-mute);margin-top:2px;}
+.grp .gpop{top:-6px;right:calc(100% + 16px);transform:translateX(8px);}
+.grp .bar{margin:8px 0 0;height:4px;}
+
+/* поповеры у солнца и панелей */
+#nSun .pop-sun{left:0;right:0;width:auto;}
+
+/* ---------- журнал ---------- */
+.sec-h{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.sec-h h2{margin:0;font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.08em;text-transform:uppercase;}
+.sec-h .p-tabs{margin-left:auto;}
+.p-tab{border-radius:999px;background:rgba(20,28,56,.55);}
+.p-tab.active{background:#4FD1E7;border-color:#4FD1E7;box-shadow:0 0 18px rgba(79,209,231,.45);}
+.live{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--v-dim);}
+.live b{font-family:var(--font-mono);font-weight:500;color:var(--v-text);}
+.cov{font-size:11.5px;color:var(--v-mute);} .cov:empty{display:none;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+.kpi{position:relative;overflow:hidden;background:var(--glass);border:1px solid var(--v-line);border-radius:16px;padding:12px 14px 12px;min-width:0;}
+.kpi::after{content:'';position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--kc) 22%,transparent),transparent 70%);pointer-events:none;}
+.kpi:hover{border-color:color-mix(in srgb,var(--kc) 50%,transparent);}
+.kh{display:flex;align-items:center;gap:8px;}
+.kl{flex:1;min-width:0;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--v-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.kv{font-family:var(--font-mono);font-size:23px;font-weight:500;margin-top:4px;white-space:nowrap;color:var(--kc);text-shadow:0 0 18px color-mix(in srgb,var(--kc) 40%,transparent);}
+.ks{font-family:var(--font-mono);font-size:11px;color:var(--v-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.kbar{height:3px;border-radius:999px;background:rgba(0,0,0,.4);overflow:hidden;margin:9px 0 6px;}
+.kbar i{display:block;height:100%;background:var(--kc);box-shadow:0 0 8px var(--kc);transition:width .4s;}
+.kpi .i-btn{opacity:.55;} .kpi:hover .i-btn{opacity:1;}
+.d-wrap{background:var(--glass);backdrop-filter:blur(10px);}
+
+@media (max-width:1060px){
+  .grid{grid-template-columns:1fr;grid-template-areas:'core' 'src' 'store' 'cons';gap:16px;}
+  #fl{display:none;}
+  .grp .gpop{right:auto;left:0;top:calc(100% + 8px);}
+  .col-core{order:-1;}
+}
+@media (max-width:420px){ #nCore{width:290px;height:290px;} .core-stats{grid-template-columns:repeat(2,1fr);} .core-state{bottom:76px;} }
+</style>
+</head>
+<body>
+<div class="page">
+  <a class="back" href="index.html">← Все варианты</a>
+  <header class="hd"><div>
+    <div class="eyebrow">Индустриальный пояс · Энергия · Вариант 1</div>
+    <h1>Энергоядро</h1>
+    <p class="sub">Инвертор базы — живое ядро в центре: внешнее кольцо показывает обеспеченность, внутреннее — заряд аккумуляторов. Источники втекают слева, потребители питаются справа.</p>
+  </div></header>
+  <div id="invCtl"></div>
+  <div id="app"></div>
+</div>
+<script src="inv-core.js"></script>
+<script>
+(function(){
+var I=INV, L=null;
+var stCol={ok:'#4ADE9B',sag:'#F0B93D',black:'#F4557B'};
+
+function sun(c){
+  return '<div class="mod" id="nSun" style="--nc:#FFDD57"><div class="sunrow">'+
+    '<svg class="sunico" viewBox="0 0 56 56" aria-hidden="true"><defs><radialGradient id="sg"><stop offset="0" stop-color="#FFF4B8"/><stop offset="1" stop-color="#FFC93D"/></radialGradient></defs>'+
+      '<g class="sunrays" data-live="sunRays" opacity="'+Math.max(.1,c.sun).toFixed(2)+'"><path d="M28 3v8M28 45v8M3 28h8M45 28h8M10 10l5.7 5.7M40.3 40.3L46 46M46 10l-5.7 5.7M15.7 40.3L10 46" stroke="#FFDD57" stroke-width="3" stroke-linecap="round"/></g>'+
+      '<circle data-live="sunDisc" cx="28" cy="28" r="12" fill="'+(c.day?'url(#sg)':'#C9D2EE')+'" opacity="'+Math.max(.3,c.sun).toFixed(2)+'" style="filter:drop-shadow(0 0 '+(c.day?8:2)+'px #FFDD57)"/>'+
+      '<circle data-live="moonCut" cx="33" cy="23" r="11" fill="#10162C" opacity="'+(c.day?0:1)+'"/></svg>'+
+    '<div style="flex:1;min-width:0"><div class="mh"><h3>Солнце</h3>'+I.infoBtn('sun')+'</div>'+
+    '<div class="big" data-live="sunPct">'+Math.round(c.sun*100)+'%</div><div class="of" data-live="sunTxt">'+(c.day?'День':'Ночь')+' · '+c.clock+'</div></div></div>'+I.sunPopHtml()+'</div>';
+}
+function gen(g,c){
+  var k='g_'+g.id, extra='';
+  if(g.isSolar){ var t=''; for(var i=0;i<Math.min(g.count,30);i++) t+='<i></i>';
+    extra='<div class="tiles" data-live="'+k+'_tl" style="--to:'+(0.12+0.88*c.sun).toFixed(2)+'">'+t+'</div><div class="line"><span>Прогноз на сутки</span><b data-live="'+k+'_d">'+I.kwh(g.daily)+'</b></div>'; }
+  else extra='<div class="line"><span>Работает</span><b data-live="'+k+'_u">'+Math.round(g.pct)+'%</b></div>';
+  return '<div class="mod'+(g.now>0?' on':'')+'" data-live-class="'+k+'_c" id="nGen-'+g.id+'" style="--nc:'+g.color+'">'+
+    '<div class="mh"><h3>'+g.title+'</h3><span class="tag">×'+g.count+'</span>'+(g.isSolar?I.infoBtn('gen',g.id):'')+'</div>'+
+    '<div class="big" data-live="'+k+'_n">'+I.kw(g.now)+'</div><div class="of" data-live="'+k+'_o">из '+I.kw(g.nameplate)+' установленных</div>'+
+    '<div class="bar"><i data-live="'+k+'_b" style="width:'+g.pct.toFixed(1)+'%"></i></div>'+extra+I.genPopHtml(g)+'</div>';
+}
+function plan(p){
+  return '<div class="mod plan" id="nPlan-'+p.id+'" style="--nc:'+p.color+'"><div class="mh"><h3>'+p.title+'</h3></div><div class="big">'+I.kw(0)+'</div><div class="of">'+p.kind+' · '+p.note+'</div></div>';
+}
+function core(c){
+  var col=stCol[c.state], N=72, lit=Math.round(c.frac*N), ticks='';
+  for(var i=0;i<N;i++){ var a=(i/N*360-90)*Math.PI/180, a2=((i+0.62)/N*360-90)*Math.PI/180, r0=150, r1=166;
+    ticks+='<path d="M'+(170+r0*Math.cos(a)).toFixed(1)+' '+(170+r0*Math.sin(a)).toFixed(1)+' L'+(170+r1*Math.cos(a)).toFixed(1)+' '+(170+r1*Math.sin(a)).toFixed(1)+' L'+(170+r1*Math.cos(a2)).toFixed(1)+' '+(170+r1*Math.sin(a2)).toFixed(1)+' L'+(170+r0*Math.cos(a2)).toFixed(1)+' '+(170+r0*Math.sin(a2)).toFixed(1)+'Z" fill="'+(i<lit?col:'rgba(120,190,255,.10)')+'"'+(i<lit?' style="filter:drop-shadow(0 0 3px '+col+')"':'')+'/>'; }
+  var br=124, bc=2*Math.PI*br, bl=bc*c.pct/100, pct=c.frac*100;
+  return '<div class="core-stats">'+
+      '<div class="cs"><span>Потребность</span><b data-live="cDem">'+I.kw(c.demand)+'</b></div>'+
+      '<div class="cs"><span>Получено</span><b data-live="cSup">'+I.kw(c.supply)+'</b></div>'+
+      '<div class="cs"><span>Выработка</span><b data-live="cGen">'+I.kw(c.gen)+'</b></div>'+
+      '<div class="cs"><span>Акк. поток</span><b data-live="cFlow" style="color:'+(c.flow>0.01?'#4FD1E7':c.flow<-0.01?'#F0B93D':'inherit')+'">'+c.flowSigned+'</b></div>'+
+      '<div class="cs"><span>Автономия</span><b data-live="cAuto">'+c.autonomy+'</b></div>'+
+      '<div class="cs"><span>Сброс</span><b data-live="cCurt">'+(c.curtail>0.01?I.kw(c.curtail):'нет')+'</b></div>'+
+    '</div>'+
+    '<div id="nCore"><svg viewBox="0 0 340 340" aria-label="Инвертор базы">'+
+      '<defs><radialGradient id="cg" cx="50%" cy="45%"><stop offset="0" data-live="cg0" stop-color="'+col+'" stop-opacity=".55"/><stop offset=".55" data-live="cg1" stop-color="'+col+'" stop-opacity=".12"/><stop offset="1" stop-color="#04060F" stop-opacity="0"/></radialGradient>'+
+      '<linearGradient id="bg2" x1="0" x2="1"><stop offset="0" stop-color="#2CB5CC"/><stop offset="1" stop-color="#9BF0FF"/></linearGradient></defs>'+
+      '<circle cx="170" cy="170" r="168" fill="rgba(6,10,24,.85)" stroke="rgba(120,190,255,.16)"/>'+
+      '<g data-live="cTicks">'+ticks+'</g>'+
+      '<g class="core-spin"><circle cx="170" cy="170" r="140" fill="none" stroke="rgba(79,209,231,.25)" stroke-width="1" stroke-dasharray="2 7"/></g>'+
+      '<circle cx="170" cy="170" r="'+br+'" fill="none" stroke="rgba(79,209,231,.10)" stroke-width="8"/>'+
+      '<circle data-live="cBat" cx="170" cy="170" r="'+br+'" fill="none" stroke="'+(c.pct<15?'#F4557B':'url(#bg2)')+'" stroke-width="8" stroke-linecap="round" transform="rotate(-90 170 170)" stroke-dasharray="'+bl.toFixed(1)+' '+bc.toFixed(1)+'" style="filter:drop-shadow(0 0 6px #4FD1E7)"/>'+
+      '<g class="core-spin2"><path d="M170 58 A112 112 0 0 1 282 170" fill="none" stroke="rgba(179,136,255,.35)" stroke-width="1.5"/><path d="M170 282 A112 112 0 0 1 58 170" fill="none" stroke="rgba(179,136,255,.35)" stroke-width="1.5"/></g>'+
+      '<circle class="core-pulse" cx="170" cy="170" r="104" fill="url(#cg)"/>'+
+      '<circle cx="170" cy="170" r="86" fill="rgba(4,6,15,.7)" stroke="rgba(255,255,255,.08)"/>'+
+      '<text class="core-lbl" x="170" y="128" text-anchor="middle" font-size="11">ИНВЕРТОР</text>'+
+      '<text class="core-txt" data-live="cPct" x="170" y="178" text-anchor="middle" font-size="42" font-weight="500" style="fill:'+col+'">'+(pct<99.5&&pct>0?pct.toFixed(1):Math.round(pct))+'%</text>'+
+      '<text x="170" y="198" text-anchor="middle" font-size="11" fill="#9CA6C4" font-family="IBM Plex Sans">обеспечено</text>'+
+      '<text x="170" y="306" text-anchor="middle" font-size="10" fill="#4FD1E7" font-family="IBM Plex Mono" data-live="cBatT">заряд '+Math.round(c.pct)+'%</text>'+
+    '</svg><div class="core-state"><span class="pill" data-live="cState" style="color:'+col+'">'+c.stateLabel+'</span></div></div>';
+}
+function batt(c){
+  var cells=''; for(var i=0;i<10;i++){ var f=Math.max(0,Math.min(1,c.pct/10-i)); cells+='<i><b style="height:'+(f*100).toFixed(0)+'%"></b></i>'; }
+  return '<div class="mod batt on" id="nBat"><div class="mh"><h3>Аккумуляторы</h3><span class="tag">'+(c.batteries?'×'+c.batteries:'базовый блок')+'</span></div>'+
+    '<div class="big" data-live="bJ">'+I.J(c.stored)+'<small>('+I.kwh(c.stored)+')</small></div><div class="of" data-live="bOf">из '+I.J(c.cap)+' ('+I.kwh(c.cap)+')</div>'+
+    '<div class="cells'+(c.pct<15?' low':'')+'" data-live="bCells">'+cells+'</div><div class="of" data-live="bFlow">'+c.flowTxt+'</div></div>';
+}
+function curt(c){
+  return '<div class="mod curt'+(c.curtail>0.01?'':' idle')+'" data-live-class="curtC" id="nCurt"><h3>Сброс излишка</h3><span class="big" style="font-size:15px" data-live="curtV">'+(c.curtail>0.01?I.kw(c.curtail):'нет')+'</span></div>';
+}
+function grp(g){
+  return '<div class="mod grp has-gpop" tabindex="0" id="nGrp-'+g.id+'" style="--nc:'+g.color+'" aria-describedby="gpop-'+g.id+'">'+
+    '<div class="gh"><h3>'+g.name+'</h3><b data-live="gv_'+g.id+'">'+I.kw(g.sum)+'</b></div>'+
+    '<div class="gsub"><span>'+g.kinds+' '+I.plural(g.kinds,'вид','вида','видов')+' · '+g.units+' '+I.plural(g.units,'установка','установки','установок')+'</span><span data-live="gl_'+g.id+'">загрузка '+Math.round(g.load)+'%</span></div>'+
+    '<div class="bar"><i data-live="gb_'+g.id+'" style="width:'+g.load.toFixed(0)+'%"></i></div>'+I.groupPop(g)+'</div>';
+}
+function journal(c){
+  var jv=I.journal(I.UI.period);
+  return '<section class="journal" style="display:flex;flex-direction:column;gap:12px">'+
+    '<div class="sec-h"><h2>Журнал</h2><div class="p-tabs">'+I.periodTabs('data-en-period',I.UI.period)+'</div></div>'+
+    '<div class="live" data-live="jLive"><span>Сейчас: выработка <b>'+I.kw(c.gen)+'</b></span><span>нагрузка <b>'+I.kw(c.demand)+'</b></span><span>обеспечено <b>'+Math.round(c.frac*100)+'%</b></span><span>заряд <b>'+I.J(c.stored)+'</b></span></div>'+
+    '<div class="cov" data-live="jCov">'+jv.covNote+'</div>'+
+    '<div class="kpis">'+jv.list.map(function(k){
+      return '<div class="kpi" style="--kc:'+k.color+'" data-live="k_'+k.id+'"><div class="kh"><span class="kl">'+k.l+'</span><button type="button" class="i-btn" data-kpi-chart="'+k.id+'" title="График: '+k.l.toLowerCase()+'">i</button></div>'+
+        '<div class="kv">'+k.v+'</div><div class="ks">'+k.s+'</div><div class="kbar"><i style="width:'+(Math.max(0,Math.min(1,k.frac))*100).toFixed(1)+'%"></i></div>'+I.deltaHtml(k.d)+'</div>'; }).join('')+
+    '</div></section>';
+}
+function render(c){
+  return '<section class="scheme" id="scheme"><svg id="fl" aria-hidden="true"></svg><div class="grid">'+
+    '<div class="col-src">'+sun(c)+c.gens.map(function(g){ return gen(g,c); }).join('')+
+      '<div class="planrow">'+I.PLANNED.map(plan).join('')+'</div></div>'+
+    '<div class="col-core">'+core(c)+'</div>'+
+    '<div class="col-store">'+batt(c)+curt(c)+'</div>'+
+    '<div class="col-cons">'+(c.groups.length?c.groups.map(grp).join(''):'<div class="of">Пока никто не потребляет энергию.</div>')+'</div>'+
+  '</div></section>'+journal(c)+
+  '<section class="d-wrap"><table class="d-table" data-live="tbl">'+I.tableRows(c)+'</table></section>';
+}
+function build(c){
+  L=new I.FlowLayer(document.getElementById('fl'),document.getElementById('scheme'));
+  var circ={toCircle:.93}, from={fromCircle:.93,spreadTo:true};
+  I.stdFlows(L,{sun:'nSun',gen:function(id){ return 'nGen-'+id; },bus:'nCore',admin:'nPlan-admin',genset:'nPlan-genset',bat:'nBat',curt:'nCurt',grp:function(id){ return 'nGrp-'+id; }},c,
+    {genBus:circ,plan:circ,busGrp:from});
+}
+I.start({root:document.getElementById('app'),render:render,build:build,tick:function(c){ if(L) L.update(c); },layout:function(){ if(L) L.layout(); }});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Рабочие — 5 вариантов интерфейса</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="workers-core.css">
+<style>
+.g-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+.g-card{display:flex;flex-direction:column;gap:9px;background:linear-gradient(180deg,#171D33,#12172A);border:1px solid var(--border);border-left:4px solid var(--c);border-radius:14px;padding:16px 17px 17px;text-decoration:none;color:inherit;transition:border-color .15s,transform .12s;}
+.g-card:hover{transform:translateY(-2px);border-color:var(--border-strong);}
+.g-n{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:.06em;}
+.g-t{font-family:var(--font-display);font-weight:700;font-size:20px;}
+.g-d{font-size:12.5px;color:var(--text-secondary);line-height:1.55;}
+.g-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px;}
+.g-tags span{font-size:10.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--border-strong);color:var(--text-secondary);}
+.g-open{margin-top:4px;font-family:var(--font-display);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--c);}
+.note{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:13px;color:var(--text-secondary);line-height:1.6;}
+.note b{color:var(--text-primary);}
+</style>
+</head>
+<body>
+<div class="wk-page">
+  <div class="wk-eyebrow">Редизайн вкладки «Рабочие»</div>
+  <h1 class="wk-h1">5 вариантов интерфейса вкладки «Рабочие»</h1>
+  <p class="wk-sub">Это не про здания — про сам экран: статус отдела кадров, набор населения с других планет (жильё + ползунок бонусных пайков), и по каждому классу персонала — нужды быта, запасы, жильё и сервисные постройки. Все пять вариантов работают на одних и тех же демо-данных (<code>workers-data.js</code>), включая три иллюстративных класса сверх текущего «Разнорабочие» — так виднее, как интерфейс ведёт себя при росте числа тиров.</p>
+
+  <div class="note">Все страницы живые: ползунок бонусных пайков двигается, строки/карточки/плитки раскрываются по клику. Ничего не подключено к игре — это только черновики интерфейса для выбора направления перед переносом в <code>js/pages/4-workers.js</code>.</div>
+
+  <div class="g-grid">
+    <a class="g-card" href="1-dispatcher.html" style="--c:var(--tier0)"><div class="g-n">ВАРИАНТ 1</div><div class="g-t">Пульт диспетчера</div>
+      <div class="g-d">Плотная таблица классов со свёрнутыми строками и консолью набора слева. Максимум данных на экран, минимум скролла — для игрока, которому важны цифры и контроль.</div>
+      <div class="g-tags"><span>таблица</span><span>плотный</span><span>экспандеры</span></div><div class="g-open">Открыть →</div></a>
+    <a class="g-card" href="2-dossier.html" style="--c:var(--tier2)"><div class="g-n">ВАРИАНТ 2</div><div class="g-t">Кадровое досье</div>
+      <div class="g-d">Каждый класс — карточка-досье с кольцом продуктивности, переворачивается кликом и показывает постройки на обороте. Набор населения подан как «посадочный талон».</div>
+      <div class="g-tags"><span>карточки</span><span>флип</span><span>персонифицированный</span></div><div class="g-open">Открыть →</div></a>
+    <a class="g-card" href="3-map.html" style="--c:var(--tier0)"><div class="g-n">ВАРИАНТ 3</div><div class="g-t">Карта базы</div>
+      <div class="g-d">Жильё и постройки — плитки на условной карте базы по зонам-классам; клик открывает панель справа. «Шаттлы» переселенцев бегут сверху. Задел на вид базы сверху.</div>
+      <div class="g-tags"><span>пространственный</span><span>плитки</span><span>наглядный</span></div><div class="g-open">Открыть →</div></a>
+    <a class="g-card" href="4-ledger.html" style="--c:var(--tier1)"><div class="g-n">ВАРИАНТ 4</div><div class="g-t">Хроника набора</div>
+      <div class="g-d">Журнальная подача: сводка периода, таблица классов со спарклайнами штата и тренды, лента последних кадровых событий. Для игроков, которым важна динамика, а не снимок.</div>
+      <div class="g-tags"><span>периоды</span><span>спарклайны</span><span>события</span></div><div class="g-open">Открыть →</div></a>
+    <a class="g-card" href="5-compact.html" style="--c:var(--tier4)"><div class="g-n">ВАРИАНТ 5</div><div class="g-t">Компактная панель</div>
+      <div class="g-d">Один общий «индекс персонала» сверху, набор населения — в одну полоску, классы — аккордеоном, открыт всегда один. Для телефона и для тех, кто не хочет лишних решений на экране.</div>
+      <div class="g-tags"><span>аккордеон</span><span>мобильный</span><span>минимализм</span></div><div class="g-open">Открыть →</div></a>
+  </div>
+</div>
+</body>
+</html>

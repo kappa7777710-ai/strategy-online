@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Инвертор: 5 вариантов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="inv-base.css">
+<style>
+body{background:radial-gradient(60% 40% at 50% 0%,rgba(79,209,231,.08),transparent 70%),#07090F;}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--v-mute);}
+h1{margin:2px 0 0;font-family:var(--font-display);font-weight:700;font-size:34px;letter-spacing:.03em;}
+.sub{margin:6px 0 0;color:var(--v-dim);font-size:14px;max-width:80ch;}
+.keep{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px 18px;font-size:13px;color:var(--v-dim);}
+.keep b{color:var(--v-text);font-weight:600;}
+.keep ul{margin:8px 0 0;padding-left:18px;columns:2;column-gap:32px;} .keep li{margin:3px 0;break-inside:avoid;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:16px;}
+.card{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;transition:border-color .2s,transform .2s;}
+.card:hover{border-color:var(--tier0);transform:translateY(-2px);}
+.card:focus-visible{outline:2px solid var(--tier0);outline-offset:3px;}
+.shot{position:relative;aspect-ratio:16/10;overflow:hidden;background:#000;border-bottom:1px solid var(--border);}
+.shot iframe{position:absolute;left:0;top:0;width:1440px;height:900px;border:0;transform-origin:0 0;pointer-events:none;}
+.body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;}
+.n{font-family:var(--font-mono);font-size:11px;color:var(--v-mute);letter-spacing:.08em;}
+.t{font-family:var(--font-display);font-weight:700;font-size:22px;letter-spacing:.02em;}
+.d{font-size:13px;color:var(--v-dim);}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.tags span{font-size:11px;padding:2px 9px;border-radius:999px;border:1px solid var(--border-strong);color:var(--v-dim);}
+@media (max-width:700px){ .keep ul{columns:1;} .grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="eyebrow">Индустриальный пояс · Вкладка «Энергия»</div>
+    <h1>Инвертор: 5 вариантов оформления</h1>
+    <p class="sub">Концепция та же — инвертор в центре распределяет энергию от источников к потребителям, аккумуляторам и сбросу. Меняется только подача. Все страницы живые: идёт игровое время, сверху можно выбрать базу (Старт / Развитая / Промышленная), скорость и время суток.</p>
+  </header>
+  <section class="keep"><b>Механика сохранена во всех пяти:</b>
+    <ul>
+      <li>Солнце: % освещённости, день/ночь, часы, «i» → «Профиль суток» (циферблат)</li>
+      <li>Солнечные панели: сейчас / установлено, плитки панелей, прогноз на сутки, «i» → «Выработка по часам»</li>
+      <li>ТЭС: выработка и загрузка; Админцентр и Генератор — заглушки «ещё не подключён/построен»</li>
+      <li>Инвертор: обеспеченность %, Норма / Просадка / Блэкаут, потребность, получено, выработка, поток аккумуляторов, автономия</li>
+      <li>Аккумуляторы: заряд в Дж и кВт·ч, ёмкость, «полон/пуст через…»; сброс излишка</li>
+      <li>Группы потребителей: мощность, виды и установки, загрузка, наведение → список «Сейчас добывается…»</li>
+      <li>Живые потоки энергии: толщина и скорость зависят от мощности, разряд идёт обратно</li>
+      <li>Журнал: 5 периодов, 9 карточек со сравнением к прошлому периоду, «i» → график с 6 периодами</li>
+      <li>Таблица источников и потребителей с долями</li>
+    </ul>
+  </section>
+  <section class="grid">
+    <a class="card" href="1-core.html"><div class="shot"><iframe src="1-core.html" loading="lazy" tabindex="-1" title="Превью варианта 1"></iframe></div>
+      <div class="body"><div class="n">ВАРИАНТ 1</div><div class="t">Энергоядро</div>
+      <div class="d">Инвертор — светящееся ядро: внешнее кольцо из 72 сегментов показывает обеспеченность, внутреннее — заряд. Стеклянные модули, звёздный фон, потоки‑частицы.</div>
+      <div class="tags"><span>sci‑fi</span><span>стекло</span><span>ядро в центре</span></div></div></a>
+    <a class="card" href="2-switchboard.html"><div class="shot"><iframe src="2-switchboard.html" loading="lazy" tabindex="-1" title="Превью варианта 2"></iframe></div>
+      <div class="body"><div class="n">ВАРИАНТ 2</div><div class="t">Распределительный щит</div>
+      <div class="d">Шкаф с вводными приборами и стрелками, стоечный инвертор с янтарными табло и лампами режимов, медная шина и автоматы потребителей с рычагами.</div>
+      <div class="tags"><span>индустриальный</span><span>приборы</span><span>тактильный</span></div></div></a>
+    <a class="card" href="3-hex.html"><div class="shot"><iframe src="3-hex.html" loading="lazy" tabindex="-1" title="Превью варианта 3"></iframe></div>
+      <div class="body"><div class="n">ВАРИАНТ 3</div><div class="t">Тактическая сеть</div>
+      <div class="d">HUD космической стратегии: инвертор — командный гекс, вокруг соты источников и потребителей, лучи‑шевроны, строка телеметрии сверху.</div>
+      <div class="tags"><span>HUD</span><span>соты</span><span>стратегия</span></div></div></a>
+    <a class="card" href="4-flow.html"><div class="shot"><iframe src="4-flow.html" loading="lazy" tabindex="-1" title="Превью варианта 4"></iframe></div>
+      <div class="body"><div class="n">ВАРИАНТ 4</div><div class="t">Поток энергии</div>
+      <div class="d">Санки‑диаграмма: толщина каждой ленты — кВт прямо сейчас, инвертор — призма посередине. В журнале у каждой карточки спарклайн за период.</div>
+      <div class="tags"><span>современный</span><span>data‑viz</span><span>пропорции</span></div></div></a>
+    <a class="card" href="5-pcb.html"><div class="shot"><iframe src="5-pcb.html" loading="lazy" tabindex="-1" title="Превью варианта 5"></iframe></div>
+      <div class="body"><div class="n">ВАРИАНТ 5</div><div class="t">Плата базы</div>
+      <div class="d">Печатная плата: инвертор — главный чип, источники и потребители — микросхемы, аккумуляторы — конденсаторы, сброс — резистор. Периоды журнала — DIP‑переключатели.</div>
+      <div class="tags"><span>игровой</span><span>схемотехника</span><span>золотые дорожки</span></div></div></a>
+  </section>
+</div>
+<script>
+function fit(){ document.querySelectorAll('.shot').forEach(function(s){ var f=s.querySelector('iframe'); f.style.transform='scale('+(s.clientWidth/1440)+')'; }); }
+window.addEventListener('resize',fit); fit();
+document.querySelectorAll('.shot iframe').forEach(function(f){ f.addEventListener('load',function(){ try{ var s=f.contentDocument.getElementById('scheme'); if(s) f.contentWindow.scrollTo(0,s.getBoundingClientRect().top+f.contentWindow.scrollY-(s.classList.contains('map')?110:16)); }catch(e){} }); });
+</script>
+</body>
+</html>

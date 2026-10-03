@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Энергосистема · Вариант 1 · Диспетчерская</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="energy-core.css">
+<style>
+/* Вариант 1 — «Диспетчерская»: плотный инженерный дашборд в духе окна «Информация об электрической сети». */
+.d-top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.d-card{background:linear-gradient(180deg,#171D33,#12172A);border:1px solid var(--border);border-radius:12px;padding:12px 14px 13px;display:flex;flex-direction:column;gap:9px;min-width:0;}
+.d-title{font-family:var(--font-display);font-weight:700;font-size:17px;letter-spacing:.02em;display:flex;align-items:center;gap:7px;}
+.d-info{width:15px;height:15px;border-radius:50%;background:var(--tier0);color:#0A0D18;font-size:10px;font-weight:700;display:inline-grid;place-items:center;font-style:normal;cursor:help;}
+.d-bar{position:relative;height:36px;border-radius:7px;background:#0B1022;box-shadow:inset 0 2px 6px rgba(0,0,0,.65);overflow:hidden;border:1px solid #070A16;}
+.d-fill{position:absolute;left:0;top:0;bottom:0;width:0;transition:width .35s;}
+.d-fill.sup{background:linear-gradient(180deg,#3FE85A,#22B93C);}
+.d-fill.prod{background:linear-gradient(180deg,#F4D34A,#C79B12);}
+.d-fill.batt{background:linear-gradient(180deg,#5BE2F5,#1D9CB5);}
+.d-fill.warn{background:linear-gradient(180deg,#F0B93D,#C08417);}
+.d-fill.bad{background:linear-gradient(180deg,#F4557B,#B8304F);}
+.d-val{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:14px;font-weight:500;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8);white-space:nowrap;}
+.d-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--text-secondary);align-items:center;}
+.d-meta b{color:var(--text-primary);font-weight:500;font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+.d-badge{font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:5px;}
+.d-badge.ok{background:rgba(74,222,155,.16);color:var(--good);}
+.d-badge.warn{background:rgba(240,185,61,.16);color:#F0B93D;}
+.d-badge.bad{background:rgba(244,85,123,.16);color:var(--bad);}
+.d-badge.info{background:rgba(79,209,231,.14);color:var(--tier0);}
+
+.d-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;}
+.d-kpi{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:9px 12px;}
+.d-kpi-l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);}
+.d-kpi-v{font-family:var(--font-mono);font-size:18px;font-weight:500;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.d-kpi-s{font-size:11px;color:var(--text-secondary);margin-top:1px;font-family:var(--font-mono);}
+
+.d-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.d-panel{background:#0F1424;border:1px solid var(--border);border-radius:12px;padding:10px 12px 8px;display:flex;flex-direction:column;gap:8px;min-width:0;}
+.d-panel .en-legend{min-height:26px;}
+.d-ph{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.d-ph h2{font-family:var(--font-display);font-weight:700;font-size:16px;margin:0;letter-spacing:.02em;flex:1;min-width:120px;}
+.d-sel{font:inherit;font-size:12.5px;color:var(--text-primary);background:var(--card);border:1px solid var(--border-strong);border-radius:7px;padding:5px 26px 5px 9px;cursor:pointer;appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,#9CA6C4 50%),linear-gradient(135deg,#9CA6C4 50%,transparent 50%);background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%;background-size:5px 5px;background-repeat:no-repeat;}
+.d-foot{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:11.5px;color:var(--text-secondary);padding-top:6px;border-top:1px solid var(--border);margin-top:auto;}
+.d-foot b{color:var(--text-primary);font-family:var(--font-mono);font-weight:500;}
+
+.d-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:#0F1424;}
+.d-table{width:100%;border-collapse:collapse;min-width:760px;font-size:12.5px;}
+.d-table th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);font-weight:500;text-align:right;padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.d-table th:first-child,.d-table td:first-child{text-align:left;}
+.d-table td{padding:7px 12px;text-align:right;border-bottom:1px solid rgba(41,49,80,.55);font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.d-table td:first-child{font-family:var(--font-body);}
+.d-table tr.grp td{background:#131A30;font-family:var(--font-display);font-weight:600;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-secondary);text-align:left;}
+.d-table tr.tot td{font-weight:500;color:var(--text-primary);background:#131A30;border-bottom:none;}
+.d-dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:8px;vertical-align:-1px;}
+.d-mini{display:inline-block;width:70px;height:6px;border-radius:3px;background:#0B1022;vertical-align:middle;margin-left:8px;overflow:hidden;}
+.d-mini i{display:block;height:100%;}
+.dim{color:var(--text-muted);}
+
+@media (max-width:980px){ .d-top{grid-template-columns:1fr;} .d-charts{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="en-page">
+  <header>
+    <a class="en-back" href="index.html">← Все варианты</a>
+    <div class="en-eyebrow">Вариант 1 · Диспетчерская</div>
+    <h1 class="en-h1">Информация об энергосистеме</h1>
+    <p class="en-sub">Три главных показателя сверху, ниже — история за любой период и построчный учёт каждого источника и потребителя. Ближе всего к окну электросети из Factorio.</p>
+  </header>
+
+  <div id="ctl"></div>
+
+  <section class="d-top">
+    <div class="d-card">
+      <div class="d-title">Обеспечение <i class="d-info" title="Сколько энергии база получает от того, что ей нужно прямо сейчас. Если меньше 100% — установки сбавляют ход.">i</i></div>
+      <div class="d-bar"><i class="d-fill sup" id="supFill"></i><span class="d-val" id="supVal">—</span></div>
+      <div class="d-meta"><span>Обеспечено <b id="supPct">—</b></span><span id="supBadge" class="d-badge ok">Норма</span><span id="supNote"></span></div>
+    </div>
+    <div class="d-card">
+      <div class="d-title">Производство <i class="d-info" title="Текущая выработка солнечных панелей относительно их установленной мощности.">i</i></div>
+      <div class="d-bar"><i class="d-fill prod" id="prodFill"></i><span class="d-val" id="prodVal">—</span></div>
+      <div class="d-meta"><span>Солнце <b id="prodSun">—</b></span><span>Панелей <b id="prodCnt">—</b></span><span id="prodNote"></span></div>
+    </div>
+    <div class="d-card">
+      <div class="d-title">Заряд аккумулятора <i class="d-info" title="Запас энергии в аккумуляторах базы. 1 кВт·ч = 3,6 МДж.">i</i></div>
+      <div class="d-bar"><i class="d-fill batt" id="batFill"></i><span class="d-val" id="batVal">—</span></div>
+      <div class="d-meta"><span id="batFlow"></span><span id="batEta"></span><span id="batKwh" class="dim"></span></div>
+    </div>
+  </section>
+
+  <div id="periods"></div>
+  <section class="d-strip" id="strip"></section>
+
+  <section class="d-charts">
+    <div class="d-panel">
+      <div class="d-ph"><h2>Обеспечение</h2></div>
+      <div class="en-legend" id="lgSup"></div>
+      <div id="chSup"></div>
+      <div class="d-foot" id="ftSup"></div>
+    </div>
+    <div class="d-panel">
+      <div class="d-ph"><h2>Потребление</h2>
+        <select class="d-sel" id="consMode" aria-label="Режим отображения потребления">
+          <option value="sep">Всё (раздельно)</option><option value="sum">Всё (сумма)</option><option value="grp">По группам</option>
+        </select></div>
+      <div class="en-legend" id="lgCons"></div>
+      <div id="chCons"></div>
+      <div class="d-foot" id="ftCons"></div>
+    </div>
+    <div class="d-panel">
+      <div class="d-ph"><h2>Производство</h2></div>
+      <div class="en-legend" id="lgProd"></div>
+      <div id="chProd"></div>
+      <div class="d-foot" id="ftProd"></div>
+    </div>
+    <div class="d-panel">
+      <div class="d-ph"><h2>Заряд аккумулятора</h2></div>
+      <div class="en-legend" id="lgBat"></div>
+      <div id="chBat"></div>
+      <div class="d-foot" id="ftBat"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="d-table-wrap"><table class="d-table" id="tbl"></table></div>
+  </section>
+</div>
+
+<script src="energy-core.js"></script>
+<script>
+(function(){
+var $=function(id){ return document.getElementById(id); };
+EN.mountControls($('ctl'));
+EN.mountPeriods($('periods'));
+
+/* ---------- шапка: обеспечение / производство / заряд ---------- */
+function live(){
+  var c=EN.cur, F=EN.fmt;
+  // обеспечение
+  var frac=c.frac, dem=F.power(c.demand), sup=F.power(c.supply);
+  $('supFill').style.width=(frac*100).toFixed(1)+'%';
+  $('supFill').className='d-fill '+(frac>=0.999?'sup':frac>=0.5?'warn':'bad');
+  $('supVal').textContent=sup.text+' / '+dem.text;
+  $('supPct').textContent=F.pct(frac*100,frac<0.995&&frac>0?1:0);
+  var b=$('supBadge'); b.className='d-badge '+(frac>=0.999?'ok':frac>=0.5?'warn':'bad');
+  b.textContent= frac>=0.999?'Норма' : frac<0.02?'Блэкаут' : frac>=0.5?'Просадка':'Дефицит';
+  $('supNote').textContent= frac<0.999?'Не хватает '+F.power(c.demand-c.supply).text : (c.flow<-1?'Покрыто из аккумуляторов':'');
+  // производство
+  var np=c.nameplate>0?c.gen/c.nameplate:0;
+  $('prodFill').style.width=(np*100).toFixed(1)+'%';
+  $('prodVal').textContent=F.power(c.gen).text+' / '+F.power(c.nameplate).text;
+  $('prodSun').textContent=F.pct(c.sun*100);
+  $('prodCnt').textContent=EN.counts.solar;
+  $('prodNote').textContent= c.curtail>1?'Сброс излишка '+F.power(c.curtail).text : (c.sun<=0?'Ночь — панели не работают':'');
+  // аккумулятор
+  var st=F.stored(c.stored), cp=F.stored(c.cap);
+  $('batFill').style.width=c.pct.toFixed(1)+'%';
+  $('batFill').className='d-fill '+(c.pct<15?'bad':'batt');
+  $('batVal').textContent=st.text+' / '+cp.text;
+  var fl=$('batFlow');
+  if(Math.abs(c.flow)<1){ fl.innerHTML='<span class="d-badge info">Без изменений</span>'; $('batEta').textContent=''; }
+  else if(c.flow>0){ fl.innerHTML='<span class="d-badge ok">Заряд</span> <b>+'+F.power(c.flow).text+'</b>'; $('batEta').innerHTML='Полон через <b>'+F.dur((c.cap-c.stored)/c.flow)+'</b>'; }
+  else { fl.innerHTML='<span class="d-badge warn">Разряд</span> <b>−'+F.power(-c.flow).text+'</b>'; $('batEta').innerHTML='Пуст через <b>'+F.dur(c.stored/-c.flow)+'</b>'; }
+  $('batKwh').textContent='= '+F.energy(c.stored).text+' из '+F.energy(c.cap).text;
+}
+
+/* ---------- графики ---------- */
+var chSup=EN.chart($('chSup'),{kind:'line',unit:'power',height:230,
+  series:[{key:'supply',label:'Получено',color:'#4ADE9B',fill:true},{key:'demand',label:'Потребность',color:'#B9C2E0',dash:[4,3],width:1.3}],
+  between:{top:'demand',bottom:'supply',color:'#F4557B'}});
+var chProd=EN.chart($('chProd'),{kind:'line',unit:'power',height:230,
+  series:[{key:'gen',label:'Выработка',color:'#FFDD57',fill:true},{key:'curtail',label:'Сброс излишка',color:'#8C93B0',width:1.2},
+          {key:'nameplate',label:'Установленная мощность',color:'#FFDD57',dash:[5,4],width:1.1}]});
+var chBat=EN.chart($('chBat'),{kind:'line',unit:'joule',height:230,mode:'mean',
+  series:[{key:'stored',label:'Заряд',color:'#4FD1E7',fill:true},{key:'capKWh',label:'Ёмкость',color:'#4FD1E7',dash:[5,4],width:1.1}]});
+var consSeries=[], chCons=EN.chart($('chCons'),{kind:'line',unit:'power',height:230,series:[]});
+function activeConsumers(){ return EN.CONSUMERS.filter(function(c){ return EN.counts[c.id]>0; }); }
+function buildCons(){
+  var mode=$('consMode').value, o=chCons.o;
+  if(mode==='grp'){ o.kind='area'; o.stack=true; consSeries=EN.GROUPS.map(function(g){ return {key:'g_'+g.id,label:g.name,color:g.color}; }); }
+  else if(mode==='sum'){ o.kind='area'; o.stack=true; consSeries=activeConsumers().map(function(c){ return {key:c.id,label:c.name,color:c.color}; }); }
+  else { o.kind='line'; o.stack=false; consSeries=activeConsumers().map(function(c){ return {key:c.id,label:c.name,color:c.color}; }); }
+  o.series=consSeries;
+  EN.legend($('lgCons'),consSeries,function(){ chCons.draw(); });
+  chCons.draw();
+}
+$('consMode').onchange=buildCons;
+function legends(){
+  EN.legend($('lgSup'),chSup.o.series,function(){ chSup.draw(); });
+  EN.legend($('lgProd'),chProd.o.series,function(){ chProd.draw(); });
+  EN.legend($('lgBat'),chBat.o.series,function(){ chBat.draw(); });
+}
+
+/* ---------- итоги и таблица (тяжёлые вычисления — не чаще 3 раз в секунду) ---------- */
+function kpi(l,v,s){ return '<div class="d-kpi"><div class="d-kpi-l">'+l+'</div><div class="d-kpi-v">'+v+'</div><div class="d-kpi-s">'+(s||'&nbsp;')+'</div></div>'; }
+function heavy(){
+  var p=EN.period, F=EN.fmt, ph=EN.PMAP[p].phrase;
+  var g=EN.stat('gen',p), d=EN.stat('demand',p), s=EN.stat('supply',p), cu=EN.stat('curtail',p), b=EN.stat('stored',p);
+  var ratio=d.sum>0?s.sum/d.sum*100:100, defMin=EN.deficitMinutes(p);
+  $('strip').innerHTML=
+    kpi('Выработано',F.energy(g.sum).text,ph)+kpi('Потреблено',F.energy(s.sum).text,'из '+F.energy(d.sum).text+' нужных')+
+    kpi('Обеспеченность',F.pct(ratio,1),'дефицит '+F.dur(defMin/60))+kpi('Сброшено излишка',F.energy(cu.sum).text,F.pct(g.sum>0?cu.sum/g.sum*100:0)+' выработки')+
+    kpi('Пик выработки',F.power(g.max).text,'средняя '+F.power(g.mean).text)+kpi('Пик нагрузки',F.power(d.max).text,'средняя '+F.power(d.mean).text)+
+    kpi('Заряд за период','<span style="font-size:14px;white-space:normal;line-height:1.35">от '+F.stored(b.min).text+'<br>до '+F.stored(b.max).text+'</span>','сейчас '+F.stored(EN.cur.stored).text);
+  $('ftSup').innerHTML='<span>Средняя потребность <b>'+F.power(d.mean).text+'</b></span><span>Пик <b>'+F.power(d.max).text+'</b></span><span>Не хватало <b>'+F.energy(d.sum-s.sum).text+'</b></span>';
+  $('ftProd').innerHTML='<span>Всего <b>'+F.energy(g.sum).text+'</b></span><span>Средняя <b>'+F.power(g.mean).text+'</b></span><span>Пик <b>'+F.power(g.max).text+'</b></span>';
+  $('ftBat').innerHTML='<span>Среднее <b>'+F.stored(b.mean).text+'</b></span><span>Минимум <b>'+F.stored(b.min).text+'</b></span><span>Максимум <b>'+F.stored(b.max).text+'</b></span>';
+  $('ftCons').innerHTML='<span>Всего <b>'+F.energy(s.sum).text+'</b></span><span>Средняя <b>'+F.power(s.mean).text+'</b></span><span>Пик <b>'+F.power(s.max).text+'</b></span>';
+  chSup.draw(); chProd.draw(); chBat.draw(); chCons.draw();
+  table(p,s.sum);
+}
+function table(p,totalUsed){
+  var F=EN.fmt, c=EN.cur, rows='';
+  rows+='<thead><tr><th>Источник / потребитель</th><th>Кол-во</th><th>Установлено</th><th>Сейчас</th><th>Загрузка</th><th>Энергия '+EN.PMAP[p].phrase+'</th><th>Доля</th></tr></thead><tbody>';
+  var gs=EN.stat('gen',p), np=EN.counts.solar*EN.SOLAR_KW;
+  rows+='<tr class="grp"><td colspan="7">Источники</td></tr>';
+  rows+='<tr><td><i class="d-dot" style="background:#FFDD57"></i>Солнечные панели</td><td>'+EN.counts.solar+'</td><td>'+F.power(np).text+'</td><td>'+F.power(c.gen).text+'</td><td>'+F.pct(np>0?c.gen/np*100:0)+'</td><td>'+F.energy(gs.sum).text+'</td><td class="dim">—</td></tr>';
+  EN.GROUPS.forEach(function(gr){
+    var list=activeConsumers().filter(function(x){ return x.group===gr.id; }); if(!list.length) return;
+    rows+='<tr class="grp"><td colspan="7">'+gr.name+'</td></tr>';
+    list.forEach(function(x){
+      var inst=EN.counts[x.id]*x.kw, now=c.cons[x.id]||0, e=EN.stat(x.id,p).sum, sh=totalUsed>0?e/totalUsed*100:0;
+      rows+='<tr><td><i class="d-dot" style="background:'+x.color+'"></i>'+x.name+'</td><td>'+EN.counts[x.id]+'</td><td>'+F.power(inst).text+'</td><td>'+F.power(now).text+'</td><td>'+F.pct(inst>0?now/inst*100:0)+'</td><td>'+F.energy(e).text+'</td><td>'+F.pct(sh,1)+'<span class="d-mini"><i style="width:'+Math.min(100,sh*2.2)+'%;background:'+x.color+'"></i></span></td></tr>';
+    });
+  });
+  var instAll=activeConsumers().reduce(function(a,x){ return a+EN.counts[x.id]*x.kw; },0), cntAll=activeConsumers().reduce(function(a,x){ return a+EN.counts[x.id]; },0);
+  rows+='<tr class="tot"><td>Итого потребители</td><td>'+cntAll+'</td><td>'+F.power(instAll).text+'</td><td>'+F.power(c.supply).text+'</td><td>'+F.pct(instAll>0?c.supply/instAll*100:0)+'</td><td>'+F.energy(totalUsed).text+'</td><td>100%</td></tr></tbody>';
+  $('tbl').innerHTML=rows;
+}
+
+/* ---------- цикл обновления ---------- */
+var dirty=true, lastHeavy=0;
+EN.on('data',function(){ dirty=true; });
+EN.on('period',function(){ dirty=true; lastHeavy=0; });
+EN.on('reset',function(){ dirty=true; lastHeavy=0; buildCons(); legends(); });
+EN.on('frame',function(){
+  live();
+  var now=performance.now();
+  if(dirty&&now-lastHeavy>350){ dirty=false; lastHeavy=now; heavy(); }
+});
+EN.start();
+})();
+</script>
+</body>
+</html>

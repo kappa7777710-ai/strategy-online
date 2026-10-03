@@ -1,0 +1,1015 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Энергосистема · Тестовая страница (синтез)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>/* Общие стили демо-страниц энергосистемы: палитра игры (css/base.css), панель демо-управления,
+   вкладки периодов, подсказки графиков. */
+:root{
+  color-scheme:dark;
+  --bg:#0A0D18;--panel:#12172A;--card:#171D33;--card-hover:#1E2640;--border:#293150;--border-strong:#3A4468;
+  --text-primary:#E9ECF7;--text-secondary:#9CA6C4;--text-muted:#606A8A;
+  --tier0:#4FD1E7;--tier1:#F2A93B;--energy:#FFDD57;--water:#49B8F0;--good:#4ADE9B;--bad:#F4557B;--skill:#B388FF;--ink:#0A0D18;
+  --supply:#4ADE9B;--prod:#FFDD57;--batt:#4FD1E7;--demand:#B9C2E0;
+  --en-grid:rgba(255,255,255,.07);--en-night:rgba(4,7,20,.55);
+  --font-display:'Rajdhani',sans-serif;--font-body:'IBM Plex Sans',sans-serif;--font-mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{margin:0;background:var(--bg);color:var(--text-primary);font-family:var(--font-body);font-size:14px;line-height:1.45;}
+button{font:inherit;color:inherit;}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+.en-page{max-width:1240px;margin:0 auto;padding:22px 20px 64px;display:flex;flex-direction:column;gap:16px;}
+.en-eyebrow{font-size:11px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--text-muted);}
+.en-h1{font-family:var(--font-display);font-weight:700;font-size:30px;margin:2px 0 0;letter-spacing:.01em;}
+.en-sub{font-size:13px;color:var(--text-secondary);margin:4px 0 0;max-width:78ch;}
+
+/* панель демо-управления */
+.en-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;padding:9px 14px;border-radius:12px;background:linear-gradient(180deg,#1A2143,#0E1328);border:1px solid #2B3563;}
+.en-ctl-g{display:flex;align-items:center;gap:9px;}
+.en-ctl-l{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap;}
+.en-btns{display:inline-flex;gap:4px;flex-wrap:wrap;}
+.en-btn{font-family:var(--font-mono);font-size:12px;background:var(--card);color:var(--text-secondary);border:1px solid var(--border);border-radius:7px;padding:5px 10px;cursor:pointer;}
+.en-btn:hover{color:var(--text-primary);border-color:var(--border-strong);}
+.en-btn.active{background:var(--skill);border-color:var(--skill);color:#0A0D18;}
+.en-btn:focus-visible,.en-tab:focus-visible{outline:2px solid var(--tier0);outline-offset:2px;}
+.en-ctl-clock{margin-left:auto;}
+.en-ctl-clock b{font-size:14px;font-weight:500;color:var(--text-primary);}
+
+/* вкладки периодов */
+.en-tabs{display:flex;gap:4px;flex-wrap:wrap;}
+.en-tab{font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:.03em;text-transform:uppercase;padding:8px 16px;border-radius:8px;cursor:pointer;
+  background:var(--card);border:1px solid var(--border);color:var(--text-secondary);transition:background .15s,color .15s,border-color .15s;}
+.en-tab:hover{color:var(--text-primary);border-color:var(--border-strong);}
+.en-tab.active{background:var(--tier1);border-color:var(--tier1);color:#0A0D18;}
+
+.en-legend{display:flex;flex-wrap:wrap;gap:5px;}
+.en-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;padding:3px 9px 3px 7px;border-radius:999px;cursor:pointer;background:var(--card);border:1px solid var(--border);color:var(--text-secondary);}
+.en-chip i{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+
+@media (max-width:640px){
+  .en-page{padding:14px 12px 48px;}
+  .en-h1{font-size:24px;}
+  .en-ctl{padding:9px 10px;gap:8px 14px;}
+  .en-ctl-clock{margin-left:0;}
+  .en-tab{padding:7px 11px;font-size:13px;}
+}
+@media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important;} }
+</style>
+<style>
+/* ---- Мнемосхема (из варианта 2): главный битборд с живыми потоками ---- */
+.m-scheme{position:relative;border-radius:16px;padding:22px 20px;border:1px solid #173A4A;
+  background:radial-gradient(120% 90% at 20% 0%,rgba(79,209,231,.09),transparent 60%),
+    repeating-linear-gradient(0deg,rgba(79,209,231,.045) 0 1px,transparent 1px 28px),repeating-linear-gradient(90deg,rgba(79,209,231,.045) 0 1px,transparent 1px 28px),#070B18;}
+.m-grid{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,190px) minmax(0,1.25fr);grid-template-areas:'src bus cons' 'bat bus cons';gap:26px 70px;align-items:stretch;}
+.m-src{grid-area:src;display:flex;flex-direction:column;gap:34px;}
+.m-bat{grid-area:bat;display:flex;flex-direction:column;gap:22px;}
+.m-bus{grid-area:bus;}
+.m-cons{grid-area:cons;display:flex;flex-direction:column;gap:14px;justify-content:center;}
+.m-flows{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible;}
+.m-flow-base{fill:none;stroke-linecap:round;opacity:.16;}
+.m-flow-dash{fill:none;stroke-linecap:round;stroke-dasharray:1 12;animation:m-dash 1s linear infinite;}
+.m-flow-dash.rev{animation-direction:reverse;}
+@keyframes m-dash{to{stroke-dashoffset:-13;}}
+@keyframes m-spin{to{transform:rotate(360deg);}}
+
+.m-node{position:relative;background:linear-gradient(180deg,rgba(23,29,51,.96),rgba(15,20,36,.96));border:1px solid var(--border-strong);border-radius:12px;padding:11px 13px;cursor:pointer;text-align:left;color:inherit;width:100%;font:inherit;
+  transition:border-color .15s,box-shadow .15s,transform .1s;}
+.m-node:hover{border-color:var(--nc,var(--tier0));}
+.m-node:focus-visible{outline:2px solid var(--tier0);outline-offset:2px;}
+.m-nh{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.m-nh h3{margin:0;font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:.02em;flex:1;}
+.m-tag{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);}
+.m-big{font-family:var(--font-mono);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.1;}
+.m-of{font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);}
+.m-line{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--text-secondary);padding:1px 0;}
+.m-line b{font-family:var(--font-mono);font-weight:500;color:var(--text-primary);font-variant-numeric:tabular-nums;}
+.m-bar{height:6px;border-radius:3px;background:#0B1022;overflow:hidden;margin:7px 0 5px;box-shadow:inset 0 1px 3px rgba(0,0,0,.6);}
+.m-bar i{display:block;height:100%;background:var(--nc);transition:width .35s;}
+.m-sun{--nc:#FFDD57;position:relative;overflow:visible;cursor:default;}
+.m-info{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid var(--border-strong);color:var(--text-secondary);font-family:var(--font-mono);font-style:italic;font-weight:700;font-size:11px;display:inline-grid;place-items:center;cursor:pointer;flex-shrink:0;}
+.m-info:hover{color:var(--text-primary);border-color:var(--energy);}
+.m-info[aria-expanded="true"]{background:var(--energy);border-color:var(--energy);color:#0A0D18;}
+.m-dialpop{position:absolute;top:calc(100% + 10px);left:0;width:min(440px,88vw);z-index:30;background:linear-gradient(180deg,#151B31,#0F1424);border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px 10px;box-shadow:0 16px 44px rgba(0,0,0,.55);cursor:default;}
+.m-dialpop[hidden]{display:none;}
+.m-dialpop-head{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
+.m-dialpop-head h4{margin:0;flex:1;font-family:var(--font-display);font-weight:700;font-size:14px;letter-spacing:.02em;}
+.m-dialpop-close{width:22px;height:22px;border-radius:6px;background:none;border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;font-size:14px;line-height:1;display:inline-grid;place-items:center;flex-shrink:0;}
+.m-dialpop-close:hover{color:var(--text-primary);border-color:var(--border-strong);}
+.m-dialpop-note{margin:0 0 8px;font-size:10.5px;color:var(--text-secondary);}
+.m-dialpop .c-tools{margin:0 0 8px;}
+.m-dialpop .c-read{min-height:0;margin-top:8px;padding:7px 9px;font-size:11.5px;}
+@media (max-width:640px){ .m-dialpop{width:92vw;} }
+.m-solar{--nc:#FFDD57;position:relative;overflow:visible;cursor:default;}
+.m-batt{--nc:#4FD1E7;}
+.m-busn{--nc:#4ADE9B;}
+.m-curt{--nc:#8C93B0;border-style:dashed;padding:8px 12px;}
+.m-curt .m-nh{margin:0;}
+.m-curt.idle{opacity:.5;}
+.m-sunrow{display:flex;align-items:center;gap:12px;}
+.m-sunico{width:54px;height:54px;flex-shrink:0;}
+.m-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(14px,1fr));gap:3px;margin:8px 0 2px;}
+.m-tiles i{aspect-ratio:1.5;border-radius:2px;background:#FFDD57;border:1px solid rgba(255,221,87,.5);transition:opacity .4s;}
+.m-ring{display:block;margin:2px auto 8px;width:118px;height:118px;}
+.m-ring text{font-family:var(--font-mono);fill:var(--text-primary);}
+.m-batrow{display:flex;gap:12px;align-items:center;}
+.m-batico{width:52px;height:78px;flex-shrink:0;}
+.m-group{background:rgba(15,20,36,.92);border:1px solid var(--border);border-left:3px solid var(--nc);border-radius:12px;padding:9px 10px 8px;--nc:var(--tier0);flex-shrink:0;}
+.m-gh{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;color:inherit;cursor:pointer;padding:2px 2px 6px;text-align:left;}
+.m-gh h3{margin:0;font-family:var(--font-display);font-weight:700;font-size:15px;flex:1;letter-spacing:.02em;}
+.m-gh b{font-family:var(--font-mono);font-weight:500;font-size:14px;}
+.m-gcount{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);}
+.m-chev{width:14px;height:14px;color:var(--text-muted);flex-shrink:0;transition:transform .2s ease;}
+.m-group.collapsed .m-chev{transform:rotate(-90deg);}
+.m-grows{display:flex;flex-direction:column;gap:2px;overflow:hidden;max-height:900px;opacity:1;transition:max-height .3s ease,opacity .25s ease;}
+.m-group.collapsed .m-grows{max-height:0;opacity:0;}
+.m-cons-bar{display:flex;align-items:center;gap:10px;padding:2px 2px 4px;}
+.m-cons-l{font-family:var(--font-display);font-weight:700;font-size:14px;letter-spacing:.02em;flex:1;}
+.m-cons-list{display:flex;flex-direction:column;gap:14px;max-height:min(640px,70vh);overflow-y:auto;padding-right:4px;}
+.m-cons-list::-webkit-scrollbar{width:7px;}
+.m-cons-list::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:4px;}
+.m-row{display:grid;grid-template-columns:10px minmax(0,1fr) 34px 78px;gap:8px;align-items:center;width:100%;background:none;border:1px solid transparent;border-radius:7px;color:inherit;cursor:pointer;padding:4px 6px;font-size:12.5px;text-align:left;}
+.m-row:hover{background:rgba(255,255,255,.04);}
+.m-row i{width:9px;height:9px;border-radius:2px;background:var(--rc);}
+.m-row span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.m-row em{font-style:normal;font-family:var(--font-mono);font-size:11.5px;color:var(--text-muted);text-align:right;}
+.m-row b{font-family:var(--font-mono);font-weight:500;font-size:12px;text-align:right;font-variant-numeric:tabular-nums;}
+.m-rowbar{grid-column:2/5;height:3px;border-radius:2px;background:#0B1022;margin-top:-2px;overflow:hidden;}
+.m-rowbar i{display:block;height:100%;width:0;background:var(--rc);transition:width .35s;border-radius:0;}
+
+/* клик по узлу/строке мнемосхемы даёт импульс — либо себе (если нет строки в таблице), либо строке таблицы */
+.pulse{animation:m-pulse .6s ease;}
+@keyframes m-pulse{0%{box-shadow:0 0 0 0 rgba(79,209,231,.55);}100%{box-shadow:0 0 0 16px rgba(79,209,231,0);}}
+
+@media (max-width:860px){
+  .m-scheme{padding:14px 12px;}
+  .m-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:'src' 'bus' 'bat' 'cons';gap:34px;}
+  .m-src{gap:34px;}
+}
+
+/* ---- Профиль суток: циферблат (из варианта 4) ---- */
+.c-card{background:linear-gradient(180deg,#151B31,#0F1424);border:1px solid var(--border);border-radius:16px;padding:14px 16px;min-width:0;}
+.c-card h2{margin:0 0 2px;font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:.02em;}
+.c-card p.c-note{margin:0 0 8px;font-size:12px;color:var(--text-secondary);}
+.c-dial{max-width:520px;margin:0 auto;}
+.c-dial svg{display:block;width:100%;height:auto;}
+.c-dial text{font-family:var(--font-mono);}
+.c-wedge{fill:transparent;cursor:crosshair;}
+.c-wedge:hover{fill:rgba(255,255,255,.07);}
+.c-read{min-height:56px;margin-top:6px;padding:9px 12px;border-radius:10px;background:#0B1022;border:1px solid #16203C;font-size:12.5px;color:var(--text-secondary);}
+.c-read b{font-family:var(--font-mono);font-weight:500;color:var(--text-primary);}
+.c-read .r{display:flex;gap:6px 16px;flex-wrap:wrap;margin-top:3px;}
+.c-key{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 16px;font-size:12px;color:var(--text-secondary);margin-top:8px;}
+.c-key i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;}
+
+/* ---- Календарь по часам (в поповере у «Солнечных панелей») ---- */
+.c-tools{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 10px;}
+.c-tools .en-btn{font-family:var(--font-body);font-size:12.5px;padding:6px 12px;}
+.c-tools .en-btn.active{background:var(--tier0);border-color:var(--tier0);color:#0A0D18;}
+.c-hm{position:relative;}
+.c-hm canvas{display:block;width:100%;cursor:crosshair;}
+.c-legend{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:11.5px;color:var(--text-secondary);font-family:var(--font-mono);}
+.c-legend .grad{flex:1;max-width:280px;height:10px;border-radius:5px;border:1px solid #16203C;}
+
+/* ---- KPI-полоса ---- */
+.d-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;}
+.d-kpi{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:9px 12px;}
+.d-kpi-l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);}
+.d-kpi-v{font-family:var(--font-mono);font-size:18px;font-weight:500;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.d-kpi-s{font-size:11px;color:var(--text-secondary);margin-top:1px;font-family:var(--font-mono);}
+
+/* ---- Детальная таблица источников/потребителей (из варианта 1: «Диспетчерская») ---- */
+.d-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:#0F1424;}
+.d-table{width:100%;border-collapse:collapse;min-width:760px;font-size:12.5px;}
+.d-table th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);font-weight:500;text-align:right;padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.d-table th:first-child,.d-table td:first-child{text-align:left;}
+.d-table td{padding:7px 12px;text-align:right;border-bottom:1px solid rgba(41,49,80,.55);font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.d-table td:first-child{font-family:var(--font-body);}
+.d-table tr.grp td{background:#131A30;font-family:var(--font-display);font-weight:600;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-secondary);text-align:left;}
+.d-table tr.tot td{font-weight:500;color:var(--text-primary);background:#131A30;border-bottom:none;}
+.d-table tr.flash{animation:tr-flash 1.2s ease;}
+@keyframes tr-flash{0%{background:rgba(79,209,231,.32);}100%{background:transparent;}}
+.d-dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:8px;vertical-align:-1px;}
+.d-mini{display:inline-block;width:70px;height:6px;border-radius:3px;background:#0B1022;vertical-align:middle;margin-left:8px;overflow:hidden;}
+.d-mini i{display:block;height:100%;}
+.dim{color:var(--text-muted);}
+
+@media (max-width:980px){ .c-dial{max-width:none;} }
+</style>
+</head>
+<body>
+<div class="en-page">
+  <header>
+    <div class="en-eyebrow">Тестовая страница · синтез вариантов 1, 2 и 4</div>
+    <h1 class="en-h1">Энергосистема базы</h1>
+    <p class="en-sub">Мнемосхема как главный экран (вариант «Мнемосхема»), календарь по часам вместо линейного графика солнечных панелей — теперь под кнопкой «i» у «Солнечных панелей» (вариант «Циферблат и календарь»), и построчная таблица каждого источника/потребителя внизу (вариант «Диспетчерская»). Кликните по узлу или группе на схеме — таблица снизу прокрутится к нужной строке.</p>
+  </header>
+
+  <div id="ctl"></div>
+  <div id="periods"></div>
+
+  <section class="m-scheme" id="scheme">
+    <svg class="m-flows" id="flows" aria-hidden="true"></svg>
+    <div class="m-grid">
+      <div class="m-src">
+        <div class="m-node m-sun" id="nSun" data-sel="solar">
+          <div class="m-sunrow">
+            <svg class="m-sunico" viewBox="0 0 54 54" aria-hidden="true">
+              <g id="sunRays" style="transform-origin:27px 27px;animation:m-spin 26s linear infinite">
+                <path d="M27 3v8M27 43v8M3 27h8M43 27h8M10 10l5.7 5.7M38.3 38.3L44 44M44 10l-5.7 5.7M15.7 38.3L10 44" stroke="#FFDD57" stroke-width="3" stroke-linecap="round"/></g>
+              <circle id="sunDisc" cx="27" cy="27" r="11" fill="#FFDD57"/>
+              <circle id="moonCut" cx="32" cy="23" r="10" fill="#0F1424" opacity="0"/>
+            </svg>
+            <div style="flex:1;min-width:0"><div class="m-nh" style="margin:0"><h3>Солнце</h3>
+                <button type="button" class="m-info" id="sunInfoBtn" aria-expanded="false" aria-label="Показать профиль суток" title="Профиль суток">i</button></div>
+              <div class="m-big" id="sunPct">—</div><div class="m-of" id="sunTxt">—</div></div>
+          </div>
+          <div class="m-dialpop" id="sunDialPop" hidden>
+            <div class="m-dialpop-head"><h4>Профиль суток</h4><button type="button" class="m-dialpop-close" id="sunDialPopClose" aria-label="Закрыть">×</button></div>
+            <p class="m-dialpop-note" id="sunDialNote">—</p>
+            <svg id="sunDial" viewBox="0 0 480 480" role="img" aria-label="Суточный циферблат выработки и потребления"></svg>
+            <div class="c-read" id="sunDialRead">Наведите курсор на любой час циферблата.</div>
+            <div class="c-key"><span><i style="background:#FFDD57"></i>Выработка</span><span><i style="background:#5AA9FF"></i>Потребление</span><span><i style="background:#4FD1E7"></i>Заряд</span></div>
+          </div>
+        </div>
+        <div class="m-node m-solar" id="nSolar" data-sel="solar">
+          <div class="m-nh"><h3>Солнечные панели</h3><span class="m-tag" id="solCnt">×—</span>
+            <button type="button" class="m-info" id="dialInfoBtn" aria-expanded="false" aria-label="Показать календарь по часам" title="Календарь по часам">i</button></div>
+          <div class="m-big" id="solGen">—</div><div class="m-of" id="solOf">—</div>
+          <div class="m-bar"><i id="solBar" style="width:0"></i></div>
+          <div class="m-tiles" id="solTiles"></div>
+          <div class="m-line"><span>Выработано за период</span><b id="solEn">—</b></div>
+          <div class="m-dialpop" id="dialPop" hidden>
+            <div class="m-dialpop-head"><h4>Календарь по часам</h4><button type="button" class="m-dialpop-close" id="dialPopClose" aria-label="Закрыть">×</button></div>
+            <p class="m-dialpop-note" id="hmNote">Тепловая карта «день × час» за весь срок наблюдений.</p>
+            <div class="c-tools" id="hmTools" role="group" aria-label="Показатель тепловой карты"></div>
+            <div class="c-hm" id="hm"><canvas id="hmCv"></canvas></div>
+            <div class="c-read" id="hmRead">Наведите курсор на ячейку карты.</div>
+            <div class="c-legend"><span id="lgMin">—</span><div class="grad" id="lgGrad"></div><span id="lgMax">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="m-bus">
+        <button type="button" class="m-node m-busn" id="nBus" data-sel="bus" style="height:100%;display:flex;flex-direction:column;justify-content:center">
+          <div class="m-nh"><h3>Шина базы</h3></div>
+          <svg class="m-ring" id="ring" viewBox="0 0 118 118" aria-hidden="true">
+            <circle cx="59" cy="59" r="48" fill="none" stroke="#0B1022" stroke-width="12"/>
+            <circle id="ringArc" cx="59" cy="59" r="48" fill="none" stroke="#4ADE9B" stroke-width="12" stroke-linecap="round" transform="rotate(-90 59 59)" stroke-dasharray="0 302"/>
+            <text id="ringPct" x="59" y="58" text-anchor="middle" font-size="22" font-weight="500">—</text>
+            <text x="59" y="76" text-anchor="middle" font-size="10" style="fill:#9CA6C4">обеспечено</text>
+          </svg>
+          <div class="m-line"><span>Потребность</span><b id="busDem">—</b></div>
+          <div class="m-line"><span>Получено</span><b id="busSup">—</b></div>
+          <div class="m-line"><span>Выработка</span><b id="busGen">—</b></div>
+          <div class="m-line"><span>Акк. поток</span><b id="busFlow">—</b></div>
+          <div class="m-line"><span>Автономия</span><b id="busAuto">—</b></div>
+          <div style="margin-top:8px;font-size:11.5px" id="busState"></div>
+        </button>
+      </div>
+
+      <div class="m-bat">
+        <button type="button" class="m-node m-batt" id="nBat" data-sel="batt">
+          <div class="m-nh"><h3>Аккумуляторы</h3><span class="m-tag" id="batCnt">×—</span></div>
+          <div class="m-batrow">
+            <svg class="m-batico" viewBox="0 0 52 78" aria-hidden="true">
+              <rect x="17" y="1" width="18" height="6" rx="2" fill="#4B5680"/>
+              <rect x="4" y="7" width="44" height="68" rx="6" fill="#0B1022" stroke="#4B5680" stroke-width="2.5"/>
+              <clipPath id="batClip"><rect x="7" y="10" width="38" height="62" rx="3"/></clipPath>
+              <rect id="batLevel" x="7" y="72" width="38" height="0" fill="#4FD1E7" clip-path="url(#batClip)" opacity=".9"/>
+              <path id="batBolt" d="M28 22 L16 44 H25 L21 62 L36 38 H27 Z" fill="#fff" opacity=".85"/>
+            </svg>
+            <div style="flex:1;min-width:0"><div class="m-big" id="batJ">—</div><div class="m-of" id="batOf">—</div>
+              <div class="m-bar"><i id="batBar" style="width:0"></i></div>
+              <div class="m-of" id="batFlowTxt">—</div></div>
+          </div>
+          <div class="m-line" style="margin-top:6px"><span>В кВт·ч</span><b id="batKwh">—</b></div>
+        </button>
+        <button type="button" class="m-node m-curt idle" id="nCurt" data-sel="curt">
+          <div class="m-nh"><h3>Сброс излишка</h3><span class="m-big" style="font-size:15px" id="curtV">—</span></div>
+        </button>
+      </div>
+
+      <div class="m-cons">
+        <div class="m-cons-bar"><span class="m-cons-l">Потребители</span><button type="button" class="en-btn" id="consAllBtn">Свернуть все</button></div>
+        <div class="m-cons-list" id="cons"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="d-strip" id="strip"></section>
+
+  <section>
+    <div class="d-table-wrap"><table class="d-table" id="tbl"></table></div>
+  </section>
+</div>
+
+<script>/* Общий «движок» демо-страниц энергосистемы: физика базы, история на 90 суток, единицы, графики.
+ *
+ * Модель повторяет правила игры (js/core.js): солнечная панель даёт 10 ⚡ за цикл 60 с, установки
+ * тратят power ⚡ за свой цикл, аккумулятор 400 ⚡, базовый запас 150 ⚡, а если энергии не хватает,
+ * ВСЕ потребители сбавляют ход в одной и той же пропорции (powerFraction). Единица «⚡» здесь
+ * считается 1 кВт·ч (KWH_PER_UNIT), поэтому 10 ⚡ за 60 с = 600 кВт, а ёмкость батареи = 400 кВт·ч.
+ * В самой игре истории пока нет — при интеграции нужно писать такие же минутные срезы в state.
+ */
+(function(root){
+'use strict';
+
+var KWH_PER_UNIT=1, J_PER_KWH=3.6e6;
+var DAY_MIN=1440, CAP_DAYS=90, CAP=CAP_DAYS*DAY_MIN, BUF=CAP+10*DAY_MIN;
+var SOLAR_KW=600*KWH_PER_UNIT, BATTERY_KWH=400*KWH_PER_UNIT, BASE_KWH=150*KWH_PER_UNIT;
+var OFFSET_MIN=10*60+30; // «сейчас» = 10:30 игрового дня: утро, аккумуляторы заряжаются
+
+var CONSUMERS=[
+  {id:'iron',  name:'Железная руда', short:'Fe₂O₃', group:'mining', kw:72,    color:'#9FB0C8'},
+  {id:'copper',name:'Медная руда',   short:'Cu₂S',  group:'mining', kw:72,    color:'#E08A4B'},
+  {id:'coal',  name:'Уголь',         short:'C',     group:'mining', kw:60,    color:'#8B85A6'},
+  {id:'stone', name:'Камень',        short:'CaCO₃', group:'mining', kw:56.84, color:'#C2AD82'},
+  {id:'water', name:'Бурение воды',  short:'H₂O',   group:'drill',  kw:51.43, color:'#49B8F0'},
+  {id:'oil',   name:'Бурение нефти', short:'CxHy',  group:'drill',  kw:72,    color:'#B08D57'},
+  {id:'wheat', name:'Пшеница',       short:'Triticum',    group:'farm', kw:30,    color:'#E8D078'},
+  {id:'potato',name:'Картофель',     short:'Solanum tub.',group:'farm', kw:27.69, color:'#A9865B'},
+  {id:'corn',  name:'Кукуруза',      short:'Zea mays',    group:'farm', kw:31.3,  color:'#F0B93D'},
+  {id:'tomato',name:'Томаты',        short:'Solanum lyc.',group:'farm', kw:36,    color:'#E1503D'}
+];
+var GROUPS=[
+  {id:'mining',name:'Горнодобыча',color:'#C9A227'},
+  {id:'drill', name:'Бурение',    color:'#49B8F0'},
+  {id:'farm',  name:'Фермы',      color:'#8CAF52'}
+];
+var SCENARIOS={
+  start:{label:'Старт',         hint:'1 панель, без аккумуляторов', solar:1,  bat:0,   seed:11, growth:1,
+         cons:{iron:1,copper:1,water:1}},
+  mid:  {label:'Развитая база', hint:'12 панелей, 45 аккумуляторов',solar:12, bat:45,  seed:23, growth:1.15,
+         cons:{iron:6,copper:5,coal:4,stone:3,water:3,oil:3,wheat:3,potato:2,corn:2,tomato:2}},
+  big:  {label:'Промышленная',  hint:'60 панелей, 200 аккумуляторов',solar:60, bat:200, seed:37, growth:1.15,
+         cons:{iron:30,copper:25,coal:20,stone:15,water:15,oil:15,wheat:15,potato:10,corn:10,tomato:10}}
+};
+var PERIODS=[
+  {id:'h1', label:'1 час',    phrase:'за последний час',   min:60,     bin:1},
+  {id:'d1', label:'Сутки',    phrase:'за последние сутки', min:1440,   bin:10},
+  {id:'d7', label:'Неделя',   phrase:'за неделю',          min:10080,  bin:60},
+  {id:'d30',label:'Месяц',    phrase:'за месяц',           min:43200,  bin:240},
+  {id:'d90',label:'3 месяца', phrase:'за 3 месяца',        min:129600, bin:720}
+];
+var PMAP={}; PERIODS.forEach(function(p){ PMAP[p.id]=p; });
+
+var SKEYS=['gen','curtail','demand','supply','flow','stored','nameplate','capKWh'].concat(CONSUMERS.map(function(c){return c.id;}));
+var K=SKEYS.length, KI={}; SKEYS.forEach(function(k,i){ KI[k]=i; });
+// Виртуальные ряды: сумма (с весами) настоящих рядов.
+var VIRT={
+  g_mining:CONSUMERS.filter(function(c){return c.group==='mining';}).map(function(c){return c.id;}),
+  g_drill: CONSUMERS.filter(function(c){return c.group==='drill';}).map(function(c){return c.id;}),
+  g_farm:  CONSUMERS.filter(function(c){return c.group==='farm';}).map(function(c){return c.id;}),
+  unmet:[['demand',1],['supply',-1]],
+  balance:[['gen',1],['demand',-1]],
+  used:[['gen',1],['curtail',-1]]
+};
+
+var EN={
+  KWH_PER_UNIT:KWH_PER_UNIT, J_PER_KWH:J_PER_KWH, SOLAR_KW:SOLAR_KW, BATTERY_KWH:BATTERY_KWH, BASE_KWH:BASE_KWH,
+  CONSUMERS:CONSUMERS, GROUPS:GROUPS, SCENARIOS:SCENARIOS, PERIODS:PERIODS, PMAP:PMAP, CAP:CAP, DAY_MIN:DAY_MIN,
+  period:'d1', speed:600, scenario:'mid', cur:{}, counts:{}, paused:false
+};
+
+/* ---------- события ---------- */
+var handlers={};
+EN.on=function(ev,fn){ (handlers[ev]=handlers[ev]||[]).push(fn); };
+function emit(ev,a){ (handlers[ev]||[]).forEach(function(f){ f(a); }); }
+
+/* ---------- физика ---------- */
+var S={}; SKEYS.forEach(function(k){ S[k]=new Float32Array(BUF); });
+var st={}, SC=null, P=new Float64Array(K), dem=new Float64Array(CONSUMERS.length);
+
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function sunFactor(clockSec){
+  var t=clockSec%86400;
+  if(t<21600||t>72000) return 0;
+  return Math.sin((t-21600)/50400*Math.PI);
+}
+EN.sunFactor=sunFactor;
+
+function countsFor(dayIdx){
+  var g=Math.pow(Math.min(1,Math.max(0,dayIdx/CAP_DAYS)),SC.growth||1.15), n={};
+  n.solar=Math.max(1,Math.ceil(SC.solar*g));
+  n.bat=SC.bat>0?Math.ceil(SC.bat*Math.min(1,g*1.08)):0;
+  CONSUMERS.forEach(function(c){ var f=SC.cons[c.id]||0; n[c.id]=f?Math.ceil(f*g):0; });
+  return n;
+}
+function rollDuty(){
+  for(var i=0;i<CONSUMERS.length;i++){
+    var r=st.rng();
+    st.duty[i]= r<.68?1: r<.83?.85: r<.93?.6: r<.98?.3: 0; // доля установок группы, реально работающих в этот час
+  }
+}
+function prep(){
+  var a=Math.floor((st.secs+OFFSET_MIN*60)/3600);
+  if(a!==st.hr){ st.hr=a; rollDuty(); }
+  var d=Math.floor((st.secs+OFFSET_MIN*60)/86400);
+  if(d!==st.dy){ st.dy=d; st.counts=countsFor(d); EN.counts=st.counts; }
+}
+function physics(dt){
+  var clock=(st.secs+OFFSET_MIN*60)%86400, sun=sunFactor(clock), n=st.counts;
+  var gen=n.solar*SOLAR_KW*sun, np=n.solar*SOLAR_KW, D=0, i;
+  for(i=0;i<CONSUMERS.length;i++){ dem[i]=n[CONSUMERS[i].id]*CONSUMERS[i].kw*st.duty[i]; D+=dem[i]; }
+  var cap=BASE_KWH+n.bat*BATTERY_KWH;
+  var avail=st.stored+gen*dt/3600, need=D*dt/3600;
+  var frac=need>1e-12?Math.min(1,avail/need):1;
+  var left=avail-need*frac, ns=Math.min(cap,left), spill=left-ns;
+  P[0]=gen; P[1]=spill*3600/dt; P[2]=D; P[3]=D*frac; P[4]=(ns-st.stored)*3600/dt; P[5]=ns; P[6]=np; P[7]=cap;
+  for(i=0;i<CONSUMERS.length;i++) P[8+i]=dem[i]*frac;
+  st.stored=ns; st.frac=frac; st.sun=sun; st.clock=clock;
+  var c=EN.cur;
+  c.sun=sun; c.gen=gen; c.nameplate=np; c.curtail=P[1]; c.demand=D; c.supply=P[3]; c.frac=frac; c.flow=P[4];
+  c.stored=ns; c.cap=cap; c.pct=cap>0?ns/cap*100:0; c.clock=clock; c.secs=st.secs; c.day=Math.floor((st.secs+OFFSET_MIN*60)/86400)+1;
+  c.cons=c.cons||{};
+  for(i=0;i<CONSUMERS.length;i++){ c.cons[CONSUMERS[i].id]=P[8+i]; }
+  c.duty=st.duty;
+}
+function accumulate(dt){ for(var k=0;k<K;k++) st.A[k]+=P[k]*dt; st.acc+=dt; }
+function shiftBuffer(){
+  var drop=BUF-CAP;
+  SKEYS.forEach(function(k){ S[k].copyWithin(0,drop,BUF); });
+  st.base+=drop; st.w=CAP;
+}
+function commit(){
+  var i=st.w, k;
+  for(k=0;k<K;k++){ S[SKEYS[k]][i]=st.A[k]/st.acc; st.A[k]=0; }
+  st.acc=0; st.w++; st.tMin++; st.dirty=true;
+  if(st.w>=BUF) shiftBuffer();
+}
+function advance(dtGame){
+  var remain=dtGame;
+  while(remain>1e-9){
+    prep();
+    var dt=Math.min(remain,60-st.acc,15);
+    if(dt<1e-6) dt=Math.min(remain,60-st.acc);
+    physics(dt); accumulate(dt);
+    st.secs+=dt; remain-=dt;
+    if(st.acc>=60-1e-7) commit();
+  }
+}
+
+EN.load=function(name){
+  SC=SCENARIOS[name]||SCENARIOS.mid; EN.scenario=SCENARIOS[name]?name:'mid';
+  st={secs:0,acc:0,A:new Float64Array(K),w:0,base:0,tMin:0,hr:-1,dy:-1,rng:mulberry(SC.seed),duty:new Array(CONSUMERS.length).fill(1),
+      counts:{},stored:0,dirty:false};
+  prep(); st.stored=(BASE_KWH+st.counts.bat*BATTERY_KWH)*0.5;
+  for(var m=0;m<CAP;m++){ prep(); physics(60); accumulate(60); st.secs+=60; commit(); }
+  st.dirty=false;
+  prep(); physics(1e-3); // актуальные «текущие» значения
+  emit('reset'); emit('data');
+};
+EN.setSpeed=function(v){ EN.speed=v; emit('speed'); };
+EN.setPeriod=function(id){ if(!PMAP[id]) return; EN.period=id; emit('period'); };
+
+var lastTs=0;
+EN.run=function(){
+  function f(ts){
+    var dtR=lastTs?Math.min(0.25,(ts-lastTs)/1000):0; lastTs=ts;
+    if(EN.speed>0){ advance(dtR*EN.speed); }
+    if(st.dirty){ st.dirty=false; emit('data'); }
+    emit('frame',dtR);
+    root.requestAnimationFrame(f);
+  }
+  root.requestAnimationFrame(f);
+};
+
+/* ---------- чтение истории ---------- */
+function members(k){ var v=VIRT[k]; if(!v) return [[k,1]]; return v.map(function(m){ return typeof m==='string'?[m,1]:m; }); }
+// Ряды по бинам за период. mode: mean | energy (кВт·ч за бин) | max | min | last
+EN.series=function(keys,pid,mode,offsetMin){
+  var pp=PMAP[pid], n=pp.min/pp.bin, off=offsetMin||0, start=st.w-pp.min-off, out={n:n,bin:pp.bin,t0:st.tMin-pp.min-off,keys:{}};
+  mode=mode||'mean';
+  keys.forEach(function(key){
+    var ms=members(key).map(function(m){ return [S[m[0]],m[1]]; }), arr=new Float64Array(n);
+    for(var b=0;b<n;b++){
+      var s=start+b*pp.bin, acc=0, mx=-Infinity, mn=Infinity, v=0;
+      for(var i=0;i<pp.bin;i++){
+        v=0; for(var q=0;q<ms.length;q++) v+=ms[q][0][s+i]*ms[q][1];
+        acc+=v; if(v>mx) mx=v; if(v<mn) mn=v;
+      }
+      arr[b]= mode==='mean'?acc/pp.bin : mode==='energy'?acc/60 : mode==='max'?mx : mode==='min'?mn : v;
+    }
+    out.keys[key]=arr;
+  });
+  return out;
+};
+// Итоги по ряду за период: mean/max/min (кВт или кВт·ч для stored) и sum (кВт·ч).
+EN.stat=function(key,pid,offsetMin){
+  var pp=PMAP[pid], ms=members(key).map(function(m){ return [S[m[0]],m[1]]; }), off=offsetMin||0, s=st.w-pp.min-off, acc=0, mx=-Infinity, mn=Infinity;
+  for(var i=0;i<pp.min;i++){
+    var v=0; for(var q=0;q<ms.length;q++) v+=ms[q][0][s+i]*ms[q][1];
+    acc+=v; if(v>mx) mx=v; if(v<mn) mn=v;
+  }
+  return {mean:acc/pp.min, max:mx, min:mn, sum:acc/60, first:valueAt(key,s), last:valueAt(key,s+pp.min-1)};
+};
+function valueAt(key,idx){ var v=0; members(key).forEach(function(m){ v+=S[m[0]][idx]*m[1]; }); return v; }
+EN.deficitMinutes=function(pid,offsetMin){
+  var pp=PMAP[pid], off=offsetMin||0, s=st.w-pp.min-off, c=0, d=S.demand, u=S.supply;
+  for(var i=0;i<pp.min;i++){ if(d[s+i]-u[s+i]>0.02*d[s+i]+1e-6) c++; }
+  return c;
+};
+EN.tNow=function(){ return st.tMin; };
+EN.hasPrev=function(pid){ return PMAP[pid].min*2<=CAP; };
+EN.timeOf=function(absMin){
+  var t=absMin+OFFSET_MIN;
+  var day=Math.floor(t/DAY_MIN)+1, m=((t%DAY_MIN)+DAY_MIN)%DAY_MIN;
+  return {day:day,hh:Math.floor(m/60),mm:m%60,clock:m};
+};
+function p2(n){ return (n<10?'0':'')+n; }
+EN.clockStr=function(sec){ var m=Math.floor((sec%86400)/60); return p2(Math.floor(m/60))+':'+p2(m%60); };
+EN.nowStr=function(){ var c=EN.cur; return 'День '+c.day+' · '+EN.clockStr(c.clock); };
+EN.binLabel=function(t0,i,bin){
+  var a=EN.timeOf(t0+i*bin), b=EN.timeOf(t0+(i+1)*bin);
+  var s='День '+a.day+' · '+p2(a.hh)+':'+p2(a.mm);
+  if(bin>1) s+=' – '+p2(b.hh)+':'+p2(b.mm);
+  return s;
+};
+// Сетка «день × час» (для тепловой карты и суточного профиля). Пустые ячейки — NaN.
+EN.grid=function(key,days){
+  var lastAbs=st.tMin-1, lastDay=Math.floor((lastAbs+OFFSET_MIN)/DAY_MIN), rows=[], d, h;
+  var startAbs=st.tMin-CAP;
+  for(d=lastDay-days+1;d<=lastDay;d++){
+    var cells=new Float64Array(24);
+    for(h=0;h<24;h++){
+      var a0=d*DAY_MIN+h*60-OFFSET_MIN, sum=0, cnt=0;
+      for(var m=0;m<60;m++){
+        var ab=a0+m; if(ab<startAbs||ab>lastAbs) continue;
+        sum+=valueAt(key,ab-st.base); cnt++;
+      }
+      cells[h]=cnt?sum/cnt:NaN;
+    }
+    rows.push({day:d+1,cells:cells});
+  }
+  return rows;
+};
+// Последние N минут по одной точке (для «полоски» часа).
+EN.strip=function(key,minutes){
+  var out=new Float64Array(minutes), s=st.w-minutes;
+  for(var i=0;i<minutes;i++) out[i]=valueAt(key,s+i);
+  return out;
+};
+
+/* ---------- форматирование ---------- */
+var PSC=[[1e-3,'Вт'],[1,'кВт'],[1e3,'МВт'],[1e6,'ГВт']];               // база: кВт
+var ESC=[[1e-3,'Вт·ч'],[1,'кВт·ч'],[1e3,'МВт·ч'],[1e6,'ГВт·ч'],[1e9,'ТВт·ч']]; // база: кВт·ч
+var JSC=[[1,'Дж'],[1e3,'кДж'],[1e6,'МДж'],[1e9,'ГДж'],[1e12,'ТДж']];    // база: Дж
+function digitsFor(a){ return a>=100?0:a>=10?1:2; }
+function pickScale(sc,v,def){
+  var a=Math.abs(v), i=def;
+  if(a>0){ i=0; for(var k=0;k<sc.length;k++) if(a>=sc[k][0]) i=k; }
+  var num=a/sc[i][0];
+  if(Number(num.toFixed(digitsFor(num)))>=1000 && i<sc.length-1) i++;
+  return i;
+}
+function fmtBy(sc,v,def){
+  if(Math.abs(v)<1e-9) v=0;
+  var i=pickScale(sc,v,def), x=v/sc[i][0], d=digitsFor(Math.abs(x));
+  var num=(v===0||Number(x.toFixed(d))===0?'0':x.toFixed(d));
+  return {num:num,unit:sc[i][1],text:num+' '+sc[i][1],scale:sc[i][0],idx:i};
+}
+EN.fmt={
+  power:function(kw){ return fmtBy(PSC,kw,1); },
+  energy:function(kwh){ return fmtBy(ESC,kwh,1); },
+  joule:function(j){ return fmtBy(JSC,j,2); },
+  stored:function(kwh){ return fmtBy(JSC,kwh*J_PER_KWH,2); },
+  pct:function(p,d){ return (p).toFixed(d==null?0:d)+'%'; },
+  sign:function(o,plus){ return (o.num!=='0'&&plus&&parseFloat(o.num)>0?'+':'')+o.text; },
+  dur:function(h){
+    if(!isFinite(h)||h<0) return '—';
+    var m=Math.round(h*60);
+    if(m<1) return 'меньше минуты';
+    if(m<60) return m+' м';
+    if(m<1440) return Math.floor(m/60)+' ч'+(m%60?' '+(m%60)+' м':'');
+    return Math.floor(m/1440)+' д'+(Math.floor((m%1440)/60)?' '+Math.floor((m%1440)/60)+' ч':'');
+  }
+};
+
+/* ---------- общие элементы интерфейса ---------- */
+EN.mountPeriods=function(host,opts){
+  opts=opts||{}; host.classList.add('en-tabs'); host.innerHTML='';
+  PERIODS.forEach(function(p){
+    var b=document.createElement('button'); b.type='button'; b.className='en-tab'; b.dataset.p=p.id; b.textContent=(opts.short&&p.short)||p.label;
+    b.onclick=function(){ EN.setPeriod(p.id); }; host.appendChild(b);
+  });
+  function sync(){ host.querySelectorAll('.en-tab').forEach(function(b){ b.classList.toggle('active',b.dataset.p===EN.period); b.setAttribute('aria-pressed',b.dataset.p===EN.period?'true':'false'); }); }
+  EN.on('period',sync); sync();
+};
+EN.mountControls=function(host){
+  host.classList.add('en-ctl');
+  var sc=Object.keys(SCENARIOS).map(function(k){ return '<button type="button" class="en-btn" data-sc="'+k+'" title="'+SCENARIOS[k].hint+'">'+SCENARIOS[k].label+'</button>'; }).join('');
+  var sp=[[0,'⏸'],[1,'×1'],[60,'×60'],[600,'×600'],[3600,'×3600']].map(function(a){ return '<button type="button" class="en-btn" data-sp="'+a[0]+'">'+a[1]+'</button>'; }).join('');
+  host.innerHTML='<div class="en-ctl-g"><span class="en-ctl-l">Демо-база</span><span class="en-btns">'+sc+'</span></div>'+
+    '<div class="en-ctl-g"><span class="en-ctl-l">Скорость</span><span class="en-btns">'+sp+'</span></div>'+
+    '<div class="en-ctl-g en-ctl-clock"><span class="en-ctl-l">Игровое время</span><b id="enClock" class="mono">—</b></div>';
+  function sync(){
+    host.querySelectorAll('[data-sc]').forEach(function(b){ b.classList.toggle('active',b.dataset.sc===EN.scenario); });
+    host.querySelectorAll('[data-sp]').forEach(function(b){ b.classList.toggle('active',Number(b.dataset.sp)===EN.speed); });
+  }
+  host.addEventListener('click',function(e){
+    var a=e.target.closest('[data-sc]'); if(a){ EN.load(a.dataset.sc); sync(); return; }
+    var b=e.target.closest('[data-sp]'); if(b){ EN.setSpeed(Number(b.dataset.sp)); sync(); }
+  });
+  var clk=host.querySelector('#enClock');
+  EN.on('frame',function(){ clk.textContent=EN.nowStr(); });
+  sync();
+};
+EN.start=function(){ EN.load(EN.scenario); EN.run(); };
+
+root.EN=EN;
+if(typeof module!=='undefined') module.exports=EN;
+})(typeof window!=='undefined'?window:global);
+</script>
+<script>
+(function(){
+var $=function(id){ return document.getElementById(id); }, F=EN.fmt, NS='http://www.w3.org/2000/svg';
+EN.mountControls($('ctl')); EN.mountPeriods($('periods'));
+
+function activeConsumers(){ return EN.CONSUMERS.filter(function(c){ return EN.counts[c.id]>0; }); }
+
+/* ================= Мнемосхема (вариант 2) ================= */
+var flows=[], collapsedGrp={}, allCollapsed=false;
+// Категории сворачиваются по клику на шапку — на случай, если производственных зданий станет
+// много и список потребителей перестанет помещаться в колонку. Плюс кнопка «свернуть все»
+// и прокрутка внутри списка (.m-cons-list) на тот же случай.
+function buildCons(){
+  var html='';
+  EN.GROUPS.forEach(function(g){
+    var list=activeConsumers().filter(function(c){ return c.group===g.id; }); if(!list.length) return;
+    var closed=!!collapsedGrp[g.id];
+    html+='<div class="m-group'+(closed?' collapsed':'')+'" id="grp_'+g.id+'" style="--nc:'+g.color+'">'+
+      '<button type="button" class="m-gh" data-toggle="'+g.id+'" aria-expanded="'+(!closed)+'">'+
+        '<svg class="m-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+        '<h3>'+g.name+'</h3><span class="m-gcount">×'+list.length+'</span><b id="gv_'+g.id+'">—</b>'+
+      '</button><div class="m-grows">';
+    list.forEach(function(c){
+      html+='<button type="button" class="m-row" id="row_'+c.id+'" data-sel="'+c.id+'" style="--rc:'+c.color+'"><i></i><span>'+c.name+'</span><em>×'+EN.counts[c.id]+'</em><b id="rv_'+c.id+'">—</b><div class="m-rowbar"><i id="rb_'+c.id+'"></i></div></button>';
+    });
+    html+='</div></div>';
+  });
+  $('cons').innerHTML=html;
+}
+$('cons').addEventListener('click',function(e){
+  var h=e.target.closest('[data-toggle]'); if(!h) return;
+  e.stopPropagation();
+  var id=h.dataset.toggle, closed=!collapsedGrp[id]; collapsedGrp[id]=closed;
+  var grp=$('grp_'+id); if(grp) grp.classList.toggle('collapsed',closed);
+  h.setAttribute('aria-expanded',closed?'false':'true');
+});
+$('consAllBtn').addEventListener('click',function(){
+  allCollapsed=!allCollapsed;
+  EN.GROUPS.forEach(function(g){ collapsedGrp[g.id]=allCollapsed; });
+  document.querySelectorAll('.m-group').forEach(function(el){ el.classList.toggle('collapsed',allCollapsed); });
+  document.querySelectorAll('.m-gh').forEach(function(el){ el.setAttribute('aria-expanded',allCollapsed?'false':'true'); });
+  $('consAllBtn').textContent=allCollapsed?'Развернуть все':'Свернуть все';
+});
+function buildTiles(){
+  var n=Math.min(EN.counts.solar,24), h=''; for(var i=0;i<n;i++) h+='<i></i>'; $('solTiles').innerHTML=h;
+}
+var svg=$('flows');
+function mkFlow(fromId,toId,color,fn){
+  var base=document.createElementNS(NS,'path'), dash=document.createElementNS(NS,'path');
+  base.setAttribute('class','m-flow-base'); base.setAttribute('stroke',color); dash.setAttribute('class','m-flow-dash'); dash.setAttribute('stroke',color);
+  svg.appendChild(base); svg.appendChild(dash);
+  flows.push({from:fromId,to:toId,base:base,dash:dash,fn:fn,color:color,lastDur:0});
+}
+function buildFlows(){
+  svg.innerHTML=''; flows=[];
+  mkFlow('nSun','nSolar','#FFDD57',function(){ return {i:EN.cur.sun,rev:false}; });
+  mkFlow('nSolar','nBus','#FFDD57',function(){ var c=EN.cur; return {i:c.nameplate>0?c.gen/c.nameplate:0,rev:false}; });
+  mkFlow('nBus','nBat','#4FD1E7',function(){ var c=EN.cur, ref=Math.max(c.nameplate,c.demand,1); return {i:Math.min(1,Math.abs(c.flow)/ref*1.6),rev:c.flow<0}; });
+  mkFlow('nBat','nCurt','#8C93B0',function(){ var c=EN.cur; return {i:c.nameplate>0?Math.min(1,c.curtail/c.nameplate*1.6):0,rev:false}; });
+  EN.GROUPS.forEach(function(g){
+    if(!$('grp_'+g.id)) return;
+    var ids=activeConsumers().filter(function(c){ return c.group===g.id; }).map(function(c){ return c.id; });
+    var inst=ids.reduce(function(a,id){ return a+(EN.counts[id]||0)*EN.CONSUMERS.filter(function(c){return c.id===id;})[0].kw; },0);
+    mkFlow('nBus','grp_'+g.id,g.color,function(){ var now=ids.reduce(function(a,id){ return a+(EN.cur.cons[id]||0); },0); return {i:inst>0?now/inst:0,rev:false}; });
+  });
+}
+function layoutFlows(){
+  var host=$('scheme').getBoundingClientRect(), stacked=window.innerWidth<=860;
+  svg.setAttribute('viewBox','0 0 '+host.width+' '+host.height);
+  var firstGrp=true;
+  flows.forEach(function(f){
+    var A=$(f.from), B=$(f.to); if(!A||!B) return;
+    var a=A.getBoundingClientRect(), b=B.getBoundingClientRect(), d;
+    if(stacked){
+      if(f.to.indexOf('grp_')===0){ if(!firstGrp){ f.base.setAttribute('d',''); f.dash.setAttribute('d',''); return; } firstGrp=false; }
+      var cx=(Math.max(a.left,b.left)+Math.min(a.right,b.right))/2-host.left, y1=a.bottom-host.top, y2=b.top-host.top;
+      d='M'+cx+' '+y1+' L'+cx+' '+y2;
+    }else if(a.left<b.right&&b.left<a.right){          // вертикальная связь
+      var cx2=(Math.max(a.left,b.left)+Math.min(a.right,b.right))/2-host.left;
+      var y1v=(a.top<b.top?a.bottom:a.top)-host.top, y2v=(a.top<b.top?b.top:b.bottom)-host.top;
+      d='M'+cx2+' '+y1v+' L'+cx2+' '+y2v;
+    }else{                                              // горизонтальная связь: точки на одной высоте
+      var leftToRight=a.right<=b.left, xa=(leftToRight?a.right:a.left)-host.left, xb=(leftToRight?b.left:b.right)-host.left;
+      var lo=Math.max(a.top,b.top)-host.top+14, hi=Math.min(a.bottom,b.bottom)-host.top-14;
+      var ya=(a.top+a.height/2)-host.top, yb=(b.top+b.height/2)-host.top;
+      if(b.height>a.height) yb=Math.min(b.bottom-host.top-14,Math.max(b.top-host.top+14,ya)); else ya=Math.min(a.bottom-host.top-14,Math.max(a.top-host.top+14,yb));
+      var mx=(xa+xb)/2;
+      d='M'+xa+' '+ya+' C'+mx+' '+ya+' '+mx+' '+yb+' '+xb+' '+yb;
+    }
+    f.base.setAttribute('d',d); f.dash.setAttribute('d',d);
+  });
+}
+function animateFlows(){
+  flows.forEach(function(f){
+    var r=f.fn(), i=Math.max(0,Math.min(1,r.i)), on=i>0.01, w=2+7*Math.sqrt(i), dur=Math.max(.35,1.7-1.35*i);
+    f.base.setAttribute('stroke-width',w+4); f.base.style.opacity=on?'.2':'.07';
+    f.dash.setAttribute('stroke-width',Math.max(2.5,w*0.8)); f.dash.style.opacity=on?'1':'0';
+    f.dash.style.strokeDasharray='0.5 '+(9+w*0.6);
+    if(Math.abs(dur-f.lastDur)>0.06){ f.dash.style.animationDuration=dur+'s'; f.lastDur=dur; }
+    f.dash.classList.toggle('rev',!!r.rev);
+  });
+}
+function live(){
+  var c=EN.cur;
+  // солнце
+  $('sunPct').textContent=F.pct(c.sun*100); $('sunTxt').textContent=(c.sun>0?'День':'Ночь')+' · '+EN.clockStr(c.clock);
+  $('sunDisc').style.opacity=Math.max(.25,c.sun); $('sunRays').style.opacity=Math.max(.1,c.sun); $('moonCut').setAttribute('opacity',c.sun>0?0:1);
+  $('sunDisc').setAttribute('fill',c.sun>0?'#FFDD57':'#C9D2EE');
+  // панели
+  $('solCnt').textContent='×'+EN.counts.solar; $('solGen').textContent=F.power(c.gen).text; $('solOf').textContent='из '+F.power(c.nameplate).text+' установленных';
+  $('solBar').style.width=(c.nameplate>0?c.gen/c.nameplate*100:0).toFixed(1)+'%';
+  var tiles=$('solTiles').children; for(var i=0;i<tiles.length;i++) tiles[i].style.opacity=(0.12+0.88*c.sun).toFixed(2);
+  // шина
+  var pct=c.frac*100; $('ringPct').textContent=F.pct(pct,pct<99.5&&pct>0?1:0);
+  var arc=$('ringArc'); arc.setAttribute('stroke-dasharray',(302*c.frac).toFixed(1)+' 302'); arc.setAttribute('stroke',c.frac>=.999?'#4ADE9B':c.frac>=.5?'#F0B93D':'#F4557B');
+  $('busDem').textContent=F.power(c.demand).text; $('busSup').textContent=F.power(c.supply).text; $('busGen').textContent=F.power(c.gen).text;
+  $('busFlow').textContent=Math.abs(c.flow)<1?'0':(c.flow>0?'+':'−')+F.power(Math.abs(c.flow)).text;
+  $('busAuto').textContent=c.demand>1?F.dur(c.stored/c.demand):'∞';
+  $('busState').innerHTML= c.frac>=.999?'<span style="color:var(--good)">● Норма</span>' : c.frac<.02?'<span style="color:var(--bad)">● Блэкаут</span>' : '<span style="color:#F0B93D">● Просадка</span>';
+  // аккумулятор
+  $('batCnt').textContent=EN.counts.bat?'×'+EN.counts.bat:'базовый блок'; $('batJ').textContent=F.stored(c.stored).text; $('batOf').textContent='из '+F.stored(c.cap).text;
+  $('batBar').style.width=c.pct.toFixed(1)+'%'; $('batKwh').textContent=F.energy(c.stored).text+' / '+F.energy(c.cap).text;
+  var h=62*c.pct/100; $('batLevel').setAttribute('y',72-h); $('batLevel').setAttribute('height',h); $('batLevel').setAttribute('fill',c.pct<15?'#F4557B':'#4FD1E7');
+  $('batBolt').style.opacity=Math.abs(c.flow)<1?.2:.9;
+  $('batFlowTxt').textContent= Math.abs(c.flow)<1?'Без изменений' : c.flow>0?'Заряд +'+F.power(c.flow).text+' · полон через '+F.dur((c.cap-c.stored)/c.flow) : 'Разряд −'+F.power(-c.flow).text+' · пуст через '+F.dur(c.stored/-c.flow);
+  // сброс
+  $('curtV').textContent=c.curtail>1?F.power(c.curtail).text:'нет'; $('nCurt').classList.toggle('idle',c.curtail<=1);
+  // потребители
+  EN.GROUPS.forEach(function(g){
+    var el=$('gv_'+g.id); if(!el) return;
+    var sum=0; EN.CONSUMERS.forEach(function(x){ if(x.group===g.id) sum+=c.cons[x.id]||0; }); el.textContent=F.power(sum).text;
+  });
+  EN.CONSUMERS.forEach(function(x){
+    var v=$('rv_'+x.id); if(!v) return; var now=c.cons[x.id]||0, inst=EN.counts[x.id]*x.kw;
+    v.textContent=F.power(now).text; $('rb_'+x.id).style.width=(inst>0?now/inst*100:0).toFixed(0)+'%';
+  });
+  $('solEn').textContent=F.energy(EN.stat('gen',EN.period).sum).text;
+}
+// Клик по узлу/группе/строке мнемосхемы — прокрутка к строке в детальной таблице снизу.
+// Если у узла нет строки-двойника в таблице (шина, аккумуляторы, сброс) — просто подсвечиваем сам узел.
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-sel]'); if(!b) return;
+  var id=b.dataset.sel, rowId=null;
+  if(id==='solar') rowId='trow_solar';
+  else if(id.indexOf('g_')===0) rowId='tgrp_'+id.slice(2);
+  else if(id!=='bus'&&id!=='batt'&&id!=='curt') rowId='trow_'+id;
+  if(rowId){
+    var row=document.getElementById(rowId);
+    if(row){ row.scrollIntoView({behavior:'smooth',block:'center'}); row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash'); setTimeout(function(){ row.classList.remove('flash'); },1200); }
+  }else{
+    b.classList.remove('pulse'); void b.offsetWidth; b.classList.add('pulse'); setTimeout(function(){ b.classList.remove('pulse'); },600);
+  }
+});
+
+// Поповер у «Солнечных панелей»: открывается кнопкой «i», внутри — календарь по часам
+// (тепловая карта «день × час»), а не всегда развёрнутая секция, как раньше.
+var dialPopOpen=false;
+function setDialPop(open){
+  dialPopOpen=open; $('dialPop').hidden=!open; $('dialInfoBtn').setAttribute('aria-expanded',open?'true':'false');
+  if(open) drawHeat();
+}
+$('dialInfoBtn').addEventListener('click',function(e){ e.stopPropagation(); setDialPop(!dialPopOpen); });
+$('dialPopClose').addEventListener('click',function(e){ e.stopPropagation(); setDialPop(false); });
+$('dialPop').addEventListener('click',function(e){ e.stopPropagation(); });
+document.addEventListener('click',function(e){
+  if(dialPopOpen&&!e.target.closest('#dialPop')&&!e.target.closest('#dialInfoBtn')) setDialPop(false);
+});
+
+/* ================= Профиль суток — циферблат у узла «Солнце» (вариант 4) ================= */
+var CX=240, CY=240, R0=132, RMAX=52;
+function pol(r,deg){ var a=(deg-90)*Math.PI/180; return [CX+r*Math.cos(a),CY+r*Math.sin(a)]; }
+function sector(r0,r1,d0,d1){
+  var a=pol(r1,d0), b=pol(r1,d1), c=pol(r0,d1), d=pol(r0,d0), big=(d1-d0)>180?1:0;
+  return 'M'+a[0].toFixed(2)+' '+a[1].toFixed(2)+' A'+r1+' '+r1+' 0 '+big+' 1 '+b[0].toFixed(2)+' '+b[1].toFixed(2)+' L'+c[0].toFixed(2)+' '+c[1].toFixed(2)+' A'+r0+' '+r0+' 0 '+big+' 0 '+d[0].toFixed(2)+' '+d[1].toFixed(2)+' Z';
+}
+function el(tag,attrs,parent){ var e=document.createElementNS(NS,tag); for(var k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+var sunDial=$('sunDial'), prodBars=[], consBars=[], hand, handDot, ringArc2, ringPct2, ringJ2, wedges=[], prof=null, hoverH=-1;
+function buildDial(){
+  sunDial.innerHTML='';
+  el('circle',{cx:CX,cy:CY,r:206,fill:'#0A0F20',stroke:'#1B2547','stroke-width':1},sunDial);
+  el('circle',{cx:CX,cy:CY,r:R0,fill:'none',stroke:'#2B3563','stroke-width':1,'stroke-dasharray':'3 5'},sunDial);
+  [R0-RMAX,R0+RMAX].forEach(function(r){ el('circle',{cx:CX,cy:CY,r:r,fill:'none',stroke:'#1B2547','stroke-width':1},sunDial); });
+  for(var h=0;h<24;h++){
+    var d0=h*15+0.4, d1=(h+1)*15-0.4, sf=EN.sunFactor((h+0.5)*3600);
+    el('path',{d:sector(190,200,d0,d1),fill:'rgba(255,221,87,'+(0.1+0.85*sf).toFixed(2)+')'},sunDial);
+    prodBars.push(el('path',{d:'',fill:'#FFDD57',opacity:.9},sunDial));
+    consBars.push(el('path',{d:'',fill:'#5AA9FF',opacity:.9},sunDial));
+    if(h%3===0){
+      var t=pol(220,h*15+0), tk1=pol(203,h*15), tk2=pol(209,h*15);
+      el('line',{x1:tk1[0],y1:tk1[1],x2:tk2[0],y2:tk2[1],stroke:'#606A8A','stroke-width':1.5},sunDial);
+      var tx=el('text',{x:t[0],y:t[1]+4,'text-anchor':'middle','font-size':12,fill:'#9CA6C4'},sunDial); tx.textContent=(h<10?'0':'')+h+':00';
+    }
+  }
+  el('circle',{cx:CX,cy:CY,r:60,fill:'#0B1022',stroke:'#16203C'},sunDial);
+  el('circle',{cx:CX,cy:CY,r:53,fill:'none',stroke:'#16203C','stroke-width':9},sunDial);
+  ringArc2=el('circle',{cx:CX,cy:CY,r:53,fill:'none',stroke:'#4FD1E7','stroke-width':9,'stroke-linecap':'round',transform:'rotate(-90 '+CX+' '+CY+')','stroke-dasharray':'0 400'},sunDial);
+  ringPct2=el('text',{x:CX,y:CY+2,'text-anchor':'middle','font-size':22,'font-weight':500,fill:'#E9ECF7'},sunDial);
+  ringJ2=el('text',{x:CX,y:CY+20,'text-anchor':'middle','font-size':11,fill:'#9CA6C4'},sunDial);
+  hand=el('line',{x1:CX,y1:CY,x2:CX,y2:CY,stroke:'#fff','stroke-width':1.5,opacity:.85,'stroke-linecap':'round'},sunDial);
+  handDot=el('circle',{cx:CX,cy:CY,r:4.5,fill:'#fff'},sunDial);
+  for(h=0;h<24;h++){
+    var w=el('path',{d:sector(60,208,h*15,(h+1)*15),class:'c-wedge','data-h':h},sunDial); wedges.push(w);
+  }
+}
+sunDial.addEventListener('pointermove',function(e){ var w=e.target.closest&&e.target.closest('.c-wedge'); if(w){ hoverH=Number(w.dataset.h); showHour(); } });
+sunDial.addEventListener('pointerleave',function(){ hoverH=-1; $('sunDialRead').innerHTML='Наведите курсор на любой час циферблата.'; });
+function showHour(){
+  if(!prof||hoverH<0) return; var h=hoverH, g=prof.gen.mean[h], d=prof.dem.mean[h], b=g-d;
+  $('sunDialRead').innerHTML='<b>'+(h<10?'0':'')+h+':00 – '+((h+1)%24<10?'0':'')+((h+1)%24)+':00</b> · в среднем '+prof.label+
+    '<div class="r"><span>Выработка <b>'+F.power(g).text+'</b> <span style="color:var(--text-muted)">('+F.power(prof.gen.min[h]).text+' … '+F.power(prof.gen.max[h]).text+')</span></span>'+
+    '<span>Потребность <b>'+F.power(d).text+'</b></span><span>Баланс <b style="color:'+(b>=0?'var(--good)':'var(--bad)')+'">'+(b>=0?'+':'−')+F.power(Math.abs(b)).text+'</b></span></div>';
+}
+function profileOf(key,minutes){
+  var arr=EN.strip(key,minutes), t0=EN.tNow()-minutes, buckets={}, i;
+  for(i=0;i<minutes;i++){
+    var tt=EN.timeOf(t0+i), id=tt.day*24+tt.hh, b=buckets[id]||(buckets[id]={h:tt.hh,s:0,n:0}); b.s+=arr[i]; b.n++;
+  }
+  var mean=new Float64Array(24), mn=new Float64Array(24).fill(Infinity), mx=new Float64Array(24).fill(0), cnt=new Float64Array(24);
+  Object.keys(buckets).forEach(function(k){ var b=buckets[k], v=b.s/b.n; mean[b.h]+=v; cnt[b.h]++; if(v<mn[b.h]) mn[b.h]=v; if(v>mx[b.h]) mx[b.h]=v; });
+  for(i=0;i<24;i++){ mean[i]=cnt[i]?mean[i]/cnt[i]:0; if(!isFinite(mn[i])) mn[i]=0; }
+  return {mean:mean,min:mn,max:mx};
+}
+function updateDialData(){
+  var p=EN.period, minutes=(p==='h1'||p==='d1')?1440:EN.PMAP[p].min;
+  prof={gen:profileOf('gen',minutes),dem:profileOf('demand',minutes),label:(p==='h1'||p==='d1')?'за последние 24 часа':EN.PMAP[p].phrase};
+  $('sunDialNote').textContent=(p==='h1'?'Для часа профиль показан за последние 24 часа. ':'')+'Каждый сектор — один час суток, усреднённый '+prof.label+'.';
+  var top=1; for(var h=0;h<24;h++) top=Math.max(top,prof.gen.mean[h],prof.dem.mean[h]);
+  var k=RMAX/top;
+  for(h=0;h<24;h++){
+    var d0=h*15+0.6, d1=(h+1)*15-0.6, lg=prof.gen.mean[h]*k, ld=prof.dem.mean[h]*k;
+    prodBars[h].setAttribute('d',lg>0.4?sector(R0+1,R0+1+lg,d0,d1):'');
+    consBars[h].setAttribute('d',ld>0.4?sector(R0-1-ld,R0-1,d0,d1):'');
+  }
+  showHour();
+}
+function liveDial(){
+  var c=EN.cur, deg=c.clock/86400*360, a=pol(206,deg), b=pol(63,deg);
+  hand.setAttribute('x1',b[0]); hand.setAttribute('y1',b[1]); hand.setAttribute('x2',a[0]); hand.setAttribute('y2',a[1]); handDot.setAttribute('cx',a[0]); handDot.setAttribute('cy',a[1]);
+  ringArc2.setAttribute('stroke-dasharray',(333*c.pct/100).toFixed(1)+' 400'); ringArc2.setAttribute('stroke',c.pct<15?'#F4557B':'#4FD1E7');
+  ringPct2.textContent=F.pct(c.pct); var s=F.stored(c.stored); ringJ2.textContent=s.text;
+}
+var sunDialPopOpen=false;
+function setSunDialPop(open){
+  sunDialPopOpen=open; $('sunDialPop').hidden=!open; $('sunInfoBtn').setAttribute('aria-expanded',open?'true':'false');
+  if(open) updateDialData();
+}
+$('sunInfoBtn').addEventListener('click',function(e){ e.stopPropagation(); setSunDialPop(!sunDialPopOpen); });
+$('sunDialPopClose').addEventListener('click',function(e){ e.stopPropagation(); setSunDialPop(false); });
+$('sunDialPop').addEventListener('click',function(e){ e.stopPropagation(); });
+document.addEventListener('click',function(e){
+  if(sunDialPopOpen&&!e.target.closest('#sunDialPop')&&!e.target.closest('#sunInfoBtn')) setSunDialPop(false);
+});
+
+/* ================= Календарь по часам (вариант 4) ================= */
+var METRICS=[
+  {id:'bal', label:'Баланс',      note:'Зелёное — выработка больше потребления (излишек), красное — меньше (нехватка).'},
+  {id:'sup', label:'Обеспечение', note:'Какая доля потребности была закрыта. Красное — провалы, зелёное — норма.'},
+  {id:'gen', label:'Выработка',   note:'Сколько вырабатывали панели.'},
+  {id:'dem', label:'Потребление', note:'Сколько энергии просили установки.'},
+  {id:'chg', label:'Заряд',       note:'Наполненность аккумуляторов в процентах.'}
+], metric='bal', cv=$('hmCv'), ctx=cv.getContext('2d'), hmHover=null, geom=null;
+function buildTools(){
+  $('hmTools').innerHTML=METRICS.map(function(m){ return '<button type="button" class="en-btn'+(m.id===metric?' active':'')+'" data-m="'+m.id+'">'+m.label+'</button>'; }).join('');
+}
+$('hmTools').addEventListener('click',function(e){ var b=e.target.closest('[data-m]'); if(!b) return; metric=b.dataset.m; buildTools(); drawHeat(); });
+function lerp(a,b,t){ return a+(b-a)*t; }
+function mix(c1,c2,t){ return [lerp(c1[0],c2[0],t),lerp(c1[1],c2[1],t),lerp(c1[2],c2[2],t)]; }
+var DARK=[13,19,38];
+function colorOf(v,scale){
+  if(v!==v) return null;
+  var t;
+  if(metric==='bal'){ t=Math.max(-1,Math.min(1,v/scale)); return t>=0?mix(DARK,[74,222,155],Math.pow(t,.7)):mix(DARK,[244,85,123],Math.pow(-t,.7)); }
+  if(metric==='sup'){ t=Math.max(0,Math.min(1,v/100)); return t<.6?mix([244,85,123],[240,185,61],t/.6):mix([240,185,61],[74,222,155],(t-.6)/.4); }
+  t=Math.max(0,Math.min(1,v/scale)); var base=metric==='gen'?[255,221,87]:metric==='dem'?[90,169,255]:[79,209,231]; return mix(DARK,base,Math.pow(t,.8));
+}
+function cellValues(days){
+  var p=EN.period;
+  if(p==='h1'){
+    var s=function(k){ return EN.strip(k,60); };
+    var A=metric==='bal'?s('balance'):metric==='gen'?s('gen'):metric==='dem'?s('demand'):null, out=new Float64Array(60), i;
+    if(metric==='sup'){ var su=s('supply'), de=s('demand'); for(i=0;i<60;i++) out[i]=de[i]>0?su[i]/de[i]*100:100; }
+    else if(metric==='chg'){ var st=s('stored'), cp=s('capKWh'); for(i=0;i<60;i++) out[i]=cp[i]>0?st[i]/cp[i]*100:0; }
+    else out=A;
+    return {rows:1,cols:60,cells:out,labels:['последний час']};
+  }
+  var g=function(k){ return EN.grid(k,days); }, rows, out, r, h;
+  if(metric==='sup'){ var a=g('supply'), b=g('demand'); rows=a; out=new Float64Array(days*24); for(r=0;r<days;r++) for(h=0;h<24;h++){ var d=b[r].cells[h]; out[r*24+h]=d>0?a[r].cells[h]/d*100:(d===d?100:NaN); } }
+  else if(metric==='chg'){ var a2=g('stored'), b2=g('capKWh'); rows=a2; out=new Float64Array(days*24); for(r=0;r<days;r++) for(h=0;h<24;h++){ var c=b2[r].cells[h]; out[r*24+h]=c>0?a2[r].cells[h]/c*100:NaN; } }
+  else { rows=g(metric==='bal'?'balance':metric==='gen'?'gen':'demand'); out=new Float64Array(days*24); for(r=0;r<days;r++) for(h=0;h<24;h++) out[r*24+h]=rows[r].cells[h]; }
+  return {rows:days,cols:24,cells:out,labels:rows.map(function(x){ return x.day; })};
+}
+function drawHeat(){
+  if($('dialPop').hidden) return; // не тратим время, пока поповер закрыт
+  var p=EN.period, days=p==='h1'?1:p==='d1'?2:p==='d7'?7:p==='d30'?30:90, d=cellValues(days);
+  var W=$('hm').clientWidth; if(!W) return;
+  var ml=40, mt=20, mr=4, cw=(W-ml-mr)/d.cols, ch=d.rows===1?34:Math.max(5,Math.min(24,Math.floor(360/d.rows))), H=mt+d.rows*ch+6, dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); cv.style.width=W+'px'; cv.style.height=H+'px'; ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
+  var scale=1, i, vmax=0;
+  for(i=0;i<d.cells.length;i++){ var v=d.cells[i]; if(v===v){ var av=metric==='bal'?Math.abs(v):v; if(av>vmax) vmax=av; } }
+  scale=vmax>0?vmax:1;
+  ctx.font='11px "IBM Plex Mono",monospace'; ctx.fillStyle='#606A8A'; ctx.textBaseline='alphabetic';
+  if(d.cols===24){ ctx.textAlign='center'; for(var h=0;h<24;h+=3) ctx.fillText((h<10?'0':'')+h,ml+cw*(h+0.5),12); }
+  else { ctx.textAlign='center'; [0,15,30,45].forEach(function(m){ ctx.fillText('−'+(60-m)+' м',ml+cw*(m+0.5),12); }); ctx.fillText('сейчас',ml+cw*59.2,12); }
+  var step=Math.max(1,Math.ceil(d.rows/9)); ctx.textAlign='right';
+  for(var r=0;r<d.rows;r++){
+    if(d.cols===24&&(r%step===0||r===d.rows-1)){ ctx.fillStyle='#606A8A'; ctx.fillText('Д'+d.labels[r],ml-6,mt+r*ch+ch/2+4); }
+    for(var c=0;c<d.cols;c++){
+      var col=colorOf(d.cells[r*d.cols+c],scale), x=ml+c*cw, y=mt+r*ch;
+      if(col){ ctx.fillStyle='rgb('+col[0]+','+col[1]+','+col[2]+')'; ctx.fillRect(x,y,cw+0.6,ch+0.6); }
+      else { ctx.fillStyle='#0A0F20'; ctx.fillRect(x,y,cw+0.6,ch+0.6); }
+    }
+  }
+  if(ch>=8&&d.cols===24){ ctx.strokeStyle='rgba(8,12,27,.55)'; ctx.lineWidth=1; for(var rr=1;rr<d.rows;rr++){ ctx.beginPath(); ctx.moveTo(ml,mt+rr*ch+.5); ctx.lineTo(W-mr,mt+rr*ch+.5); ctx.stroke(); } }
+  geom={ml:ml,mt:mt,cw:cw,ch:ch,d:d,scale:scale};
+  if(hmHover&&hmHover.r<d.rows&&hmHover.c<d.cols){ ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.strokeRect(ml+hmHover.c*cw,mt+hmHover.r*ch,cw,ch); }
+  var m=METRICS.filter(function(x){ return x.id===metric; })[0]; $('hmNote').textContent=m.note+' '+(p==='h1'?'Одна строка — минуты последнего часа.':'Строки — игровые дни, столбцы — часы суток.');
+  var g=$('lgGrad'), stops=[], N=8, t;
+  for(i=0;i<=N;i++){ t=i/N; var v=metric==='bal'?(t*2-1)*scale:metric==='sup'||metric==='chg'?t*100:t*scale, cc=colorOf(v,scale); stops.push('rgb('+Math.round(cc[0])+','+Math.round(cc[1])+','+Math.round(cc[2])+')'); }
+  g.style.background='linear-gradient(90deg,'+stops.join(',')+')';
+  var fm=function(v){ return metric==='sup'||metric==='chg'?F.pct(v):(v<0?'−':(metric==='bal'?'+':''))+F.power(Math.abs(v)).text; };
+  $('lgMin').textContent=metric==='bal'?fm(-scale):metric==='sup'||metric==='chg'?'0%':'0'; $('lgMax').textContent=fm(metric==='sup'||metric==='chg'?100:scale);
+}
+cv.addEventListener('pointermove',function(e){
+  if(!geom) return; var r=cv.getBoundingClientRect(), x=e.clientX-r.left-geom.ml, y=e.clientY-r.top-geom.mt;
+  var c=Math.floor(x/geom.cw), rr=Math.floor(y/geom.ch);
+  if(c<0||rr<0||c>=geom.d.cols||rr>=geom.d.rows){ hmHover=null; drawHeat(); return; }
+  hmHover={r:rr,c:c}; drawHeat();
+  var v=geom.d.cells[rr*geom.d.cols+c], txt;
+  if(v!==v) txt='нет данных'; else if(metric==='sup'||metric==='chg') txt=F.pct(v,1); else txt=(metric==='bal'&&v>0?'+':'')+(v<0?'−':'')+F.power(Math.abs(v)).text;
+  var when=geom.d.cols===24?'Игровой день '+geom.d.labels[rr]+' · '+(c<10?'0':'')+c+':00–'+((c+1)%24<10?'0':'')+((c+1)%24)+':00':'Минута '+(c+1)+' из 60 последнего часа';
+  $('hmRead').innerHTML=when+' · '+METRICS.filter(function(x){return x.id===metric;})[0].label+': <b>'+txt+'</b>';
+});
+cv.addEventListener('pointerleave',function(){ hmHover=null; drawHeat(); });
+
+/* ================= KPI-полоса + детальная таблица (вариант 1) ================= */
+function kpi(l,v,s){ return '<div class="d-kpi"><div class="d-kpi-l">'+l+'</div><div class="d-kpi-v">'+v+'</div><div class="d-kpi-s">'+(s||'&nbsp;')+'</div></div>'; }
+function table(p,totalUsed){
+  var c=EN.cur, rows='';
+  rows+='<thead><tr><th>Источник / потребитель</th><th>Кол-во</th><th>Установлено</th><th>Сейчас</th><th>Загрузка</th><th>Энергия '+EN.PMAP[p].phrase+'</th><th>Доля</th></tr></thead><tbody>';
+  var gs=EN.stat('gen',p), np=EN.counts.solar*EN.SOLAR_KW;
+  rows+='<tr class="grp"><td colspan="7">Источники</td></tr>';
+  rows+='<tr id="trow_solar"><td><i class="d-dot" style="background:#FFDD57"></i>Солнечные панели</td><td>'+EN.counts.solar+'</td><td>'+F.power(np).text+'</td><td>'+F.power(c.gen).text+'</td><td>'+F.pct(np>0?c.gen/np*100:0)+'</td><td>'+F.energy(gs.sum).text+'</td><td class="dim">—</td></tr>';
+  EN.GROUPS.forEach(function(gr){
+    var list=activeConsumers().filter(function(x){ return x.group===gr.id; }); if(!list.length) return;
+    rows+='<tr class="grp" id="tgrp_'+gr.id+'"><td colspan="7">'+gr.name+'</td></tr>';
+    list.forEach(function(x){
+      var inst=EN.counts[x.id]*x.kw, now=c.cons[x.id]||0, e=EN.stat(x.id,p).sum, sh=totalUsed>0?e/totalUsed*100:0;
+      rows+='<tr id="trow_'+x.id+'"><td><i class="d-dot" style="background:'+x.color+'"></i>'+x.name+'</td><td>'+EN.counts[x.id]+'</td><td>'+F.power(inst).text+'</td><td>'+F.power(now).text+'</td><td>'+F.pct(inst>0?now/inst*100:0)+'</td><td>'+F.energy(e).text+'</td><td>'+F.pct(sh,1)+'<span class="d-mini"><i style="width:'+Math.min(100,sh*2.2)+'%;background:'+x.color+'"></i></span></td></tr>';
+    });
+  });
+  var instAll=activeConsumers().reduce(function(a,x){ return a+EN.counts[x.id]*x.kw; },0), cntAll=activeConsumers().reduce(function(a,x){ return a+EN.counts[x.id]; },0);
+  rows+='<tr class="tot"><td>Итого потребители</td><td>'+cntAll+'</td><td>'+F.power(instAll).text+'</td><td>'+F.power(c.supply).text+'</td><td>'+F.pct(instAll>0?c.supply/instAll*100:0)+'</td><td>'+F.energy(totalUsed).text+'</td><td>100%</td></tr></tbody>';
+  $('tbl').innerHTML=rows;
+}
+function heavy(){
+  var p=EN.period, ph=EN.PMAP[p].phrase;
+  var g=EN.stat('gen',p), d=EN.stat('demand',p), s=EN.stat('supply',p), cu=EN.stat('curtail',p), b=EN.stat('stored',p);
+  var ratio=d.sum>0?s.sum/d.sum*100:100, defMin=EN.deficitMinutes(p);
+  $('strip').innerHTML=
+    kpi('Выработано',F.energy(g.sum).text,ph)+
+    kpi('Обеспечено',F.energy(s.sum).text,'из '+F.energy(d.sum).text+' нужных')+
+    kpi('Обеспеченность',F.pct(ratio,1),'дефицит '+F.dur(defMin/60))+
+    kpi('Сброшено излишка',F.energy(cu.sum).text,F.pct(g.sum>0?cu.sum/g.sum*100:0)+' выработки')+
+    kpi('Заряд, диапазон','<span style="font-size:14px;white-space:normal;line-height:1.35">от '+F.stored(b.min).text+'<br>до '+F.stored(b.max).text+'</span>','среднее '+F.stored(b.mean).text)+
+    kpi('Пик выработки / нагрузки',F.power(g.max).text+' / '+F.power(d.max).text,'');
+  drawHeat();
+  if(sunDialPopOpen) updateDialData();
+  table(p,s.sum);
+}
+
+/* ================= цикл обновления ================= */
+var dirty=true, lastHeavy=0, lastLayout=0;
+EN.on('data',function(){ dirty=true; });
+EN.on('period',function(){ dirty=true; lastHeavy=0; });
+EN.on('reset',function(){ buildCons(); buildTiles(); buildFlows(); dirty=true; lastHeavy=0; heavy(); layoutFlows(); });
+EN.on('frame',function(){
+  live(); animateFlows(); if(sunDialPopOpen) liveDial();
+  var now=performance.now();
+  if(now-lastLayout>400){ lastLayout=now; layoutFlows(); }
+  if(dirty&&now-lastHeavy>350){ dirty=false; lastHeavy=now; heavy(); }
+});
+window.addEventListener('resize',function(){ layoutFlows(); drawHeat(); });
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(layoutFlows);
+buildTools(); buildDial();
+EN.start();
+})();
+</script>
+</body>
+</html>

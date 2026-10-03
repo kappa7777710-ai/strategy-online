@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Рабочие — Карта базы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="workers-core.css">
+<style>
+.shuttle-strip{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:relative;overflow:hidden;}
+.shuttle-track{position:relative;flex:1;min-width:180px;height:26px;background:repeating-linear-gradient(90deg,var(--border) 0 1px,transparent 1px 18px);border-radius:6px;}
+.shuttle-dot{position:absolute;top:50%;width:9px;height:9px;border-radius:50%;background:var(--class1);transform:translate(-50%,-50%);animation:shuttle-move 4.5s linear infinite;box-shadow:0 0 8px var(--class1);}
+@keyframes shuttle-move{from{left:0%;opacity:0;}10%{opacity:1;}90%{opacity:1;}to{left:100%;opacity:0;}}
+.shuttle-info{font-size:12px;color:var(--text-secondary);white-space:nowrap;}
+.shuttle-info b{color:var(--text-primary);font-family:var(--font-mono);}
+
+.map-grid{display:grid;grid-template-columns:1fr 320px;gap:14px;align-items:start;}
+@media (max-width:920px){ .map-grid{grid-template-columns:1fr;} }
+.mapbox{background:radial-gradient(90% 90% at 50% 10%,rgba(79,209,231,.07),transparent 65%),#070B18;border:1px solid #173A4A;border-radius:14px;padding:18px;display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+.tile{aspect-ratio:1;border-radius:10px;background:var(--card);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:transform .12s,border-color .15s;position:relative;}
+.tile:hover{transform:translateY(-2px);border-color:var(--border-strong);}
+.tile.sel{border-color:var(--c);box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 50%,transparent);}
+.tile svg{width:26px;height:26px;color:var(--c);}
+.tile .t-name{font-size:9.5px;color:var(--text-secondary);text-align:center;padding:0 4px;line-height:1.2;}
+.tile .t-badge{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;}
+.tile.empty{opacity:.35;border-style:dashed;}
+.tile.empty .t-name{color:var(--text-muted);}
+
+.drawer{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;position:sticky;top:14px;min-height:300px;}
+.drawer h3{margin:0 0 4px;font-family:var(--font-display);font-size:17px;}
+.drawer .sub{font-size:11.5px;color:var(--text-muted);margin-bottom:12px;}
+.drawer .metrics{display:flex;gap:14px;margin-bottom:12px;flex-wrap:wrap;}
+.drawer .metrics .m{display:flex;flex-direction:column;gap:2px;}
+.drawer .metrics .m b{font-family:var(--font-mono);font-size:15px;}
+.drawer .metrics .m span{font-size:10px;color:var(--text-muted);}
+.drawer .need-row{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-secondary);margin-bottom:6px;}
+.drawer .need-row .bar{flex:1;height:5px;}
+.drawer .svc-mini{font-size:11.5px;background:var(--card);border-radius:7px;padding:7px 9px;margin-top:6px;border-left:3px solid var(--c);}
+.drawer .svc-mini b{display:block;font-size:12px;}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
+.legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--text-secondary);}
+.legend i{width:8px;height:8px;border-radius:50%;}
+</style>
+</head>
+<body>
+<div class="wk-page">
+  <a class="wk-back" href="index.html">← все варианты</a>
+  <div class="wk-eyebrow">Вкладка «Рабочие» · Вариант 3</div>
+  <h1 class="wk-h1">Карта базы</h1>
+  <p class="wk-sub">Пространственный взгляд: жильё и сервисные постройки каждого класса — плитки на условной карте базы, сгруппированные по зонам. Сверху — «шаттлы» переселенцев, прибывающие с других планет. Клик по плитке открывает карточку в правой панели. Хорошо ложится на будущий вид базы сверху.</p>
+
+  <div class="shuttle-strip" id="shuttle"></div>
+
+  <div class="map-grid">
+    <div>
+      <div class="mapbox" id="map"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="drawer" id="drawer"></div>
+  </div>
+
+  <p class="footnote">Сейчас плитки расставлены по зонам (классам) слева направо; когда появится настоящая карта участка, те же данные лягут на реальные координаты построек.</p>
+</div>
+
+<script src="workers-data.js"></script>
+<script>
+const D=WORKERS_DATA, r=D.recruit;
+document.getElementById('shuttle').innerHTML=
+  '<div class="shuttle-info">Приток переселенцев<br><b>'+r.actualRate.toFixed(2)+' чел/ч</b></div>'+
+  '<div class="shuttle-track">'+[0,0.9,1.8,2.7].map(d=>'<div class="shuttle-dot" style="animation-delay:-'+d+'s"></div>').join('')+'</div>'+
+  '<div class="shuttle-info">'+r.pop+' / '+r.cap+' расселено · '+r.room+' мест свободно</div>';
+
+const ICONS={
+  house:'<path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/>',
+  svc:'<rect x="4" y="7" width="16" height="12" rx="1.5"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+};
+
+const tiles=[];
+D.classes.forEach(c=>{
+  tiles.push({kind:'house',cls:c,label:c.housing.name.replace(/^Жилой блок: /,''),data:{type:'housing',c}});
+  c.services.forEach(sv=>tiles.push({kind:'svc',cls:c,label:sv.name,data:{type:'service',c,sv}}));
+  tiles.push({kind:'empty'});
+});
+document.getElementById('map').innerHTML=tiles.map((t,i)=>{
+  if(t.kind==='empty') return '<div class="tile empty"></div>';
+  const stateColor = t.kind==='svc' ? (t.data.sv.state==='full'?'var(--good)':'var(--tier1)') : 'var(--good)';
+  return '<div class="tile" data-i="'+i+'" style="--c:var(--'+t.cls.color+')"><span class="t-badge" style="background:'+stateColor+'"></span>'+
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">'+ICONS[t.kind]+'</svg>'+
+    '<div class="t-name">'+t.label+'</div></div>';
+}).join('');
+
+document.getElementById('legend').innerHTML=D.classes.map(c=>'<span><i style="background:var(--'+c.color+')"></i>'+c.name+'</span>').join('');
+
+function renderDrawer(t){
+  const c=t.data.c;
+  if(t.data.type==='housing'){
+    const h=t.data.c.housing;
+    document.getElementById('drawer').innerHTML=
+      '<h3 style="color:var(--'+c.color+')">'+h.name+'</h3><div class="sub">Жильё · класс «'+c.name+'»</div>'+
+      '<div class="metrics"><div class="m"><b>'+h.count+'</b><span>построено</span></div><div class="m"><b>'+h.totalCap+'</b><span>мест</span></div></div>'+
+      '<div class="svc-mini" style="--c:var(--'+c.color+')"><b>Цена постройки</b>'+Object.entries(h.cost).map(([k,v])=>v+' '+k).join(' + ')+'</div>';
+  }else{
+    const sv=t.data.sv;
+    const label=REASON_LABELS_DEMO[sv.state]||sv.state;
+    document.getElementById('drawer').innerHTML=
+      '<h3 style="color:var(--'+c.color+')">'+sv.name+'</h3><div class="sub">Постройка · класс «'+c.name+'» · ×'+sv.count+'</div>'+
+      '<div class="metrics"><div class="m"><b>'+Math.round(sv.util*100)+'%</b><span>загрузка</span></div><div class="m"><b>'+sv.cycle+'</b><span>цикл</span></div></div>'+
+      '<div class="bar" style="height:7px;margin-bottom:8px"><i style="width:'+Math.round(sv.util*100)+'%;background:var(--'+c.color+')"></i></div>'+
+      '<div class="sub" style="margin-bottom:10px">'+label+'</div>'+
+      '<div class="svc-mini" style="--c:var(--'+c.color+')"><b>Рецепт</b>'+sv.recipe+'</div>';
+  }
+}
+
+document.querySelectorAll('.tile[data-i]').forEach(el=>{
+  el.addEventListener('click',()=>{
+    document.querySelectorAll('.tile.sel').forEach(x=>x.classList.remove('sel'));
+    el.classList.add('sel');
+    renderDrawer(tiles[el.dataset.i]);
+  });
+});
+const first=document.querySelector('.tile[data-i]');
+first.classList.add('sel');
+renderDrawer(tiles[first.dataset.i]);
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+/* Вкладка «Планета» (Административный центр). */
+.pl-building{display:flex;align-items:center;gap:16px;padding:16px 18px;}
+.pl-building-icon{width:52px;height:52px;flex-shrink:0;}
+.pl-building-body h3{margin:0 0 6px;font-family:var(--font-display);font-weight:700;font-size:16px;color:var(--text-primary);}
+.pl-building-desc{font-size:12.5px;line-height:1.5;color:var(--text-secondary);max-width:560px;}
+
+.pl-clock{display:flex;align-items:center;gap:14px;padding:14px 16px;}
+.pl-clock-icon{width:42px;height:42px;color:var(--planet);flex-shrink:0;}
+.pl-clock-body{flex:1;display:flex;flex-direction:column;gap:4px;}
+.pl-clock-time{font-family:var(--font-mono);font-size:24px;font-variant-numeric:tabular-nums;color:var(--text-primary);}
+.pl-clock-sub{font-size:12px;color:var(--text-secondary);}
+
+.pl-presets{display:flex;flex-wrap:wrap;gap:8px;}
+.pl-presets button{font-family:var(--font-mono);font-size:12px;background:var(--card);color:var(--text-secondary);border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;transition:background .15s,border-color .15s,color .15s;}
+.pl-presets button:hover{background:var(--card-hover);border-color:var(--border-strong);}
+.pl-presets button.active{background:var(--planet);border-color:var(--planet);color:#0A0D18;}
+
+.pl-nudge{display:flex;gap:8px;margin-top:10px;}
+.pl-nudge button{font-family:var(--font-mono);font-size:13px;background:var(--card);color:var(--text-primary);border:1px solid var(--border);border-radius:8px;padding:8px 18px;cursor:pointer;transition:background .15s,border-color .15s;}
+.pl-nudge button:hover{background:var(--card-hover);border-color:var(--border-strong);}
+
+.pl-admin-note{margin-top:10px;font-size:11px;color:var(--text-muted);}
+
+@media (max-width:560px){ .pl-clock{padding:10px 12px;gap:10px;} .pl-clock-icon{width:32px;height:32px;} .pl-clock-time{font-size:19px;} .pl-building{padding:12px 14px;gap:10px;} .pl-building-icon{width:40px;height:40px;} }

@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Энергосистема · Вариант 4 · Циферблат и календарь</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="energy-core.css">
+<style>
+/* Вариант 4 — «Циферблат и календарь»: суточный ритм на круглом циферблате + тепловая карта «день × час». */
+.c-head{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.c-mini{background:linear-gradient(180deg,#171D33,#12172A);border:1px solid var(--border);border-radius:12px;padding:10px 14px;min-width:0;}
+.c-mini-l{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);}
+.c-mini-v{font-family:var(--font-mono);font-size:22px;font-weight:500;margin-top:2px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.c-mini-s{font-size:12px;color:var(--text-secondary);font-family:var(--font-mono);margin-top:1px;}
+.c-mbar{height:6px;border-radius:3px;background:#0B1022;margin-top:8px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.6);}
+.c-mbar i{display:block;height:100%;transition:width .35s;}
+
+.c-main{display:grid;grid-template-columns:minmax(0,480px) minmax(0,1fr);gap:14px;align-items:start;}
+.c-card{background:linear-gradient(180deg,#151B31,#0F1424);border:1px solid var(--border);border-radius:16px;padding:14px 16px;min-width:0;}
+.c-card h2{margin:0 0 2px;font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:.02em;}
+.c-card p.c-note{margin:0 0 8px;font-size:12px;color:var(--text-secondary);}
+.c-dial svg{display:block;width:100%;height:auto;}
+.c-dial text{font-family:var(--font-mono);}
+.c-wedge{fill:transparent;cursor:crosshair;}
+.c-wedge:hover{fill:rgba(255,255,255,.07);}
+.c-read{min-height:64px;margin-top:6px;padding:9px 12px;border-radius:10px;background:#0B1022;border:1px solid #16203C;font-size:12.5px;color:var(--text-secondary);}
+.c-read b{font-family:var(--font-mono);font-weight:500;color:var(--text-primary);}
+.c-read .r{display:flex;gap:6px 16px;flex-wrap:wrap;margin-top:3px;}
+.c-key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--text-secondary);margin-top:8px;}
+.c-key i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;}
+
+.c-tools{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px;}
+.c-tools .en-btn{font-family:var(--font-body);font-size:12.5px;padding:6px 12px;}
+.c-tools .en-btn.active{background:var(--tier0);border-color:var(--tier0);color:#0A0D18;}
+.c-hm{position:relative;}
+.c-hm canvas{display:block;width:100%;cursor:crosshair;}
+.c-legend{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:11.5px;color:var(--text-secondary);font-family:var(--font-mono);}
+.c-legend .grad{flex:1;max-width:280px;height:10px;border-radius:5px;border:1px solid #16203C;}
+
+.c-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;}
+.c-kpi{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:9px 12px;}
+.c-kpi-l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);}
+.c-kpi-v{font-family:var(--font-mono);font-size:17px;font-weight:500;margin-top:2px;white-space:nowrap;}
+.c-kpi-s{font-size:11px;color:var(--text-secondary);font-family:var(--font-mono);}
+
+@media (max-width:980px){ .c-main{grid-template-columns:1fr;} .c-head{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="en-page">
+  <header>
+    <a class="en-back" href="index.html">← Все варианты</a>
+    <div class="en-eyebrow">Вариант 4 · Циферблат и календарь</div>
+    <h1 class="en-h1">Суточный ритм энергосистемы</h1>
+    <p class="en-sub">На циферблате видно, в какие часы суток база вырабатывает и тратит энергию (усреднённо за выбранный период). Тепловая карта показывает то же по дням: где были провалы и излишки.</p>
+  </header>
+  <div id="ctl"></div>
+
+  <section class="c-head">
+    <div class="c-mini"><div class="c-mini-l">Обеспечение</div><div class="c-mini-v" id="hSup">—</div><div class="c-mini-s" id="hSupS">—</div><div class="c-mbar"><i id="hSupB" style="width:0"></i></div></div>
+    <div class="c-mini"><div class="c-mini-l">Производство</div><div class="c-mini-v" id="hProd">—</div><div class="c-mini-s" id="hProdS">—</div><div class="c-mbar"><i id="hProdB" style="width:0;background:#FFDD57"></i></div></div>
+    <div class="c-mini"><div class="c-mini-l">Заряд аккумулятора</div><div class="c-mini-v" id="hBat">—</div><div class="c-mini-s" id="hBatS">—</div><div class="c-mbar"><i id="hBatB" style="width:0;background:#4FD1E7"></i></div></div>
+  </section>
+
+  <div id="periods"></div>
+
+  <section class="c-main">
+    <div class="c-card c-dial">
+      <h2>Профиль суток</h2>
+      <p class="c-note" id="dialNote">—</p>
+      <svg id="dial" viewBox="0 0 480 480" role="img" aria-label="Суточный циферблат выработки и потребления"></svg>
+      <div class="c-read" id="dialRead">Наведите курсор на любой час циферблата.</div>
+      <div class="c-key"><span><i style="background:#FFDD57"></i>Выработка (наружу)</span><span><i style="background:#5AA9FF"></i>Потребление (внутрь)</span><span><i style="background:#4FD1E7"></i>Заряд в центре</span></div>
+    </div>
+    <div class="c-card">
+      <h2>Календарь по часам</h2>
+      <p class="c-note" id="hmNote">—</p>
+      <div class="c-tools" id="hmTools" role="group" aria-label="Показатель тепловой карты"></div>
+      <div class="c-hm" id="hm"><canvas id="hmCv"></canvas></div>
+      <div class="c-read" id="hmRead" style="margin-top:10px">Наведите курсор на ячейку карты.</div>
+      <div class="c-legend"><span id="lgMin">—</span><div class="grad" id="lgGrad"></div><span id="lgMax">—</span></div>
+    </div>
+  </section>
+
+  <section class="c-strip" id="strip"></section>
+</div>
+
+<script src="energy-core.js"></script>
+<script>
+(function(){
+var $=function(id){ return document.getElementById(id); }, F=EN.fmt, NS='http://www.w3.org/2000/svg';
+EN.mountControls($('ctl')); EN.mountPeriods($('periods'));
+
+/* ---------- геометрия циферблата ---------- */
+var CX=240, CY=240, R0=132, RMAX=52;
+function pol(r,deg){ var a=(deg-90)*Math.PI/180; return [CX+r*Math.cos(a),CY+r*Math.sin(a)]; }
+function sector(r0,r1,d0,d1){
+  var a=pol(r1,d0), b=pol(r1,d1), c=pol(r0,d1), d=pol(r0,d0), big=(d1-d0)>180?1:0;
+  return 'M'+a[0].toFixed(2)+' '+a[1].toFixed(2)+' A'+r1+' '+r1+' 0 '+big+' 1 '+b[0].toFixed(2)+' '+b[1].toFixed(2)+' L'+c[0].toFixed(2)+' '+c[1].toFixed(2)+' A'+r0+' '+r0+' 0 '+big+' 0 '+d[0].toFixed(2)+' '+d[1].toFixed(2)+' Z';
+}
+function el(tag,attrs,parent){ var e=document.createElementNS(NS,tag); for(var k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+var dial=$('dial'), prodBars=[], consBars=[], sunSegs=[], hand, handDot, ringArc, ringPct, ringJ, wedges=[], prof=null, hoverH=-1;
+function buildDial(){
+  dial.innerHTML='';
+  el('circle',{cx:CX,cy:CY,r:206,fill:'#0A0F20',stroke:'#1B2547','stroke-width':1},dial);
+  el('circle',{cx:CX,cy:CY,r:R0,fill:'none',stroke:'#2B3563','stroke-width':1,'stroke-dasharray':'3 5'},dial);
+  [R0-RMAX,R0+RMAX].forEach(function(r){ el('circle',{cx:CX,cy:CY,r:r,fill:'none',stroke:'#1B2547','stroke-width':1},dial); });
+  for(var h=0;h<24;h++){
+    var d0=h*15+0.4, d1=(h+1)*15-0.4, sf=EN.sunFactor((h+0.5)*3600);
+    sunSegs.push(el('path',{d:sector(190,200,d0,d1),fill:'rgba(255,221,87,'+(0.1+0.85*sf).toFixed(2)+')'},dial));
+    prodBars.push(el('path',{d:'',fill:'#FFDD57',opacity:.9},dial));
+    consBars.push(el('path',{d:'',fill:'#5AA9FF',opacity:.9},dial));
+    if(h%3===0){
+      var t=pol(220,h*15+0), tk1=pol(203,h*15), tk2=pol(209,h*15);
+      el('line',{x1:tk1[0],y1:tk1[1],x2:tk2[0],y2:tk2[1],stroke:'#606A8A','stroke-width':1.5},dial);
+      var tx=el('text',{x:t[0],y:t[1]+4,'text-anchor':'middle','font-size':12,fill:'#9CA6C4'},dial); tx.textContent=(h<10?'0':'')+h+':00';
+    }
+  }
+  // центр: заряд
+  el('circle',{cx:CX,cy:CY,r:60,fill:'#0B1022',stroke:'#16203C'},dial);
+  el('circle',{cx:CX,cy:CY,r:53,fill:'none',stroke:'#16203C','stroke-width':9},dial);
+  ringArc=el('circle',{cx:CX,cy:CY,r:53,fill:'none',stroke:'#4FD1E7','stroke-width':9,'stroke-linecap':'round',transform:'rotate(-90 '+CX+' '+CY+')','stroke-dasharray':'0 400'},dial);
+  ringPct=el('text',{x:CX,y:CY+2,'text-anchor':'middle','font-size':22,'font-weight':500,fill:'#E9ECF7'},dial);
+  ringJ=el('text',{x:CX,y:CY+20,'text-anchor':'middle','font-size':11,fill:'#9CA6C4'},dial);
+  // стрелка «сейчас»
+  hand=el('line',{x1:CX,y1:CY,x2:CX,y2:CY,stroke:'#fff','stroke-width':1.5,opacity:.85,'stroke-linecap':'round'},dial);
+  handDot=el('circle',{cx:CX,cy:CY,r:4.5,fill:'#fff'},dial);
+  for(h=0;h<24;h++){
+    var w=el('path',{d:sector(60,208,h*15,(h+1)*15),class:'c-wedge','data-h':h},dial); wedges.push(w);
+  }
+}
+dial.addEventListener('pointermove',function(e){ var w=e.target.closest&&e.target.closest('.c-wedge'); if(w){ hoverH=Number(w.dataset.h); showHour(); } });
+dial.addEventListener('pointerleave',function(){ hoverH=-1; $('dialRead').innerHTML='Наведите курсор на любой час циферблата.'; });
+function showHour(){
+  if(!prof||hoverH<0) return; var h=hoverH, g=prof.gen.mean[h], d=prof.dem.mean[h], b=g-d;
+  $('dialRead').innerHTML='<b>'+(h<10?'0':'')+h+':00 – '+((h+1)%24<10?'0':'')+((h+1)%24)+':00</b> · в среднем '+prof.label+
+    '<div class="r"><span>Выработка <b>'+F.power(g).text+'</b> <span style="color:var(--text-muted)">('+F.power(prof.gen.min[h]).text+' … '+F.power(prof.gen.max[h]).text+')</span></span>'+
+    '<span>Потребность <b>'+F.power(d).text+'</b></span><span>Баланс <b style="color:'+(b>=0?'var(--good)':'var(--bad)')+'">'+(b>=0?'+':'−')+F.power(Math.abs(b)).text+'</b></span></div>';
+}
+
+/* ---------- профиль суток по периоду ---------- */
+function profileOf(key,minutes){
+  var arr=EN.strip(key,minutes), t0=EN.tNow()-minutes, buckets={}, i;
+  for(i=0;i<minutes;i++){
+    var tt=EN.timeOf(t0+i), id=tt.day*24+tt.hh, b=buckets[id]||(buckets[id]={h:tt.hh,s:0,n:0}); b.s+=arr[i]; b.n++;
+  }
+  var mean=new Float64Array(24), mn=new Float64Array(24).fill(Infinity), mx=new Float64Array(24).fill(0), cnt=new Float64Array(24);
+  Object.keys(buckets).forEach(function(k){ var b=buckets[k], v=b.s/b.n; mean[b.h]+=v; cnt[b.h]++; if(v<mn[b.h]) mn[b.h]=v; if(v>mx[b.h]) mx[b.h]=v; });
+  for(i=0;i<24;i++){ mean[i]=cnt[i]?mean[i]/cnt[i]:0; if(!isFinite(mn[i])) mn[i]=0; }
+  return {mean:mean,min:mn,max:mx};
+}
+function updateDialData(){
+  var p=EN.period, minutes=(p==='h1'||p==='d1')?1440:EN.PMAP[p].min;
+  prof={gen:profileOf('gen',minutes),dem:profileOf('demand',minutes),label:(p==='h1'||p==='d1')?'за последние 24 часа':EN.PMAP[p].phrase};
+  $('dialNote').textContent=(p==='h1'?'Для часа суточный профиль показан за последние 24 часа. ':'')+'Каждый сектор — один час суток, усреднённый '+prof.label+'.';
+  var top=1; for(var h=0;h<24;h++) top=Math.max(top,prof.gen.mean[h],prof.dem.mean[h]);
+  var k=RMAX/top;
+  for(h=0;h<24;h++){
+    var d0=h*15+0.6, d1=(h+1)*15-0.6, lg=prof.gen.mean[h]*k, ld=prof.dem.mean[h]*k;
+    prodBars[h].setAttribute('d',lg>0.4?sector(R0+1,R0+1+lg,d0,d1):'');
+    consBars[h].setAttribute('d',ld>0.4?sector(R0-1-ld,R0-1,d0,d1):'');
+  }
+  showHour();
+}
+function liveDial(){
+  var c=EN.cur, deg=c.clock/86400*360, a=pol(206,deg), b=pol(63,deg);
+  hand.setAttribute('x1',b[0]); hand.setAttribute('y1',b[1]); hand.setAttribute('x2',a[0]); hand.setAttribute('y2',a[1]); handDot.setAttribute('cx',a[0]); handDot.setAttribute('cy',a[1]);
+  ringArc.setAttribute('stroke-dasharray',(333*c.pct/100).toFixed(1)+' 400'); ringArc.setAttribute('stroke',c.pct<15?'#F4557B':'#4FD1E7');
+  ringPct.textContent=F.pct(c.pct); var s=F.stored(c.stored); ringJ.textContent=s.text;
+}
+
+/* ---------- шапка ---------- */
+function liveHead(){
+  var c=EN.cur;
+  $('hSup').textContent=F.pct(c.frac*100,c.frac>0&&c.frac<.995?1:0); $('hSup').style.color=c.frac>=.999?'var(--good)':c.frac>=.5?'#F0B93D':'var(--bad)';
+  $('hSupS').textContent=F.power(c.supply).text+' из '+F.power(c.demand).text; $('hSupB').style.width=(c.frac*100).toFixed(1)+'%'; $('hSupB').style.background=c.frac>=.999?'#4ADE9B':c.frac>=.5?'#F0B93D':'#F4557B';
+  $('hProd').textContent=F.power(c.gen).text; $('hProdS').textContent='из '+F.power(c.nameplate).text+' · солнце '+F.pct(c.sun*100); $('hProdB').style.width=(c.nameplate>0?c.gen/c.nameplate*100:0).toFixed(1)+'%';
+  $('hBat').textContent=F.stored(c.stored).text; $('hBatS').textContent='из '+F.stored(c.cap).text+' · '+(Math.abs(c.flow)<1?'без изменений':c.flow>0?'заряд +'+F.power(c.flow).text:'разряд −'+F.power(-c.flow).text);
+  $('hBatB').style.width=c.pct.toFixed(1)+'%';
+}
+
+/* ---------- тепловая карта ---------- */
+var METRICS=[
+  {id:'bal', label:'Баланс',      note:'Зелёное — выработка больше потребления (излишек), красное — меньше (нехватка).'},
+  {id:'sup', label:'Обеспечение', note:'Какая доля потребности была закрыта. Красное — провалы, зелёное — норма.'},
+  {id:'gen', label:'Выработка',   note:'Сколько вырабатывали панели.'},
+  {id:'dem', label:'Потребление', note:'Сколько энергии просили установки.'},
+  {id:'chg', label:'Заряд',       note:'Наполненность аккумуляторов в процентах.'}
+], metric='bal', hm={cells:null,rows:0,cols:24,label:[]}, cv=$('hmCv'), ctx=cv.getContext('2d'), hmHover=null, geom=null;
+function buildTools(){
+  $('hmTools').innerHTML=METRICS.map(function(m){ return '<button type="button" class="en-btn'+(m.id===metric?' active':'')+'" data-m="'+m.id+'">'+m.label+'</button>'; }).join('');
+}
+$('hmTools').addEventListener('click',function(e){ var b=e.target.closest('[data-m]'); if(!b) return; metric=b.dataset.m; buildTools(); heavy(); });
+function lerp(a,b,t){ return a+(b-a)*t; }
+function mix(c1,c2,t){ return [lerp(c1[0],c2[0],t),lerp(c1[1],c2[1],t),lerp(c1[2],c2[2],t)]; }
+var DARK=[13,19,38];
+function colorOf(v,scale){
+  if(v!==v) return null;
+  var t;
+  if(metric==='bal'){ t=Math.max(-1,Math.min(1,v/scale)); return t>=0?mix(DARK,[74,222,155],Math.pow(t,.7)):mix(DARK,[244,85,123],Math.pow(-t,.7)); }
+  if(metric==='sup'){ t=Math.max(0,Math.min(1,v/100)); return t<.6?mix([244,85,123],[240,185,61],t/.6):mix([240,185,61],[74,222,155],(t-.6)/.4); }
+  t=Math.max(0,Math.min(1,v/scale)); var base=metric==='gen'?[255,221,87]:metric==='dem'?[90,169,255]:[79,209,231]; return mix(DARK,base,Math.pow(t,.8));
+}
+function cellValues(days){
+  var p=EN.period;
+  if(p==='h1'){
+    var s=function(k){ return EN.strip(k,60); };
+    var A=metric==='bal'?s('balance'):metric==='gen'?s('gen'):metric==='dem'?s('demand'):null, out=new Float64Array(60), i;
+    if(metric==='sup'){ var su=s('supply'), de=s('demand'); for(i=0;i<60;i++) out[i]=de[i]>0?su[i]/de[i]*100:100; }
+    else if(metric==='chg'){ var st=s('stored'), cp=s('capKWh'); for(i=0;i<60;i++) out[i]=cp[i]>0?st[i]/cp[i]*100:0; }
+    else out=A;
+    return {rows:1,cols:60,cells:out,labels:['последний час']};
+  }
+  var g=function(k){ return EN.grid(k,days); }, rows, out, r, h;
+  if(metric==='sup'){ var a=g('supply'), b=g('demand'); rows=a; out=new Float64Array(days*24); for(r=0;r<days;r++) for(h=0;h<24;h++){ var d=b[r].cells[h]; out[r*24+h]=d>0?a[r].cells[h]/d*100:(d===d?100:NaN); } }
+  else if(metric==='chg'){ var a2=g('stored'), b2=g('capKWh'); rows=a2; out=new Float64Array(days*24); for(r=0;r<days;r++) for(h=0;h<24;h++){ var c=b2[r].cells[h]; out[r*24+h]=c>0?a2[r].cells[h]/c*100:NaN; } }
+  else { rows=g(metric==='bal'?'balance':metric==='gen'?'gen':'demand'); out=new Float64Array(days*24); for(r=0;r<days;r++) for(h=0;h<24;h++) out[r*24+h]=rows[r].cells[h]; }
+  return {rows:days,cols:24,cells:out,labels:rows.map(function(x){ return x.day; })};
+}
+function drawHeat(){
+  var p=EN.period, days=p==='h1'?1:p==='d1'?2:p==='d7'?7:p==='d30'?30:90, d=cellValues(days);
+  var W=$('hm').clientWidth; if(!W) return;
+  var ml=40, mt=20, mr=4, cw=(W-ml-mr)/d.cols, ch=d.rows===1?34:Math.max(5,Math.min(24,Math.floor(360/d.rows))), H=mt+d.rows*ch+6, dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); cv.style.width=W+'px'; cv.style.height=H+'px'; ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
+  var scale=1, i, vmax=0;
+  for(i=0;i<d.cells.length;i++){ var v=d.cells[i]; if(v===v){ var av=metric==='bal'?Math.abs(v):v; if(av>vmax) vmax=av; } }
+  scale=vmax>0?vmax:1;
+  ctx.font='11px "IBM Plex Mono",monospace'; ctx.fillStyle='#606A8A'; ctx.textBaseline='alphabetic';
+  if(d.cols===24){ ctx.textAlign='center'; for(var h=0;h<24;h+=3) ctx.fillText((h<10?'0':'')+h,ml+cw*(h+0.5),12); }
+  else { ctx.textAlign='center'; [0,15,30,45].forEach(function(m){ ctx.fillText('−'+(60-m)+' м',ml+cw*(m+0.5),12); }); ctx.fillText('сейчас',ml+cw*59.2,12); }
+  var step=Math.max(1,Math.ceil(d.rows/9)); ctx.textAlign='right';
+  for(var r=0;r<d.rows;r++){
+    if(d.cols===24&&(r%step===0||r===d.rows-1)){ ctx.fillStyle='#606A8A'; ctx.fillText('Д'+d.labels[r],ml-6,mt+r*ch+ch/2+4); }
+    for(var c=0;c<d.cols;c++){
+      var col=colorOf(d.cells[r*d.cols+c],scale), x=ml+c*cw, y=mt+r*ch;
+      if(col){ ctx.fillStyle='rgb('+col[0]+','+col[1]+','+col[2]+')'; ctx.fillRect(x,y,cw+0.6,ch+0.6); }
+      else { ctx.fillStyle='#0A0F20'; ctx.fillRect(x,y,cw+0.6,ch+0.6); }
+    }
+  }
+  if(ch>=8&&d.cols===24){ ctx.strokeStyle='rgba(8,12,27,.55)'; ctx.lineWidth=1; for(var rr=1;rr<d.rows;rr++){ ctx.beginPath(); ctx.moveTo(ml,mt+rr*ch+.5); ctx.lineTo(W-mr,mt+rr*ch+.5); ctx.stroke(); } }
+  geom={ml:ml,mt:mt,cw:cw,ch:ch,d:d,scale:scale};
+  if(hmHover&&hmHover.r<d.rows&&hmHover.c<d.cols){ ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.strokeRect(ml+hmHover.c*cw,mt+hmHover.r*ch,cw,ch); }
+  var m=METRICS.filter(function(x){ return x.id===metric; })[0]; $('hmNote').textContent=m.note+' '+(p==='h1'?'Одна строка — минуты последнего часа.':'Строки — игровые дни, столбцы — часы суток.');
+  // легенда
+  var g=$('lgGrad'), stops=[], N=8, t;
+  for(i=0;i<=N;i++){ t=i/N; var v=metric==='bal'?(t*2-1)*scale:metric==='sup'||metric==='chg'?t*100:t*scale, cc=colorOf(v,scale); stops.push('rgb('+Math.round(cc[0])+','+Math.round(cc[1])+','+Math.round(cc[2])+')'); }
+  g.style.background='linear-gradient(90deg,'+stops.join(',')+')';
+  var fm=function(v){ return metric==='sup'||metric==='chg'?F.pct(v):(v<0?'−':(metric==='bal'?'+':''))+F.power(Math.abs(v)).text; };
+  $('lgMin').textContent=metric==='bal'?fm(-scale):metric==='sup'||metric==='chg'?'0%':'0'; $('lgMax').textContent=fm(metric==='sup'||metric==='chg'?100:scale);
+}
+cv.addEventListener('pointermove',function(e){
+  if(!geom) return; var r=cv.getBoundingClientRect(), x=e.clientX-r.left-geom.ml, y=e.clientY-r.top-geom.mt;
+  var c=Math.floor(x/geom.cw), rr=Math.floor(y/geom.ch);
+  if(c<0||rr<0||c>=geom.d.cols||rr>=geom.d.rows){ hmHover=null; drawHeat(); return; }
+  hmHover={r:rr,c:c}; drawHeat();
+  var v=geom.d.cells[rr*geom.d.cols+c], txt;
+  if(v!==v) txt='нет данных'; else if(metric==='sup'||metric==='chg') txt=F.pct(v,1); else txt=(metric==='bal'&&v>0?'+':'')+(v<0?'−':'')+F.power(Math.abs(v)).text;
+  var when=geom.d.cols===24?'Игровой день '+geom.d.labels[rr]+' · '+(c<10?'0':'')+c+':00–'+((c+1)%24<10?'0':'')+((c+1)%24)+':00':'Минута '+(c+1)+' из 60 последнего часа';
+  $('hmRead').innerHTML=when+' · '+METRICS.filter(function(x){return x.id===metric;})[0].label+': <b>'+txt+'</b>';
+});
+cv.addEventListener('pointerleave',function(){ hmHover=null; drawHeat(); });
+
+/* ---------- итоги ---------- */
+function kpi(l,v,s){ return '<div class="c-kpi"><div class="c-kpi-l">'+l+'</div><div class="c-kpi-v">'+v+'</div><div class="c-kpi-s">'+(s||'&nbsp;')+'</div></div>'; }
+function heavy(){
+  var p=EN.period, ph=EN.PMAP[p].phrase, g=EN.stat('gen',p), d=EN.stat('demand',p), u=EN.stat('supply',p), cu=EN.stat('curtail',p), s=EN.stat('stored',p);
+  var ratio=d.sum>0?u.sum/d.sum*100:100;
+  $('strip').innerHTML=kpi('Выработано',F.energy(g.sum).text,ph)+kpi('Потреблено',F.energy(u.sum).text,'из '+F.energy(d.sum).text)+kpi('Обеспеченность',F.pct(ratio,1),'дефицит '+F.dur(EN.deficitMinutes(p)/60))+
+    kpi('Излишек сброшен',F.energy(cu.sum).text,F.pct(g.sum>0?cu.sum/g.sum*100:0)+' выработки')+kpi('Заряд, диапазон',F.stored(s.min).text+' … '+F.stored(s.max).text,'среднее '+F.stored(s.mean).text)+kpi('Пик выработки',F.power(g.max).text,'пик нагрузки '+F.power(d.max).text);
+  updateDialData(); drawHeat();
+}
+
+var dirty=true, lastHeavy=0;
+EN.on('data',function(){ dirty=true; });
+EN.on('period',function(){ dirty=true; lastHeavy=0; });
+EN.on('reset',function(){ dirty=true; lastHeavy=0; });
+EN.on('frame',function(){ liveDial(); liveHead(); var now=performance.now(); if(dirty&&now-lastHeavy>500){ dirty=false; lastHeavy=now; heavy(); } });
+window.addEventListener('resize',drawHeat);
+buildDial(); buildTools();
+EN.start();
+})();
+</script>
+</body>
+</html>

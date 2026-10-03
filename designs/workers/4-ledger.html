@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Рабочие — Хроника набора</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="workers-core.css">
+<style>
+.periods{display:flex;gap:4px;flex-wrap:wrap;}
+.ptab{font-family:var(--font-display);font-weight:600;font-size:13px;letter-spacing:.03em;text-transform:uppercase;padding:7px 15px;border-radius:8px;cursor:pointer;background:var(--card);border:1px solid var(--border);color:var(--text-secondary);}
+.ptab.active{background:var(--class1);border-color:var(--class1);color:#0A0D18;}
+
+.ledger-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.ledger-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+.ledger-head h3{margin:0;font-family:var(--font-display);font-size:15px;}
+.ledger-compare{font-size:11.5px;color:var(--text-secondary);}
+.ledger-compare b{color:var(--good);font-family:var(--font-mono);}
+
+table.ltab{width:100%;border-collapse:collapse;font-size:12.5px;}
+table.ltab th{text-align:left;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);padding:6px 10px;border-bottom:1px solid var(--border);font-weight:500;}
+table.ltab td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+table.ltab tr:last-child td{border-bottom:none;}
+table.ltab td.num{font-family:var(--font-mono);text-align:right;}
+.spark{display:flex;align-items:flex-end;gap:2px;height:22px;}
+.spark i{width:4px;border-radius:1px;background:var(--c);opacity:.85;}
+.trend{font-family:var(--font-mono);font-size:11px;}
+.trend.up{color:var(--good);} .trend.down{color:var(--bad);} .trend.flat{color:var(--text-muted);}
+.cls-tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-display);font-weight:600;}
+.cls-tag i{width:8px;height:8px;border-radius:50%;background:var(--c);}
+
+.events{display:flex;flex-direction:column;gap:0;margin-top:4px;}
+.ev{display:flex;gap:12px;padding:9px 2px;border-bottom:1px dashed var(--border);font-size:12px;}
+.ev:last-child{border-bottom:none;}
+.ev-t{font-family:var(--font-mono);color:var(--text-muted);width:70px;flex-shrink:0;}
+.ev-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.ev-body b{color:var(--text-primary);}
+.ev-body{color:var(--text-secondary);}
+
+.recap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+</style>
+</head>
+<body>
+<div class="wk-page">
+  <a class="wk-back" href="index.html">← все варианты</a>
+  <div class="wk-eyebrow">Вкладка «Рабочие» · Вариант 4</div>
+  <h1 class="wk-h1">Хроника набора</h1>
+  <p class="wk-sub">Журнальная подача для игроков, которым важны тренды, а не мгновенный снимок: сводка по периодам, таблица классов со спарклайнами штата и ряд последних кадровых событий (достроили жильё, кончился паёк, выросла производительность). Тот же язык, что у варианта «Журнал» в энергосистеме.</p>
+
+  <div class="periods" id="periods"></div>
+
+  <div class="ledger-panel">
+    <div class="ledger-head"><h3>Сводка периода</h3><span class="ledger-compare">набрано <b id="sumHire">+0</b> · к предыдущему периоду <b id="sumDelta">+0%</b></span></div>
+    <div class="kpi-row recap-grid" id="recap"></div>
+  </div>
+
+  <div class="ledger-panel">
+    <div class="ledger-head"><h3>Классы персонала</h3></div>
+    <table class="ltab">
+      <thead><tr><th>Класс</th><th>Занято/потр.</th><th>Штат</th><th>Произв.</th><th>Тренд за период</th><th>Нужды</th></tr></thead>
+      <tbody id="ltbody"></tbody>
+    </table>
+  </div>
+
+  <div class="ledger-panel">
+    <div class="ledger-head"><h3>Последние события</h3></div>
+    <div class="events" id="events"></div>
+  </div>
+
+  <p class="footnote">Вкладки периодов и спарклайны — заготовка под реальную историю (как в энергосистеме); пока используют одни и те же демо-числа независимо от выбранного периода.</p>
+</div>
+
+<script src="workers-data.js"></script>
+<script>
+const D=WORKERS_DATA, r=D.recruit;
+
+document.getElementById('periods').innerHTML=['Сутки','Неделя','Месяц','3 месяца'].map((p,i)=>'<button class="ptab'+(i===0?' active':'')+'" data-p="'+i+'">'+p+'</button>').join('');
+document.querySelectorAll('.ptab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.ptab').forEach(x=>x.classList.remove('active'));b.classList.add('active');}));
+
+document.getElementById('sumHire').textContent='+'+Math.round(r.actualRate*24)+' чел';
+document.getElementById('sumDelta').textContent=(r.short?'−12%':'+8%');
+
+document.getElementById('recap').innerHTML=
+  '<div class="kpi"><div class="kpi-l">Всего рабочих</div><div class="kpi-v">'+D.hr.total+'</div></div>'+
+  '<div class="kpi"><div class="kpi-l">Работают</div><div class="kpi-v">'+D.hr.assigned+'</div></div>'+
+  '<div class="kpi"><div class="kpi-l">Набрано за период</div><div class="kpi-v">+'+Math.round(r.actualRate*24)+'</div></div>'+
+  '<div class="kpi"><div class="kpi-l">Расход пайков</div><div class="kpi-v">'+(r.cost.ration*r.actualRate*24).toFixed(0)+'<small> /сутки</small></div></div>';
+
+function spark(seed,color){
+  let s='<div class="spark">';
+  for(let i=0;i<14;i++){ const h=6+Math.round(((Math.sin(seed*7+i*1.7)+1)/2)*16); s+='<i style="height:'+h+'px;background:var(--'+color+')"></i>'; }
+  return s+'</div>';
+}
+
+document.getElementById('ltbody').innerHTML=D.classes.map((c,i)=>{
+  const prod=Math.round(c.staffing*c.satisfaction*100);
+  const trendDir = prod>=65?'up':(prod>=45?'flat':'down');
+  const trendTxt = trendDir==='up'?'▲ +4%':(trendDir==='flat'?'● без изм.':'▼ −6%');
+  const needsStr=c.needs.map(n=>n.label+' '+Math.round(n.fraction*100)+'%').join(' · ');
+  return '<tr><td><span class="cls-tag" style="--c:var(--'+c.color+')"><i></i>'+c.name+'</span></td>'+
+    '<td class="num">'+Math.floor(c.assigned)+' / '+Math.floor(c.demand)+'</td>'+
+    '<td class="num">'+Math.round(c.staffing*100)+'%</td>'+
+    '<td class="num">'+prod+'%</td>'+
+    '<td>'+spark(i+1,c.color)+'<span class="trend '+trendDir+'">'+trendTxt+'</span></td>'+
+    '<td style="color:var(--text-secondary);font-size:11.5px">'+needsStr+'</td></tr>';
+}).join('');
+
+const EVENTS=[
+  {t:'−2 ч',color:'good',cls:1,text:'<b>Разнорабочие:</b> достроен жилой блок — +24 места, потолок найма вырос до 48/сутки.'},
+  {t:'−5 ч',color:'tier1',cls:1,text:'<b>Разнорабочие:</b> запас пайков просел ниже 200 — набор идёт медленнее потолка.'},
+  {t:'−11 ч',color:'good',cls:3,text:'<b>Инженеры:</b> производительность выросла до 66% после пополнения запаса «Данные».'},
+  {t:'−1 д',color:'bad',cls:4,text:'<b>Администраторы:</b> нехватка документооборота — офис работает на 32% мощности.'},
+  {t:'−2 д',color:'good',cls:2,text:'<b>Техники:</b> построена мастерская №2 — обеспечение инструментом должно вырасти.'},
+];
+document.getElementById('events').innerHTML=EVENTS.map(e=>{
+  const cls=D.classes.find(c=>c.id===e.cls);
+  return '<div class="ev"><div class="ev-t">'+e.t+'</div><div class="ev-dot" style="background:var(--'+e.color+')"></div><div class="ev-body" style="border-left:2px solid var(--'+cls.color+');padding-left:8px">'+e.text+'</div></div>';
+}).join('');
+</script>
+</body>
+</html>

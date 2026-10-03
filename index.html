@@ -1,0 +1,80 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Индустриальный пояс</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/hotbar.css">
+<link rel="stylesheet" href="css/pages/1-hq.css">
+<link rel="stylesheet" href="css/pages/2-buildings.css">
+<link rel="stylesheet" href="css/pages/3-build.css">
+<link rel="stylesheet" href="css/pages/4-workers.css">
+<link rel="stylesheet" href="css/pages/5-skills.css">
+<link rel="stylesheet" href="css/pages/6-production.css">
+<link rel="stylesheet" href="css/pages/7-warehouse.css">
+<link rel="stylesheet" href="css/pages/8-energy.css">
+<link rel="stylesheet" href="css/pages/9-planet.css">
+
+<div class="page">
+  <header>
+    <div class="eyebrow">Управляющий модуль · Сектор Керберос-9</div>
+    <h1>Индустриальный пояс</h1>
+    <div class="sub">Замкнутая производственная экономика: каждый товар на складе кто-то добыл или произвёл, и каждую фабрику кто-то обслуживает. Ничего не появляется без цепочки и без персонала.</div>
+    <div class="stats-row">
+      <div class="stat"><span class="stat-label">Время работы колонии</span><span class="stat-value" id="statTime">—</span></div>
+      <div class="stat"><span class="stat-label">Построено объектов</span><span class="stat-value" id="statBuilt">0</span></div>
+      <div class="stat"><span class="stat-label">Занято персонала</span><span class="stat-value" id="statWorkers">0</span></div>
+      <div class="stat"><span class="stat-label">Сохранено</span><span class="stat-value" id="statSaved">—</span></div>
+    </div>
+  </header>
+
+  <section>
+    <nav class="sections" id="sections"></nav>
+    <nav class="tabs" id="tabs" style="margin-top:10px;"></nav>
+    <div class="pop-panel" id="hqPanel" style="margin-top:14px;" hidden></div>
+    <div class="pop-panel" id="buildingsPanel" style="margin-top:14px;" hidden></div>
+    <div class="bgrid" id="bgrid" style="margin-top:14px;" hidden></div>
+    <div class="pop-panel" id="productionPanel" style="margin-top:14px;" hidden></div>
+    <div class="pop-panel" id="popPanel" style="margin-top:14px;" hidden></div>
+    <div class="pop-panel" id="skillsPanel" style="margin-top:14px;" hidden></div>
+    <div class="pop-panel" id="energyPanel" style="margin-top:14px;" hidden></div>
+    <div class="pop-panel" id="warehousePanel" style="margin-top:14px;" hidden></div>
+    <div class="pop-panel" id="planetPanel" style="margin-top:14px;" hidden></div>
+  </section>
+
+  <div class="devbar" id="devbar">
+    <span>Тест: ускорение времени</span>
+    <button data-speed="1" class="active">×1</button>
+    <button data-speed="60">×60</button>
+    <button data-speed="600">×600</button>
+    <button data-speed="3600">×3600</button>
+    <span id="devHint">1 с реального времени = 1 с игры</span>
+  </div>
+
+  <div class="footnote">Этап 1: только сырьё T0 (железная руда, медная руда, уголь, камень, вода, нефть) — горнодобывающая установка одного универсального типа, перенастраиваемая на любой из четырёх видов руды, плюс буровая установка одного универсального типа, перенастраиваемая между водой и нефтью. Сырьё поступает только с месторождений (у каждого — своё случайное богатство, растущее с уровнем навыка «Горное дело»), а рабочие набираются из жилых модулей и не дают установке выйти на полную мощность, пока не укомплектован штат и не обеспечена вода. Все производственные установки также потребляют электроэнергию — при её нехватке выпуск падает в том же проценте, что и нехватка; вкладка «Энергия» — аккумуляторы базы (ёмкость заряда) и солнечные панели, чья выработка следует за игровым циклом дня и ночи. Симуляция идёт в реальном времени и продолжается, пока вкладка закрыта — при следующем заходе колония досчитает прогресс (не более 12 часов офлайн за раз).</div>
+</div>
+
+<div class="modal-backdrop" id="offlineModal" hidden>
+  <div class="modal">
+    <h2>С возвращением на базу</h2>
+    <div class="modal-time" id="modalTime"></div>
+    <div class="modal-rows" id="modalRows"></div>
+    <div class="modal-cap-note" id="modalCapNote">Учтено не более 12 часов офлайн-прогресса за один раз.</div>
+    <button class="modal-close" id="modalClose">Продолжить работу колонии</button>
+  </div>
+</div>
+
+<script src="js/core.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/pages/1-hq.js"></script>
+<script src="js/pages/2-buildings.js"></script>
+<script src="js/pages/3-build-art.js"></script>
+<script src="js/pages/3-build.js"></script>
+<script src="js/pages/4-workers.js"></script>
+<script src="js/pages/5-skills.js"></script>
+<script src="js/pages/6-production.js"></script>
+<script src="js/pages/7-warehouse.js"></script>
+<script src="js/pages/8-energy.js"></script>
+<script src="js/pages/9-planet.js"></script>
+<script src="js/main.js"></script>
+
+</body></html>

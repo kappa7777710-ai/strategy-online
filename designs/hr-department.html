@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Отдел кадров — 5 вариантов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0A0D18; --panel:#12172A; --card:#171D33; --card-hover:#1E2640;
+  --border:#293150; --border-strong:#3A4468;
+  --text-primary:#E9ECF7; --text-secondary:#9CA6C4; --text-muted:#606A8A;
+  --tier0:#4FD1E7; --tier1:#F2A93B; --tier2:#9C7CF4; --tier3:#F4557B; --tier4:#4ADE9B;
+  --class1:#E8C15A; --class2:#6FCF7A; --class3:#7C9CF4; --class4:#E07CE0;
+  --skill:#B388FF; --good:#4ADE9B; --bad:#F4557B; --energy:#FFDD57;
+  --font-display:'Rajdhani',sans-serif; --font-body:'IBM Plex Sans',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text-primary);font-family:var(--font-body);}
+.page{max-width:1240px;margin:0 auto;padding:28px 20px 70px;display:flex;flex-direction:column;gap:22px;}
+.eyebrow{font-size:11px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--text-muted);}
+h1{font-family:var(--font-display);font-weight:700;font-size:30px;letter-spacing:.01em;margin:2px 0 0;}
+.sub{font-size:13px;color:var(--text-secondary);margin-top:6px;max-width:72ch;line-height:1.55;}
+.note{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:13px 16px;font-size:13px;color:var(--text-secondary);line-height:1.6;}
+.note b{color:var(--text-primary);font-weight:600;}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:16px;}
+.hcard{background:linear-gradient(180deg,#171D33,#12172A);border:1px solid var(--border);border-left:3px solid var(--tier-color,var(--tier0));border-radius:14px;padding:14px 14px 16px;display:flex;flex-direction:column;gap:11px;}
+.hcard-n{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:.06em;}
+.hcard-t{font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.02em;}
+.hcard-d{font-size:12.5px;color:var(--text-secondary);line-height:1.55;}
+.hcard-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.hcard-tags span{font-size:10.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--border-strong);color:var(--text-secondary);}
+
+/* Сцена: изометрическая SVG-картинка, всё движение — CSS. */
+.bart{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:224/184;
+  background:radial-gradient(90% 90% at 50% 20%,color-mix(in srgb,var(--tier-color) 14%,transparent),transparent 70%),
+    repeating-linear-gradient(0deg,rgba(79,209,231,.05) 0 1px,transparent 1px 16px),
+    repeating-linear-gradient(90deg,rgba(79,209,231,.05) 0 1px,transparent 1px 16px),#070B18;
+  border:1px solid #173A4A;}
+.bart-svg{display:block;width:100%;height:100%;}
+.bart .ba-win{fill:var(--tier-color);opacity:.55;animation:ba-blink 4s ease-in-out infinite;}
+.bart .ba-beacon{fill:#F4557B;animation:ba-blink 1.8s ease-in-out infinite;}
+.bart .ba-led{fill:var(--good);animation:ba-blink 2.2s ease-in-out infinite;}
+@keyframes ba-blink{0%,100%{opacity:.3;}50%{opacity:1;}}
+.bart .ba-spin{transform-box:fill-box;transform-origin:center;animation:ba-spin var(--spd,3s) linear infinite;}
+@keyframes ba-spin{to{transform:rotate(360deg);}}
+.bart .ba-orbit{transform-box:view-box;transform-origin:var(--ox,0) var(--oy,0);animation:ba-spin var(--spd,6s) linear infinite;}
+.bart .ba-flow{animation:ba-flow var(--dur,3s) linear infinite;}
+@keyframes ba-flow{0%{translate:0 0;opacity:0;}10%{opacity:1;}88%{opacity:1;}100%{translate:var(--tx) var(--ty);opacity:0;}}
+.bart .ba-skip{animation:ba-skip 6s ease-in-out infinite;}
+@keyframes ba-skip{0%,10%{translate:0 0;}48%,58%{translate:0 var(--tr,-40px);}96%,100%{translate:0 0;}}
+.bart .ba-sway{transform-box:fill-box;transform-origin:50% 100%;animation:ba-sway 3s ease-in-out infinite;}
+@keyframes ba-sway{0%,100%{transform:rotate(-3deg);}50%{transform:rotate(3deg);}}
+.bart .ba-smoke{fill:#C9D2EE;fill-opacity:.4;}
+.bart .ba-rise{animation:ba-grow 2.6s ease-in-out infinite alternate;}
+@keyframes ba-grow{0%{transform:scaleY(var(--lo,.3));}100%{transform:scaleY(var(--hi,1));}}
+.bart .ba-pulse{animation:ba-pulse 2.4s ease-in-out infinite;}
+@keyframes ba-pulse{0%,100%{opacity:.4;}50%{opacity:1;}}
+@media (prefers-reduced-motion:reduce){ .bart *{animation:none!important;} }
+.footnote{font-size:12px;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border);padding-top:16px;}
+@media (max-width:480px){ h1{font-size:24px;} .grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="eyebrow">Вкладка «Рабочие» · Здание отдела кадров</div>
+    <h1>5 вариантов здания отдела кадров</h1>
+    <p class="sub">Черновые изометрические сцены в текущем визуальном языке игры (та же инженерная подача, что у шахты, буровой и солнечной панели в «Стройке»). Задача — нащупать общую композицию и характер анимации; когда вариант понравится, его можно будет перерисовать в фотореалистичном виде, сохранив силуэт и движение.</p>
+  </header>
+
+  <div class="note">
+    <b>Что это и чего это не делает:</b> страница ничего не меняет в игре — это отдельная витрина с пятью концептами здания отдела кадров для вкладки «Рабочие». Ресурсы, расчёты, прочие здания не затронуты. В каждой сцене есть живая CSS-анимация (мигающие окна, вращение, движение фигур рабочих) — предпросмотр того, как здание будет «дышать» на экране.
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <p class="footnote">Фигуры рабочих окрашены в цвета классов (золотой/зелёный/синий/розовый) — задел на будущее разделение персонала по специализациям. Следующий шаг по любому из вариантов: зафиксировать выбранную композицию и прогнать её через фотореалистичный рендер/референсы, оставив текущую анимацию как техническое задание для аниматора.</p>
+</div>
+
+<script>
+/* ===== Изометрический движок зданий (тот же, что в designs/buildings.html) ===== */
+const IU=13, IOX=130, IOY=84;
+let bartUid=0, _bp='';
+function f1(n){ return (Math.round(n*10)/10).toString(); }
+function ip(x,y,z){ return [IOX+(x-y)*IU*0.866, IOY+(x+y)*IU*0.5-(z||0)*IU]; }
+function ipts(a){ return a.map(p=>{ const q=ip(p[0],p[1],p[2]); return f1(q[0])+','+f1(q[1]); }).join(' '); }
+function dl(a,b){ const p=ip(a[0],a[1],a[2]), q=ip(b[0],b[1],b[2]); return [Math.round(q[0]-p[0]),Math.round(q[1]-p[1])]; }
+
+const MAT={
+  steel:['#8794BA','#5B6893','#3D4772'], dark:['#4A5580','#333C63','#232A49'],
+  concrete:['#A7AFC4','#7A839F','#59627F'], roof:['#59627F','#414A6B','#2F3755'],
+  accent:['color-mix(in srgb,var(--tier-color) 80%,#fff)','var(--tier-color)','color-mix(in srgb,var(--tier-color) 55%,#000)'],
+  glass:['color-mix(in srgb,var(--tier-color) 55%,#fff)','color-mix(in srgb,var(--tier-color) 35%,#223)','color-mix(in srgb,var(--tier-color) 20%,#112)'],
+  plate:['#26305A','#1C2445','#141A33'],
+};
+function bartBegin(){ _bp='b'+(++bartUid)+'-'; }
+function matDefs(){
+  let s='<defs><radialGradient id="'+_bp+'glow" cx=".5" cy=".5" r=".5"><stop offset="0" style="stop-color:color-mix(in srgb,var(--tier-color) 38%,transparent)"/><stop offset="1" style="stop-color:transparent"/></radialGradient>';
+  Object.keys(MAT).forEach(k=>{
+    const m=MAT[k];
+    ['t','l','r'].forEach((fc,i)=>{
+      s+='<linearGradient id="'+_bp+k+fc+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:'+m[i]+'"/><stop offset="1" style="stop-color:color-mix(in srgb,'+m[i]+' '+(fc==='t'?88:70)+'%,#000)"/></linearGradient>';
+    });
+  });
+  return s+'</defs>';
+}
+function ipoly(a,fill,stroke,extra){
+  return '<polygon points="'+ipts(a)+'" style="fill:'+fill+';stroke:'+(stroke||'rgba(0,0,0,.35)')+';stroke-width:.6;stroke-linejoin:round"'+(extra?' '+extra:'')+'/>';
+}
+function ibox(x,y,z,w,d,h,mat,o){
+  o=o||{};
+  const g=fc=>'url(#'+_bp+mat+fc+')';
+  return ipoly([[x,y+d,z],[x+w,y+d,z],[x+w,y+d,z+h],[x,y+d,z+h]],g('l'))+
+    ipoly([[x+w,y,z],[x+w,y+d,z],[x+w,y+d,z+h],[x+w,y,z+h]],g('r'))+
+    (o.nt?'':ipoly([[x,y,z+h],[x+w,y,z+h],[x+w,y+d,z+h],[x,y+d,z+h]],g('t'),'rgba(255,255,255,.25)'));
+}
+function icyl(cx,cy,z,r,h,mat){
+  const p=ip(cx,cy,z), rx=r*IU*1.2247, ry=r*IU*0.7071, H=h*IU;
+  return '<path d="M'+f1(p[0]-rx)+' '+f1(p[1]-H)+' V'+f1(p[1])+' A'+f1(rx)+' '+f1(ry)+' 0 0 0 '+f1(p[0]+rx)+' '+f1(p[1])+' V'+f1(p[1]-H)+' Z" style="fill:'+(MAT[mat]?('url(#'+_bp+mat+'l)'):mat)+';stroke:rgba(0,0,0,.3);stroke-width:.6"/>'+
+    '<ellipse cx="'+f1(p[0])+'" cy="'+f1(p[1]-H)+'" rx="'+f1(rx)+'" ry="'+f1(ry)+'" style="fill:'+(MAT[mat]?('url(#'+_bp+mat+'t)'):mat)+';stroke:rgba(255,255,255,.25);stroke-width:.6"/>';
+}
+function iln(a,b,stroke,w,extra){
+  const p=ip(a[0],a[1],a[2]), q=ip(b[0],b[1],b[2]);
+  return '<line x1="'+f1(p[0])+'" y1="'+f1(p[1])+'" x2="'+f1(q[0])+'" y2="'+f1(q[1])+'" style="stroke:'+stroke+';stroke-width:'+w+';stroke-linecap:round"'+(extra?' '+extra:'')+'/>';
+}
+function iquadY(y,x0,x1,z0,z1,fill,cls){ return ipoly([[x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1]],fill,'rgba(0,0,0,.4)',cls?'class="'+cls+'"':''); }
+function smoke(x,y,z,n){
+  const p=ip(x,y,z); let s='';
+  for(let i=0;i<n;i++) s+=bartFlow('ba-flow ba-smoke','<circle cx="'+f1(p[0])+'" cy="'+f1(p[1])+'" r="3" style="fill:#C9D2EE"/>',6,-24,3.6,i*3.6/n);
+  return s;
+}
+function bartFlow(cls,shape,dx,dy,dur,delay,extra){
+  const vars='--tx:'+dx+'px;--ty:'+dy+'px;--dur:'+dur+'s;animation-delay:-'+delay+'s;'+(extra||'');
+  const s=shape.replace(/\/>$/,' class="'+cls+'"/>');
+  if(/style="/.test(s)) return s.replace('style="','style="'+vars);
+  return s.replace(/\/>$/,' style="'+vars+'"/>');
+}
+function ibase(){
+  let g='';
+  for(let i=1;i<7;i++) g+=iln([i,0,0.02],[i,7,0.02],'rgba(120,160,220,.13)',.6)+iln([0,i,0.02],[7,i,0.02],'rgba(120,160,220,.13)',.6);
+  let c='';
+  [[0,0,1,1],[7,0,-1,1],[0,7,1,-1],[7,7,-1,-1]].forEach(([x,y,dx,dy])=>{
+    c+='<polyline points="'+ipts([[x+dx*0.9,y,0.03],[x,y,0.03],[x,y+dy*0.9,0.03]])+'" style="fill:none;stroke:var(--tier-color);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round"/>';
+  });
+  return '<ellipse cx="130" cy="150" rx="122" ry="46" style="fill:url(#'+_bp+'glow)"/>'+
+    ibox(-0.4,-0.4,-0.6,7.8,7.8,0.6,'dark',{nt:true})+
+    ipoly([[-0.4,-0.4,0],[7.4,-0.4,0],[7.4,7.4,0],[-0.4,7.4,0]],'url(#'+_bp+'darkt)','rgba(255,255,255,.2)')+
+    ipoly([[0,0,0.01],[7,0,0.01],[7,7,0.01],[0,7,0.01]],'url(#'+_bp+'platet)','rgba(0,0,0,.4)')+g+c;
+}
+function bartFrame(inner){
+  return '<svg class="bart-svg" viewBox="18 4 224 184" aria-hidden="true">'+matDefs()+ibase()+inner+'</svg>';
+}
+// Фигурка рабочего — скруглённый жетон цвета класса, "идёт" по прямой от A к B и исчезает у входа.
+function worker(a,b,cls,dur,delay){
+  const p=ip(a[0],a[1],a[2]), d=dl(a,b);
+  const shape='<g><ellipse cx="'+f1(p[0])+'" cy="'+f1(p[1]+4)+'" rx="3.2" ry="1.4" style="fill:#000;opacity:.3"/>'+
+    '<rect x="'+f1(p[0]-2.6)+'" y="'+f1(p[1]-9)+'" width="5.2" height="9" rx="2.2" style="fill:var(--'+cls+')"/>'+
+    '<circle cx="'+f1(p[0])+'" cy="'+f1(p[1]-10.5)+'" r="2" style="fill:var(--'+cls+')"/></g>';
+  return bartFlow('ba-flow','<g>'+shape+'</g>'.replace(/\/>$/,'/>'),d[0],d[1],dur,delay);
+}
+
+/* ===== Вариант 1 — «Проходная»: турникет, пропуска, поток рабочих ===== */
+function hrCheckpoint(){
+  bartBegin(); let s='';
+  s+=ibox(1.2,1.0,0,3.2,2.4,1.5,'concrete');
+  s+=ibox(1.05,0.85,1.5,3.5,2.7,0.22,'roof');
+  s+=iquadY(3.4,1.5,2.6,0.5,1.15,'var(--tier-color)','ba-win');
+  s+=iquadY(3.4,2.8,3.9,0.5,1.15,'var(--tier-color)','ba-win');
+  s+=ibox(1.4,1.2,1.72,0.35,0.35,0.5,'dark');
+  // турникет-портал на входе
+  s+=ibox(3.1,3.5,0,0.22,1.3,1.1,'steel')+ibox(4.4,3.5,0,0.22,1.3,1.1,'steel');
+  s+=ibox(3.1,3.5,1.1,1.52,1.3,0.2,'accent');
+  const lp=ip(3.76,3.6,1.3);
+  s+='<circle class="ba-led" cx="'+f1(lp[0])+'" cy="'+f1(lp[1])+'" r="2.4"/>';
+  s+=smoke(1.6,1.4,2.6,2);
+  // очередь из рабочих, заходящих по одному сквозь портал
+  const cls=['class1','class2','class3','class4'];
+  for(let i=0;i<8;i++){
+    const c=cls[i%4], y0=5.8-i*0.0;
+    s+=worker([3.76,6.2,0],[3.76,2.6,0],c,5,i*0.62);
+  }
+  return bartFrame(s);
+}
+
+/* ===== Вариант 2 — «Биржа труда»: табло вакансий по классам, потоки на стрим ===== */
+function hrExchange(){
+  bartBegin(); let s='';
+  s+=ibox(2.0,2.6,0,3.4,1.6,1.1,'concrete');
+  s+=ibox(1.85,2.45,1.1,3.7,1.9,0.2,'roof');
+  // табло из 4 цветных панелей
+  const cls=['class1','class2','class3','class4'];
+  cls.forEach((c,i)=>{
+    const x=2.25+i*0.82;
+    s+=ibox(x,2.42,1.1,0.62,0.12,0.62,'dark');
+    s+='<rect x="'+f1(ip(x+0.08,2.42,1.74)[0])+'" y="'+f1(ip(x+0.08,2.42,1.74)[1])+'" width="12" height="13" rx="1.5" style="fill:var(--'+c+');opacity:.85" class="ba-pulse"/>';
+  });
+  s+=ibox(0.6,3.9,0,0.3,0.3,2.2,'steel');
+  const bp=ip(0.75,4.05,2.2);
+  s+='<g class="ba-spin" style="--spd:4s" transform="translate('+f1(bp[0])+' '+f1(bp[1])+')"><rect x="-9" y="-2" width="18" height="4" rx="2" style="fill:#F4557B"/></g>';
+  // потоки рабочих от табло к зданию, раскрашены под свой класс
+  cls.forEach((c,i)=>{
+    const x=2.55+i*0.82;
+    for(let k=0;k<3;k++) s+=worker([x,5.7,0],[x,3.2,0],c,4.4,k*1.45+i*0.3);
+  });
+  return bartFrame(s);
+}
+
+/* ===== Вариант 3 — «Учебный центр»: здание + круглый двор, фигура по кругу, растущие шкалы навыков ===== */
+function hrTraining(){
+  bartBegin(); let s='';
+  s+=ibox(3.6,0.7,0,2.6,2.2,1.4,'concrete');
+  s+=ibox(3.45,0.55,1.4,2.9,2.5,0.2,'roof');
+  s+=iquadY(2.9,3.9,4.9,0.5,1.05,'var(--tier-color)','ba-win');
+  s+=iquadY(2.9,5.1,5.9,0.5,1.05,'var(--tier-color)','ba-win');
+  // шкалы навыков слева (4 растущих столбика)
+  const skl=['class1','class2','class3','skill'];
+  skl.forEach((c,i)=>{
+    const x=0.6+i*0.55;
+    s+=ibox(x,4.6,0,0.32,0.32,0.1,'dark');
+    const bp=ip(x+0.16,4.76,0.12);
+    s+='<rect x="'+f1(bp[0]-3)+'" y="'+f1(bp[1]-34)+'" width="6" height="34" rx="2" style="fill:var(--'+c+');opacity:.25"/>'+
+       '<rect class="ba-rise" x="'+f1(bp[0]-3)+'" y="'+f1(bp[1]-34)+'" width="6" height="34" rx="2" style="fill:var(--'+c+');transform-origin:'+f1(bp[0])+'px '+f1(bp[1])+'px;--lo:'+(0.25+i*0.1).toFixed(2)+';--hi:'+(0.6+i*0.1).toFixed(2)+';animation-delay:-'+(i*0.5)+'s"/>';
+  });
+  // круглый двор с вращающейся фигурой-«курсантом»
+  s+=ipoly([[4.0,3.6,0.01],[6.6,3.6,0.01],[6.6,6.2,0.01],[4.0,6.2,0.01]],'rgba(120,160,220,.06)','rgba(150,190,240,.22)');
+  const cp=ip(5.3,4.9,0.02);
+  s+='<g class="ba-orbit" style="--ox:'+f1(cp[0])+'px;--oy:'+f1(cp[1])+'px;--spd:7s"><rect x="'+f1(cp[0]-2.4)+'" y="'+f1(cp[1]-70)+'" width="4.8" height="9" rx="2" style="fill:var(--skill)"/><circle cx="'+f1(cp[0])+'" cy="'+f1(cp[1]-71.3)+'" r="1.9" style="fill:var(--skill)"/></g>';
+  return bartFrame(s);
+}
+
+/* ===== Вариант 4 — «Архив кадров»: хранилище личных дел, вращающийся сканер, поток жетонов ===== */
+function hrArchive(){
+  bartBegin(); let s='';
+  s+=ibox(2.4,2.2,0,2.8,2.6,2.0,'dark');
+  s+=ibox(2.25,2.05,2.0,3.1,2.9,0.22,'roof');
+  // стеллажи-«файлы» с мигающими метками
+  for(let r=0;r<3;r++){
+    for(let c=0;c<4;c++){
+      const x=2.65+c*0.5, y=2.5, z=0.3+r*0.5;
+      s+=ibox(x,y,z,0.3,0.08,0.4,'plate');
+      if((r+c)%2===0) s+='<circle class="ba-led" cx="'+f1(ip(x+0.15,y+0.08,z+0.44)[0])+'" cy="'+f1(ip(x+0.15,y+0.08,z+0.44)[1])+'" r="1.5"/>';
+    }
+  }
+  // вращающийся сканер на крыше
+  const sp=ip(2.8,2.5,2.25);
+  s+='<g transform="translate('+f1(sp[0])+' '+f1(sp[1])+')"><g class="ba-spin" style="--spd:2.4s"><path d="M0 0 L16 -4 L16 4 Z" style="fill:var(--tier-color);opacity:.75"/></g><circle r="2.6" style="fill:#8794BA"/></g>';
+  // поток жетонов личных дел внутрь архива
+  const cls=['class1','class2','class3','class4'];
+  for(let i=0;i<6;i++){
+    const c=cls[i%4];
+    s+=worker([6.4,5.8,0],[3.2,3.1,0],c,4,i*0.66);
+  }
+  return bartFrame(s);
+}
+
+/* ===== Вариант 5 — «Штаб кадровой службы»: многоэтажная башня, лифт, флаг, площадь ===== */
+function hrHQ(){
+  bartBegin(); let s='';
+  s+=ibox(2.6,2.2,0,2.2,2.0,5.4,'glass');
+  // этажи с окнами разной фазой мигания
+  for(let f=0;f<4;f++){
+    const z=0.7+f*1.2;
+    s+=iquadY(4.2,2.75,3.6,z,z+0.7,'var(--tier-color)','ba-win');
+    s+=iquadY(4.2,3.7,4.65,z,z+0.7,'var(--tier-color)','ba-win');
+  }
+  // лифт в шахте на торце
+  s+=ibox(4.85,2.2,0,0.35,0.45,5.4,'dark');
+  const ep=ip(5.02,2.42,0.3);
+  s+='<rect class="ba-skip" style="--tr:-62px" x="'+f1(ep[0]-4)+'" y="'+f1(ep[1]-6)+'" width="8" height="6" rx="1.2" style="fill:var(--good)"/>';
+  // крыша, антенна, маячок, флаг
+  s+=ibox(2.45,2.05,5.4,2.5,2.3,0.2,'roof');
+  s+=ibox(3.5,3.0,5.6,0.14,0.14,1.1,'steel');
+  const bc=ip(3.57,3.07,6.7);
+  s+='<circle class="ba-beacon" cx="'+f1(bc[0])+'" cy="'+f1(bc[1])+'" r="2.4"/>';
+  s+='<g class="ba-sway"><polygon points="'+f1(bc[0]+1)+','+f1(bc[1]+2)+' '+f1(bc[0]+14)+','+f1(bc[1]+5)+' '+f1(bc[0]+1)+','+f1(bc[1]+9)+'" style="fill:var(--tier-color)"/></g>';
+  // площадь перед входом с расходящимися рабочими по классам
+  const cls=['class1','class2','class3','class4'];
+  cls.forEach((c,i)=>{
+    s+=worker([5.8+i*0.1,5.6-i*0.2,0],[3.6,4.2,0],c,4.6,i*0.7);
+  });
+  return bartFrame(s);
+}
+
+const VARIANTS=[
+  {fn:hrCheckpoint, tier:'--tier0', n:'ВАРИАНТ 1', t:'Проходная', d:'Компактное КПП с турникетом-порталом и очередью рабочих, заходящих по одному — пропуск мигает зелёным при проходе. Самый утилитарный и «игровой» вариант, ближе всего к духу текущих построек.', tags:['компактный','очередь','турникет']},
+  {fn:hrExchange, tier:'--tier1', n:'ВАРИАНТ 2', t:'Биржа труда', d:'Табло из четырёх цветных панелей по классам персонала, к которым стекаются рабочие соответствующего цвета. Хорошо читает связь здания с системой классов рабочей силы.', tags:['табло классов','потоки','наглядный']},
+  {fn:hrTraining, tier:'--tier2', n:'ВАРИАНТ 3', t:'Учебный центр', d:'Здание с круглым двором: фигура-курсант бежит по кругу, а растущие шкалы слева символизируют прокачку навыков. Подчёркивает обучение и развитие персонала, а не только найм.', tags:['обучение','двор','шкалы навыков']},
+  {fn:hrArchive, tier:'--tier3', n:'ВАРИАНТ 4', t:'Архив кадров', d:'Тёмное хранилище личных дел со стеллажами мигающих меток и вращающимся сканером на крыше; жетоны рабочих стекаются внутрь на «обработку». Более технологичный, «штабной» характер.', tags:['архив','сканер','тех-стиль']},
+  {fn:hrHQ, tier:'--tier4', n:'ВАРИАНТ 5', t:'Штаб кадровой службы', d:'Самый представительный вариант — стеклянная башня в несколько этажей с собственным лифтом, флагом и маячком на крыше; с площади расходятся рабочие разных классов. Задел на будущую «столичную» застройку.', tags:['башня','лифт','флагман']},
+];
+
+const grid=document.getElementById('grid');
+VARIANTS.forEach(v=>{
+  const card=document.createElement('div');
+  card.className='hcard';
+  card.style.setProperty('--tier-color','var('+v.tier+')');
+  card.innerHTML='<div class="hcard-n">'+v.n+'</div><div class="hcard-t">'+v.t+'</div>'+
+    '<div class="bart">'+v.fn()+'</div>'+
+    '<div class="hcard-d">'+v.d+'</div>'+
+    '<div class="hcard-tags">'+v.tags.map(tag=>'<span>'+tag+'</span>').join('')+'</div>';
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+/* Вкладка «Рабочие». */
+.pop-panel{display:flex;flex-direction:column;}
+
+/* Отдел кадров — статус управления персоналом. */
+.hr-status{display:flex;flex-direction:column;gap:16px;padding:16px 18px;margin-bottom:14px;}
+.hr-status-header{display:flex;align-items:flex-start;gap:12px;}
+.hr-status-icon{width:40px;height:40px;flex-shrink:0;}
+.hr-status-header h3{margin:0;font-family:var(--font-display);font-weight:600;font-size:15px;color:var(--text-primary);}
+.hr-status-desc{margin:4px 0 0;font-size:12px;color:var(--text-secondary);line-height:1.4;}
+.hr-status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:12px;}
+.hr-stat-box{padding:12px;background:var(--bg-secondary);border-radius:4px;text-align:center;border-left:3px solid var(--class1);}
+.hr-stat-label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:6px;font-weight:500;}
+.hr-stat-value{display:block;font-family:var(--font-mono);font-size:18px;font-weight:600;color:var(--text-primary);}
+@media (max-width:640px){ .hr-status-grid{grid-template-columns:1fr;} }
+
+/* Приток рабочих с других планет — набор населения (state.population) до жилого потолка,
+   ускоряемый ползунком «Бонусные пайки» за счёт урожая фермы. Один сунк-бар (магнитуда:
+   набрано/потолок), три подписанных числа, расход по каждой культуре — те же токены и
+   компоненты (.sunk, .chip, .stat), что и остальная игра, без новой палитры. */
+.rec-panel{padding:16px 18px 18px;margin-bottom:14px;}
+.rec-head{display:flex;align-items:center;gap:9px;margin-bottom:12px;}
+.rec-head-icon{width:20px;height:20px;flex-shrink:0;}
+.rec-head h3{margin:0;font-family:var(--font-display);font-weight:600;font-size:14.5px;color:var(--text-primary);}
+.rec-pop-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.rec-pop-bar{flex:1;height:12px;padding:0;overflow:hidden;}
+.rec-pop-fill{display:block;height:100%;background:linear-gradient(90deg,color-mix(in srgb,var(--class1) 55%,transparent),var(--class1));transition:width .3s;}
+.rec-pop-bar.full .rec-pop-fill{background:var(--good);}
+.rec-pop-val{font-family:var(--font-mono);font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--text-secondary);white-space:nowrap;}
+.rec-stats{display:flex;flex-wrap:wrap;gap:18px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.rec-stats .stat-value.ok{color:var(--good);}
+.rec-stats .stat-value.bad{color:var(--bad);}
+
+/* Информация о стоимости найма */
+.rec-cost-info{margin:14px 0;padding:12px 14px;background:var(--bg-secondary);border-radius:4px;border-left:3px solid var(--class1);}
+.rec-cost-title{font-size:12.5px;font-weight:600;color:var(--text-primary);margin-bottom:8px;}
+.rec-cost-breakdown{display:flex;align-items:center;gap:12px;font-family:var(--font-mono);font-size:13px;color:var(--text-secondary);margin-bottom:8px;}
+.rec-cost-breakdown span{display:flex;align-items:center;gap:6px;}
+.rec-cost-desc{font-size:11px;color:var(--text-muted);line-height:1.5;}
+
+.rec-slider-row{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+.rec-slider-row label{font-size:12.5px;color:var(--text-secondary);flex-shrink:0;width:118px;}
+.rec-slider-row input[type="range"]{flex:1;-webkit-appearance:none;appearance:none;height:8px;border-radius:5px;
+  background:#0B1022;box-shadow:inset 0 2px 6px rgba(0,0,0,.6);border:1px solid #070A16;cursor:pointer;}
+.rec-slider-row input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;
+  border-radius:50%;background:var(--class1);border:2px solid #0A0D18;box-shadow:0 2px 4px rgba(0,0,0,.5);cursor:pointer;margin-top:-1px;}
+.rec-slider-row input[type="range"]::-moz-range-track{height:8px;border-radius:5px;background:#0B1022;border:1px solid #070A16;}
+.rec-slider-row input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--class1);
+  border:2px solid #0A0D18;box-shadow:0 2px 4px rgba(0,0,0,.5);cursor:pointer;}
+.rec-slider-val{font-family:var(--font-mono);font-size:13px;font-variant-numeric:tabular-nums;width:42px;text-align:right;flex-shrink:0;color:var(--text-primary);}
+.rec-slider-hint{font-size:11px;color:var(--text-muted);line-height:1.5;margin-bottom:10px;}
+.rec-warn{font-size:12px;color:var(--bad);margin-bottom:10px;}
+@media (max-width:560px){ .rec-slider-row label{width:100%;} .rec-slider-row{flex-wrap:wrap;} }
+
+.wf-overview{display:flex;align-items:center;gap:10px;padding:10px 16px;margin-bottom:16px;font-size:13px;}
+.wf-overview-icon{width:22px;height:22px;flex-shrink:0;}
+.pop-class{display:flex;flex-direction:column;gap:11px;padding-block:18px;border-bottom:1px solid var(--border);}
+.pop-class:last-child{border-bottom:none;}
+.pop-class-head{display:flex;flex-wrap:wrap;align-items:center;gap:14px;border-left:3px solid var(--tier-color);padding-left:11px;}
+.pop-class-head svg{flex-shrink:0;}
+.pop-class-head h3{font-family:var(--font-display);font-weight:600;font-size:16px;margin:0;color:var(--text-primary);}
+.pop-metrics{display:flex;flex-wrap:wrap;gap:12px;font-family:var(--font-mono);font-size:11px;font-variant-numeric:tabular-nums;color:var(--text-secondary);}
+.pop-metrics .ok{color:var(--good);}
+.pop-metrics .warn{color:var(--tier1);}
+.pop-metrics .bad{color:var(--bad);}
+.need-list{display:flex;flex-direction:column;gap:7px;}
+.need-row{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text-secondary);}
+.need-row .need-label{width:150px;flex-shrink:0;}
+.need-row .need-weight{font-family:var(--font-mono);font-size:10.5px;color:var(--text-muted);width:70px;flex-shrink:0;}
+.need-row .need-bar{flex:1;height:7px;border-radius:4px;background:var(--border);overflow:hidden;}
+.need-row .need-bar-fill{height:100%;}
+.need-row .need-pct{font-family:var(--font-mono);width:38px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;}
+.pop-needs{display:flex;flex-wrap:wrap;gap:8px;}
+.pop-needs .chip{min-width:140px;flex:1 0 140px;}
+.pop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}

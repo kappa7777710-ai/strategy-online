@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Индустриальный пояс — Терминал</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0700;--amb:#ffb000;--amb2:#ffcf5a;--dim:#8a5d00;--faint:#3a2800;--alert:#ff5a1f;--ok:#c8ff5a;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--amb);font-family:'IBM Plex Mono',monospace;font-size:14px;}
+body{min-height:100vh;text-shadow:0 0 6px rgba(255,176,0,.45);}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px);}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:51;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.75) 100%);animation:flick 7s infinite;}
+@keyframes flick{0%,96%,100%{opacity:1}97%{opacity:.85}98%{opacity:1}99%{opacity:.9}}
+.wrap{max-width:1080px;margin:0 auto;padding:26px 18px 60px;}
+.box{border:1px solid var(--dim);padding:14px 16px;position:relative;}
+.box>.lbl{position:absolute;top:-10px;left:12px;background:var(--bg);padding:0 8px;font-size:12px;color:var(--amb2);letter-spacing:.08em;}
+.eyebrow{font-size:12px;color:var(--dim);letter-spacing:.14em;}
+h1{font-family:'VT323',monospace;font-weight:400;font-size:64px;line-height:1;margin:6px 0 4px;color:var(--amb2);text-shadow:0 0 14px rgba(255,190,40,.8),0 0 2px #fff3c0;}
+h1 .cur{display:inline-block;width:.5em;height:.8em;background:var(--amb);vertical-align:-.05em;animation:blink 1s steps(1) infinite;margin-left:6px;}
+@keyframes blink{50%{opacity:0}}
+.sub{color:var(--dim);max-width:70ch;line-height:1.55;font-size:13px;}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 26px;margin-top:16px;}
+.stat{display:flex;gap:6px;white-space:nowrap;overflow:hidden;}
+.stat .k{color:var(--dim);}
+.stat .dots{flex:1;overflow:hidden;color:var(--faint);}
+.stat .dots::before{content:"............................................................";}
+.stat .v{color:var(--amb2);}
+nav.menu{display:flex;flex-wrap:wrap;gap:0;margin:26px 0 0;border:1px solid var(--dim);}
+nav.menu button{flex:1 1 auto;min-width:118px;font:inherit;font-size:14px;background:none;color:var(--amb);border:none;border-right:1px solid var(--dim);padding:11px 12px;cursor:pointer;text-align:left;text-shadow:inherit;letter-spacing:.05em;}
+nav.menu button:last-child{border-right:none;}
+nav.menu button .n{color:var(--dim);margin-right:6px;}
+nav.menu button:hover{background:var(--faint);}
+nav.menu button.active{background:var(--amb);color:var(--bg);text-shadow:none;}
+nav.menu button.active .n{color:var(--bg);}
+.crumb{margin:14px 0 18px;color:var(--dim);font-size:13px;}
+.crumb b{color:var(--amb2);font-weight:500;}
+.crumb .cur{display:inline-block;width:8px;height:14px;background:var(--amb);vertical-align:-2px;animation:blink 1s steps(1) infinite;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;}
+.row{display:flex;align-items:center;gap:12px;padding:6px 0;border-bottom:1px dashed var(--faint);}
+.row:last-child{border-bottom:none;}
+.row .nm{flex:1;}
+.dimt{color:var(--dim);}
+.bar{position:relative;height:14px;border:1px solid var(--dim);flex:1;min-width:80px;}
+.bar::before{content:"";position:absolute;left:1px;top:1px;bottom:1px;width:calc(var(--w,0%) - 2px);max-width:calc(100% - 2px);
+  background:repeating-linear-gradient(90deg,var(--amb) 0 7px,transparent 7px 9px);box-shadow:0 0 8px rgba(255,176,0,.5);}
+.bar.alert::before{background:repeating-linear-gradient(90deg,var(--alert) 0 7px,transparent 7px 9px);}
+.btn{font:inherit;font-size:13px;color:var(--amb);background:none;border:1px solid var(--amb);padding:7px 12px;cursor:pointer;text-shadow:inherit;letter-spacing:.05em;}
+.btn::before{content:"[ ";color:var(--dim);} .btn::after{content:" ]";color:var(--dim);}
+.btn:hover{background:var(--amb);color:var(--bg);text-shadow:none;}
+.btn:hover::before,.btn:hover::after{color:var(--bg);}
+.btn.sm{padding:3px 7px;font-size:12px;}
+.btn.red{color:var(--alert);border-color:var(--alert);}
+.btn.red:hover{background:var(--alert);color:var(--bg);}
+.btn[disabled]{opacity:.4;pointer-events:none;}
+.card h3{font-family:'VT323',monospace;font-weight:400;font-size:28px;margin:0 0 4px;color:var(--amb2);}
+.card p{margin:4px 0;color:var(--dim);font-size:13px;line-height:1.5;}
+.card .cost{margin:10px 0;color:var(--amb2);}
+.ic{width:22px;height:22px;flex-shrink:0;filter:drop-shadow(0 0 4px rgba(255,176,0,.6));}
+/* производство */
+.line{display:grid;grid-template-columns:38px 90px 1fr 70px 64px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--faint);}
+.line:last-child{border-bottom:none;}
+.line .id{color:var(--dim);}
+.line .tg{display:flex;gap:4px;}
+.line .tg button{font:inherit;font-size:12px;background:none;border:1px solid var(--dim);color:var(--dim);padding:2px 6px;cursor:pointer;}
+.line .tg button.on{border-color:var(--amb);background:var(--amb);color:var(--bg);text-shadow:none;}
+.line .belt{height:18px;border:1px solid var(--dim);position:relative;overflow:hidden;}
+.line .belt::before{content:"> > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > >";position:absolute;left:0;top:-1px;white-space:nowrap;color:var(--faint);font-size:13px;animation:belt 2s linear infinite;}
+.line .belt::after{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--w,0%);background:rgba(255,176,0,.22);border-right:2px solid var(--amb);}
+@keyframes belt{to{transform:translateX(18px)}}
+.line .out{color:var(--amb2);text-align:right;}
+.line .t{text-align:right;font-size:16px;}
+.yard{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;}
+.unit{border:1px dashed var(--dim);padding:10px 12px;}
+.unit .hd{display:flex;justify-content:space-between;margin-bottom:8px;}
+.unit .acts{display:flex;gap:6px;margin-top:10px;}
+.big{font-family:'VT323',monospace;font-size:44px;line-height:1;color:var(--amb2);}
+.wh{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;}
+.wh .cell{border:1px solid var(--dim);padding:12px;display:flex;flex-direction:column;gap:6px;}
+.wh .cell .f{color:var(--dim);font-size:12px;}
+.dev{margin-top:30px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;color:var(--dim);font-size:13px;border-top:1px dashed var(--dim);padding-top:14px;}
+.dev button{font:inherit;font-size:13px;background:none;color:var(--dim);border:1px solid var(--dim);padding:4px 10px;cursor:pointer;}
+.dev button.active{background:var(--amb);border-color:var(--amb);color:var(--bg);text-shadow:none;}
+.foot{color:var(--dim);font-size:12px;line-height:1.6;margin-top:18px;}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;background:var(--bg);border:1px solid var(--amb);padding:10px 16px;z-index:60;transition:.25s;}
+#toast::before{content:"> ";color:var(--dim);}
+#toast.show{opacity:1;transform:translate(-50%,0);}
+@media (max-width:640px){h1{font-size:44px}.line{grid-template-columns:30px 1fr 60px;}.line .belt,.line .out{display:none}nav.menu button{min-width:33%;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="box">
+    <span class="lbl">SYS://KERBEROS-9/IND-BELT v0.1</span>
+    <div class="eyebrow">УПРАВЛЯЮЩИЙ МОДУЛЬ · СЕКТОР КЕРБЕРОС-9</div>
+    <h1>ИНДУСТРИАЛЬНЫЙ ПОЯС<span class="cur"></span></h1>
+    <div class="sub">Замкнутая производственная экономика: каждый товар на складе кто-то добыл или произвёл, и каждую фабрику кто-то обслуживает.</div>
+    <div class="stats">
+      <div class="stat"><span class="k">ВРЕМЯ РАБОТЫ</span><span class="dots"></span><span class="v" data-v="time"></span></div>
+      <div class="stat"><span class="k">ПОСТРОЕНО</span><span class="dots"></span><span class="v" data-v="built"></span></div>
+      <div class="stat"><span class="k">ПЕРСОНАЛ</span><span class="dots"></span><span class="v" data-v="staff"></span></div>
+      <div class="stat"><span class="k">СОХРАНЕНО</span><span class="dots"></span><span class="v" data-v="saved"></span></div>
+    </div>
+  </header>
+
+  <nav class="menu" id="menu"></nav>
+  <div class="crumb">C:\КОЛОНИЯ\<b data-sectitle></b>&gt; <span class="cur"></span></div>
+
+  <section data-view="hq" hidden>
+    <div class="grid">
+      <div class="box"><span class="lbl">ОБЗОР БАЗЫ</span>
+        <div class="row"><span class="nm dimt">Время работы</span><span data-v="time"></span></div>
+        <div class="row"><span class="nm dimt">Построено объектов</span><span data-v="built"></span></div>
+        <div class="row"><span class="nm dimt">Площадь участка</span><span data-v="area"></span></div>
+        <div class="row"><span class="nm dimt">Персонал</span><span data-v="staff"></span></div>
+        <div class="row"><span class="nm dimt">Склад</span><span data-v="kg"></span></div>
+        <div class="row"><span class="nm dimt">Изучается</span><span>Горное дело (ур. <span data-v="lvl"></span>)</span></div>
+      </div>
+      <div class="box"><span class="lbl">ПРОИЗВОДСТВЕННЫЕ ЗДАНИЯ</span><div data-dyn="hqlist"></div></div>
+    </div>
+  </section>
+
+  <section data-view="buildings" hidden>
+    <div class="yard" data-dyn="yard"></div>
+  </section>
+
+  <section data-view="build" hidden>
+    <div class="row" style="margin-bottom:16px"><span class="dimt">ВКЛАДКА:</span><span style="background:var(--amb);color:var(--bg);padding:2px 8px;text-shadow:none">ДОБЫЧА · T0</span><span class="dimt" style="margin-left:auto">ПЛОЩАДЬ</span><div class="bar" data-w="area" style="max-width:260px"></div><span data-v="area"></span></div>
+    <div class="grid">
+      <div class="box card"><span class="lbl">T0 · МОДУЛЬ</span>
+        <h3>Горнодобывающая установка</h3>
+        <p>Может добывать: Железная руда / Медная руда</p>
+        <p>Рецепт выбирается после постройки, во вкладке «Цех» · Площадь: 25</p>
+        <div class="cost">СТОИМОСТЬ: 60 Fe</div>
+        <button class="btn" data-build="iron_ore">ПОСТРОИТЬ (+1)</button>
+      </div>
+      <div class="box card"><span class="lbl">T0 · МОДУЛЬ</span>
+        <h3>Буровая установка</h3>
+        <p>Месторождение → 3 H₂O за цикл 5:50</p>
+        <p>Персонал: 3 × Разнорабочие · Площадь: 10</p>
+        <div class="cost">СТОИМОСТЬ: 40 Fe</div>
+        <button class="btn" data-build="water">ПОСТРОИТЬ (+1)</button>
+      </div>
+    </div>
+  </section>
+
+  <section data-view="workers" hidden>
+    <div class="grid">
+      <div class="box"><span class="lbl">КЛАСС 1 · РАЗНОРАБОЧИЕ</span>
+        <div class="row"><span class="nm dimt">Занято / мест</span><span data-v="staff"></span></div>
+        <div class="row"><span class="nm dimt">Штат</span><div class="bar" data-w="staff"></div><span data-v="staffpct"></span></div>
+        <div class="row"><span class="nm dimt">Потребность: Вода</span><div class="bar" style="--w:100%"></div><span>100%</span></div>
+        <div class="row"><span class="nm dimt">Запас воды</span><span><span data-v="h2o"></span> H₂O</span></div>
+      </div>
+      <div class="box card"><span class="lbl">ЖИЛЬЁ</span>
+        <h3>Жилой блок: разнорабочие</h3>
+        <p>Вместимость: 20 чел. за блок · Построено: <span data-v="house"></span></p>
+        <div class="cost">СТОИМОСТЬ: 50 Fe + 30 H₂O</div>
+        <button class="btn" data-build="house">ПОСТРОИТЬ (+1)</button>
+      </div>
+    </div>
+  </section>
+
+  <section data-view="skills" hidden>
+    <div class="grid">
+      <div class="box"><span class="lbl">ОБУЧЕНИЕ</span>
+        <div class="row"><span class="nm dimt">Итого</span><span data-v="sprate"></span></div>
+        <div class="row"><span class="nm dimt">Учебных центров</span><span data-v="academy"></span></div>
+        <p class="dimt" style="font-size:13px">Учебный центр: +90 SP/ч за блок. Стоимость 80 Fe + 40 Cu.</p>
+        <button class="btn" data-build="academy">ПОСТРОИТЬ (+1)</button>
+      </div>
+      <div class="box card"><span class="lbl">НАВЫК</span>
+        <h3>Горное дело · ур. <span data-v="lvl"></span>/5</h3>
+        <div class="row"><div class="bar" data-w="sp"></div><span data-v="sp"></span></div>
+        <p>Каждый уровень: +8% скорость, −5% персонал, +богатство месторождения</p>
+        <button class="btn" data-train="t0" disabled>ИЗУЧАЕТСЯ</button>
+      </div>
+    </div>
+  </section>
+
+  <section data-view="production" hidden>
+    <div class="box"><span class="lbl">КОНВЕЙЕРНЫЕ ЛИНИИ</span><div data-dyn="lines"></div>
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center"><button class="btn" data-sec="build">+ ЕЩЁ УСТАНОВКА</button><span class="dimt">смена руды: 10 Fe, цикл начнётся заново</span></div>
+    </div>
+  </section>
+
+  <section data-view="warehouse" hidden>
+    <div class="row" style="margin-bottom:16px"><span class="dimt">ЗАГРУЗКА СКЛАДА</span><div class="bar" data-w="kg"></div><span data-v="kg"></span></div>
+    <div class="wh">
+      <div class="cell"><div class="row" style="border:none;padding:0">${IC_FE}<span>ЖЕЛЕЗНАЯ РУДА</span></div><span class="big" data-v="fe"></span><span class="f">Fe₂O₃ · 2 кг/ед · <span data-v="rfe"></span></span></div>
+      <div class="cell"><div class="row" style="border:none;padding:0">${IC_CU}<span>МЕДНАЯ РУДА</span></div><span class="big" data-v="cu"></span><span class="f">Cu₂S · 2,2 кг/ед · <span data-v="rcu"></span></span></div>
+      <div class="cell"><div class="row" style="border:none;padding:0">${IC_H2O}<span>ВОДА</span></div><span class="big" data-v="h2o"></span><span class="f">H₂O · 1 кг/ед · <span data-v="rh2o"></span></span></div>
+    </div>
+  </section>
+
+  <div class="dev" id="devbar">
+    <span>ТЕСТ: УСКОРЕНИЕ ВРЕМЕНИ</span>
+    <button data-speed="1" class="active">×1</button><button data-speed="60">×60</button><button data-speed="600">×600</button><button data-speed="3600">×3600</button>
+    <span>ТЕКУЩЕЕ: <span data-v="speed"></span></span>
+  </div>
+  <div class="foot">Этап 1: только сырьё T0 (железная руда, медная руда, вода). Симуляция идёт в реальном времени и продолжается, пока вкладка закрыта (не более 12 часов офлайн за раз). Клавиши 1–7 переключают разделы.</div>
+</div>
+<script>// ===== Общее ядро макета: мини-симуляция, привязка чисел, кнопки =====
+const RES={
+  iron_ore:{n:'Железная руда',s:'Fe',f:'Fe₂O₃',kg:2,ic:'fe'},
+  copper_ore:{n:'Медная руда',s:'Cu',f:'Cu₂S',kg:2.2,ic:'cu'},
+  water:{n:'Вода',s:'H₂O',f:'H₂O',kg:1,ic:'h2o'}
+};
+const REC={
+  iron_ore:{cyc:400,out:4,type:'miner'},
+  copper_ore:{cyc:450,out:4,type:'miner'},
+  water:{cyc:350,out:3,type:'drill'}
+};
+const TYPES={miner:'Горнодобывающая установка',drill:'Буровая установка'};
+const COST={iron_ore:{iron_ore:60},copper_ore:{iron_ore:60},water:{iron_ore:40},house:{iron_ore:50,water:30},academy:{iron_ore:80,copper_ore:40}};
+const SECTIONS=[['hq','Штаб'],['buildings','Здания'],['build','Стройка'],['workers','Рабочие'],['skills','Навыки'],['production','Цех'],['warehouse','Склад']];
+const S={t:3*3600+1420,speed:1,saved:2,res:{iron_ore:212,copper_ore:96,water:148},capKg:3000,
+  units:[{id:1,r:'iron_ore',p:120,dur:92},{id:2,r:'copper_ore',p:300,dur:61},{id:3,r:'water',p:40,dur:34}],
+  sp:212,lvl:1,academy:0,house:1};
+
+const ICON={
+  fe:'<polygon points="4,14 3,9 7,4 13,3 17,7 16,13 12,17 6,17"/><polygon points="7,9 10,6 13,9 11,13 8,13" opacity=".45"/>',
+  cu:'<polygon points="3,12 5,5 11,3 17,6 16,13 10,17 5,16"/><circle cx="9" cy="9" r="2.2" opacity=".45"/><circle cx="13" cy="12" r="1.3" opacity=".45"/>',
+  h2o:'<path d="M10 2C10 2 4 10.5 4 14A6 6 0 0 0 16 14C16 10.5 10 2 10 2Z"/>',
+  miner:'<rect x="3" y="11" width="14" height="6" rx="1"/><path d="M6 11V6h8v5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="5" r="2.4"/>',
+  drill:'<path d="M7 2h6l-1 4H8z"/><rect x="8.5" y="6" width="3" height="8"/><path d="M8 14h4l-2 4z"/><rect x="3" y="16" width="14" height="2" rx="1" opacity=".5"/>',
+  house:'<path d="M10 2 2 8v10h16V8z"/><rect x="8" y="12" width="4" height="6" opacity=".45"/>',
+  academy:'<path d="M10 3 1 7l9 4 9-4z"/><path d="M5 9v4c0 1.5 2.5 3 5 3s5-1.5 5-3V9" fill="none" stroke="currentColor" stroke-width="1.4"/>',
+  worker:'<circle cx="10" cy="6" r="3.2"/><path d="M3 18a7 6 0 0 1 14 0z"/>',
+  skill:'<path d="M2 11c4-6 8-7.5 13-5.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="8.7" y="8" width="2.2" height="11" rx="1" transform="rotate(28 8.7 8)"/>',
+  hq:'<path d="M10 1 18 5v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V5z"/><path d="M10 6l1.3 2.7 3 .4-2.2 2 .6 3-2.7-1.5-2.7 1.5.6-3-2.2-2 3-.4z" opacity=".4"/>',
+  buildings:'<rect x="2" y="8" width="7" height="10"/><rect x="11" y="3" width="7" height="15"/><rect x="13" y="6" width="3" height="2" opacity=".4"/><rect x="13" y="10" width="3" height="2" opacity=".4"/><rect x="4" y="11" width="3" height="2" opacity=".4"/>',
+  build:'<path d="M2 18h16v-2H2z"/><path d="M4 16V6l6-3 6 3v10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 6h12M4 11h12M8 6v10M12 6v10" stroke="currentColor" stroke-width=".9" opacity=".6"/>',
+  workers:'<circle cx="7" cy="6" r="2.7"/><circle cx="14" cy="7" r="2.2" opacity=".6"/><path d="M1 18a6 5.5 0 0 1 12 0z"/><path d="M11 18a5 5 0 0 1 8-3v3z" opacity=".6"/>',
+  skills:'<path d="M10 3 1 7l9 4 9-4z"/><path d="M5 9v4c0 1.5 2.5 3 5 3s5-1.5 5-3V9" fill="none" stroke="currentColor" stroke-width="1.4"/>',
+  production:'<circle cx="8" cy="11" r="5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-dasharray="2.6 1.6"/><circle cx="8" cy="11" r="1.8"/><circle cx="15" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="1.8 1.2"/>',
+  warehouse:'<path d="M1 8 10 3l9 5v10H1z"/><rect x="4" y="11" width="5" height="7" opacity=".45"/><rect x="11" y="11" width="5" height="3" opacity=".45"/><rect x="11" y="15" width="5" height="3" opacity=".45"/>',
+  wrench:'<path d="M14.5 2a4 4 0 0 0-3.8 5.2L2.5 15.4l2.1 2.1 8.2-8.2A4 4 0 0 0 18 5.5l-2.4 2.4-2.1-.6-.6-2.1L15.3 2.8A4 4 0 0 0 14.5 2z"/>',
+  trash:'<path d="M3 5h14M8 5V3h4v2M5 5l1 13h8l1-13" fill="none" stroke="currentColor" stroke-width="1.8"/>'
+};
+function svg(k,cls,st){return '<svg viewBox="0 0 20 20" fill="currentColor" class="'+(cls||'')+'"'+(st?' style="'+st+'"':'')+' aria-hidden="true">'+(ICON[k]||'')+'</svg>';}
+
+function kg(){return Object.keys(S.res).reduce((s,k)=>s+S.res[k]*RES[k].kg,0);}
+function spRate(){return S.units.length*1+S.academy*90;}
+function nextCost(){return Math.round(300*Math.pow(S.lvl+1,2.5));}
+function fmtT(s){s=Math.floor(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h+'ч '+String(m).padStart(2,'0')+'м';}
+function mmss(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+function rateH(r){return S.units.filter(u=>u.r===r).length*REC[r].out/REC[r].cyc*3600;}
+function staff(){return S.units.length*3;}
+function staffCap(){return S.house*20+8;}
+function built(){return S.units.length+S.academy+S.house;}
+function area(){return S.units.reduce((s,u)=>s+(REC[u.r].type==='miner'?25:10),0);}
+function unitName(u){return TYPES[REC[u.r].type];}
+function afford(c){return Object.entries(c).every(([k,q])=>S.res[k]>=q);}
+function costStr(c,sep){return Object.entries(c).map(([k,q])=>q+' '+RES[k].s).join(sep||' + ');}
+
+const V={
+  time:()=>fmtT(S.t), built:()=>built(), staff:()=>staff()+' / '+staffCap(), saved:()=>S.saved+' с назад',
+  fe:()=>Math.floor(S.res.iron_ore), cu:()=>Math.floor(S.res.copper_ore), h2o:()=>Math.floor(S.res.water),
+  kg:()=>Math.round(kg()).toLocaleString('ru-RU')+' / '+S.capKg.toLocaleString('ru-RU')+' кг',
+  kgpct:()=>Math.round(kg()/S.capKg*100)+'%',
+  sp:()=>Math.floor(S.sp)+' / '+nextCost()+' SP', lvl:()=>S.lvl, sprate:()=>spRate()+' SP/ч',
+  rfe:()=>'+'+rateH('iron_ore').toFixed(1)+'/ч', rcu:()=>'+'+rateH('copper_ore').toFixed(1)+'/ч', rh2o:()=>'+'+rateH('water').toFixed(1)+'/ч',
+  area:()=>area()+' / 200', staffpct:()=>Math.min(100,Math.round(staffCap()/Math.max(1,staff())*100))+'%',
+  speed:()=>'×'+S.speed, units:()=>S.units.length, academy:()=>S.academy, house:()=>S.house
+};
+function upd(){
+  document.querySelectorAll('[data-v]').forEach(e=>{const f=V[e.dataset.v];if(f){const t=String(f());if(e.textContent!==t)e.textContent=t;}});
+  document.querySelectorAll('[data-w]').forEach(e=>{
+    const k=e.dataset.w;let w=0;
+    if(k==='kg')w=kg()/S.capKg*100;
+    else if(k==='sp')w=S.sp/nextCost()*100;
+    else if(k==='area')w=area()/2;
+    else if(k==='staff')w=Math.min(100,staffCap()/Math.max(1,staff())*100);
+    else if(k[0]==='u'){const u=S.units.find(x=>x.id==k.slice(1));if(u)w=u.p/REC[u.r].cyc*100;}
+    else if(k[0]==='r'){const r=k.slice(2);w=S.res[r]*RES[r].kg/S.capKg*100*3;}
+    e.style.setProperty('--w',Math.min(100,w).toFixed(2)+'%');
+    e.style.setProperty('--n',Math.min(1,w/100).toFixed(4));
+  });
+  document.querySelectorAll('[data-ut]').forEach(e=>{const u=S.units.find(x=>x.id==e.dataset.ut);if(u){const t=mmss((REC[u.r].cyc-u.p));if(e.textContent!==t)e.textContent=t;}});
+}
+function step(dt){
+  S.t+=dt; S.saved=(S.saved+1)%6;
+  S.units.forEach(u=>{u.p+=dt;const c=REC[u.r].cyc;while(u.p>=c){u.p-=c;S.res[u.r]+=REC[u.r].out;u.dur=Math.max(5,u.dur-0.4);if(window.onYield)onYield(u);}});
+  S.sp+=spRate()/3600*dt;
+  while(S.lvl<5&&S.sp>=nextCost()){S.sp-=nextCost();S.lvl++;}
+}
+function openSec(id){
+  document.querySelectorAll('[data-sec]').forEach(b=>b.classList.toggle('active',b.dataset.sec===id));
+  document.querySelectorAll('[data-view]').forEach(v=>v.hidden=v.dataset.view!==id);
+  document.querySelectorAll('[data-sectitle]').forEach(e=>e.textContent=(SECTIONS.find(s=>s[0]===id)||['',''])[1]);
+  if(window.onSec)onSec(id);
+  upd();
+}
+function renderDyn(){document.querySelectorAll('[data-dyn]').forEach(el=>{const f=T[el.dataset.dyn];if(f)el.innerHTML=f();});upd();}
+let toastTimer=null;
+function toast(m){let el=document.getElementById('toast');if(!el){el=document.createElement('div');el.id='toast';document.body.appendChild(el);}el.textContent=m;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1800);}
+document.addEventListener('click',e=>{
+  const sp=e.target.closest('[data-speed]');
+  if(sp){S.speed=+sp.dataset.speed;document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',b.dataset.speed===sp.dataset.speed));upd();return;}
+  const sc=e.target.closest('[data-sec]'); if(sc){openSec(sc.dataset.sec);return;}
+  const rt=e.target.closest('[data-retool]');
+  if(rt){const [id,r]=rt.dataset.retool.split(':');const u=S.units.find(x=>x.id==id);
+    if(u&&u.r!==r){if(S.res.iron_ore<10){toast('Смена руды: нужно 10 Fe');return;}S.res.iron_ore-=10;u.r=r;u.p=0;renderDyn();toast('Установка #'+u.id+' → '+RES[r].n);}return;}
+  const bd=e.target.closest('[data-build]');
+  if(bd){const r=bd.dataset.build,c=COST[r];if(!afford(c)){toast('Не хватает: '+costStr(c));return;}
+    Object.entries(c).forEach(([k,q])=>S.res[k]-=q);
+    if(REC[r]){const id=S.units.reduce((m,u)=>Math.max(m,u.id),0)+1;S.units.push({id,r,p:0,dur:100});toast('Построено: '+TYPES[REC[r].type]+' #'+id);}
+    else if(r==='academy'){S.academy++;toast('Построен учебный центр');}
+    else if(r==='house'){S.house++;toast('Построен жилой блок');}
+    renderDyn();return;}
+  const rp=e.target.closest('[data-repair]');
+  if(rp){const u=S.units.find(x=>x.id==rp.dataset.repair);if(u){if(S.res.iron_ore<8){toast('Ремонт: нужно 8 Fe');return;}S.res.iron_ore-=8;u.dur=100;renderDyn();toast('Установка #'+u.id+' отремонтирована');}return;}
+  const dm=e.target.closest('[data-demolish]');
+  if(dm){const i=S.units.findIndex(x=>x.id==dm.dataset.demolish);if(i>=0){const u=S.units[i];S.units.splice(i,1);S.res.iron_ore+=REC[u.r].type==='miner'?30:20;renderDyn();toast('Установка #'+u.id+' снесена, часть металла возвращена');}return;}
+  const tr=e.target.closest('[data-train]'); if(tr){toast('«Горное дело» уже изучается');return;}
+});
+document.addEventListener('keydown',e=>{if(e.target.closest('input,textarea'))return;const n=+e.key;if(n>=1&&n<=7)openSec(SECTIONS[n-1][0]);});
+function boot(first){renderDyn();openSec(first||'production');setInterval(()=>{step(S.speed);upd();},1000);}
+</script>
+<script>
+document.querySelectorAll('.cell').forEach(c=>{c.innerHTML=c.innerHTML.replace('${IC_FE}',svg('fe','ic')).replace('${IC_CU}',svg('cu','ic')).replace('${IC_H2O}',svg('h2o','ic'));});
+document.getElementById('menu').innerHTML=SECTIONS.map((s,i)=>'<button data-sec="'+s[0]+'"><span class="n">F'+(i+1)+'</span>'+s[1].toUpperCase()+'</button>').join('');
+const T={
+  lines:()=>S.units.map(u=>{
+    const miner=REC[u.r].type==='miner';
+    const tg=miner?['iron_ore','copper_ore'].map(r=>'<button class="'+(u.r===r?'on':'')+'" data-retool="'+u.id+':'+r+'">'+RES[r].s+'</button>').join(''):'<button class="on">H₂O</button>';
+    return '<div class="line"><span class="id">#'+String(u.id).padStart(2,'0')+'</span><div class="tg">'+tg+'</div><div class="belt" data-w="u'+u.id+'"></div><span class="out">+'+REC[u.r].out+' '+RES[u.r].s+'</span><span class="t" data-ut="'+u.id+'"></span></div>';
+  }).join('')||'<p class="dimt">Пока ничего не работает — загляните в «Стройку».</p>',
+  yard:()=>S.units.map(u=>{
+    const bad=u.dur<45;
+    return '<div class="unit"><div class="hd"><span>#'+String(u.id).padStart(2,'0')+' '+(REC[u.r].type==='miner'?'ГОРН.':'БУР.')+'</span><span class="dimt">'+RES[u.r].s+'</span></div>'+
+    '<div class="row" style="border:none;padding:0"><div class="bar'+(bad?' alert':'')+'" style="--w:'+u.dur+'%"></div><span>'+Math.round(u.dur)+'%</span></div>'+
+    '<div class="acts">'+(u.dur<99?'<button class="btn sm" data-repair="'+u.id+'">РЕМОНТ 8 Fe</button>':'<span class="dimt">ИСПРАВНО</span>')+'<button class="btn sm red" data-demolish="'+u.id+'">СНОС</button></div></div>';
+  }).join('')||'<p class="dimt">Пока ничего не построено.</p>',
+  hqlist:()=>['iron_ore','copper_ore','water'].filter(r=>S.units.some(u=>u.r===r)).map(r=>'<div class="row">'+svg(RES[r].ic,'ic')+'<span class="nm">'+RES[r].n+'</span><span class="dimt">×'+S.units.filter(u=>u.r===r).length+'</span><span>'+rateH(r).toFixed(1)+' '+RES[r].s+'/ч</span></div>').join('')
+};
+boot('production');
+</script>
+</body>
+</html>

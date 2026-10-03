@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Каталог резервуаров</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Палитра — та же, что в css/base.css игры, чтобы выбранные цистерны переносились без перекраски. */
+:root{
+  color-scheme:dark;
+  --bg:#0A0D18;--panel:#12172A;--card:#171D33;--card-hover:#1E2640;--border:#293150;--border-strong:#3A4468;
+  --text-primary:#E9ECF7;--text-secondary:#9CA6C4;--text-muted:#606A8A;
+  --tier0:#4FD1E7;--tier1:#F2A93B;--tier2:#9C7CF4;--tier3:#F4557B;--tier4:#4ADE9B;
+  --good:#4ADE9B;--bad:#F4557B;--skill:#B388FF;
+  --font-display:'Rajdhani',sans-serif;--font-body:'IBM Plex Sans',sans-serif;--font-mono:'IBM Plex Mono',monospace;
+  --lq:#49B8F0;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text-primary);font-family:var(--font-body);}
+button{font:inherit;color:inherit;}
+.page{max-width:1180px;margin:0 auto;padding:28px 20px 60px;display:flex;flex-direction:column;gap:18px;}
+.eyebrow{font-size:11px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--text-muted);}
+h1{font-family:var(--font-display);font-weight:700;font-size:30px;margin:2px 0 0;}
+.sub{font-size:13px;color:var(--text-secondary);margin-top:4px;max-width:70ch;line-height:1.55;}
+
+/* Панель управления */
+.controls{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px;padding:12px 16px;
+  background:linear-gradient(180deg,#1A2143,#0E1328);border:2px solid #2B3563;border-radius:16px;box-shadow:0 10px 26px rgba(0,0,0,.45);}
+.ctl{display:flex;align-items:center;gap:10px;}
+.ctl-label{font-size:10.5px;color:var(--text-muted);letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;}
+.fill-ctl{flex:1 1 300px;}
+.fill-val{font-family:var(--font-mono);font-size:18px;font-weight:500;min-width:52px;text-align:right;font-variant-numeric:tabular-nums;color:var(--lq);}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:22px;background:transparent;cursor:pointer;min-width:120px;}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:5px;background:linear-gradient(90deg,var(--lq) var(--p,65%),#0B1022 var(--p,65%));box-shadow:inset 0 2px 4px rgba(0,0,0,.6);border:1px solid #070A16;}
+input[type=range]::-moz-range-track{height:8px;border-radius:5px;background:#0B1022;border:1px solid #070A16;}
+input[type=range]::-moz-range-progress{height:8px;border-radius:5px;background:var(--lq);}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-7px;border-radius:50%;background:#E9ECF7;border:3px solid var(--lq);box-shadow:0 0 8px var(--lq);}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#E9ECF7;border:3px solid var(--lq);box-shadow:0 0 8px var(--lq);}
+input[type=range]:focus-visible{outline:2px solid var(--lq);outline-offset:4px;border-radius:6px;}
+.swatches{display:flex;gap:6px;flex-wrap:wrap;}
+.sw{width:26px;height:26px;border-radius:50%;border:2px solid transparent;background:var(--c);cursor:pointer;padding:0;position:relative;box-shadow:inset 0 -4px 0 rgba(0,0,0,.25);}
+.sw[aria-pressed=true]{border-color:#E9ECF7;box-shadow:0 0 0 2px var(--c),inset 0 -4px 0 rgba(0,0,0,.25);}
+.sw:focus-visible{outline:2px solid #fff;outline-offset:3px;}
+.btn{font-family:var(--font-display);font-weight:600;font-size:13px;letter-spacing:.04em;text-transform:uppercase;padding:7px 12px;border-radius:9px;cursor:pointer;
+  background:linear-gradient(180deg,#2A3360 0%,#1A2142 55%,#141A34 100%);border:1px solid #0B0F20;box-shadow:inset 0 2px 0 rgba(255,255,255,.10),inset 0 -3px 0 rgba(0,0,0,.35);white-space:nowrap;}
+.btn:hover{color:#fff;border-color:var(--border-strong);}
+.btn:active{transform:translateY(1px);}
+.btn.on{background:var(--lq);color:#0A0D18;border-color:var(--lq);}
+.btn:focus-visible{outline:2px solid var(--lq);outline-offset:2px;}
+
+/* Большой просмотр выбранной цистерны */
+.preview{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:24px;align-items:center;padding:20px 24px;border-radius:16px;
+  background:radial-gradient(90% 90% at 25% 30%,color-mix(in srgb,var(--lq) 14%,transparent),transparent 65%),#070B18;border:1px solid #173A4A;}
+.pv-stage{position:relative;}
+.pv-stage svg{display:block;width:100%;height:auto;max-height:360px;}
+.pv-pct{position:absolute;left:0;right:0;top:48%;text-align:center;font-family:var(--font-mono);font-size:30px;font-weight:500;color:#fff;
+  text-shadow:0 0 6px #000,0 0 14px #000;pointer-events:none;font-variant-numeric:tabular-nums;}
+.pv-info{display:flex;flex-direction:column;gap:10px;min-width:0;}
+.pv-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.badge{font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--c);border:1px solid color-mix(in srgb,var(--c) 40%,transparent);}
+.pv-num{font-family:var(--font-mono);font-size:12px;color:var(--text-muted);}
+.pv-name{font-family:var(--font-display);font-weight:700;font-size:28px;margin:0;line-height:1.1;}
+.pv-desc{font-size:13.5px;color:var(--text-secondary);line-height:1.6;margin:0;max-width:62ch;}
+.specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:4px;}
+.spec{background:#0B1022;border:1px solid #070A16;border-radius:10px;padding:9px 12px;box-shadow:inset 0 2px 6px rgba(0,0,0,.5);}
+.spec-l{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);}
+.spec-v{font-family:var(--font-mono);font-size:15px;font-weight:500;margin-top:3px;font-variant-numeric:tabular-nums;}
+.pv-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+
+/* Фильтры и сетка */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.filters{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{font-size:12.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--text-secondary);cursor:pointer;}
+.chip:hover{color:var(--text-primary);border-color:var(--border-strong);}
+.chip[aria-pressed=true]{background:color-mix(in srgb,var(--lq) 20%,var(--card));border-color:var(--lq);color:var(--text-primary);}
+.chip:focus-visible{outline:2px solid var(--lq);outline-offset:2px;}
+.count{font-size:12px;color:var(--text-muted);}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:10px;padding:14px;border-radius:16px;
+  background:radial-gradient(120% 80% at 50% 0%,rgba(79,209,231,.08),transparent 60%),#070B18;border:1px solid #173A4A;}
+.card{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:10px 10px 12px;border-radius:12px;cursor:pointer;text-align:left;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 8%,transparent),transparent);border:1px solid color-mix(in srgb,var(--tc) 28%,transparent);transition:border-color .2s,background .2s,transform .12s;}
+.card:hover{background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 16%,transparent),transparent);}
+.card:focus-visible{outline:2px solid var(--lq);outline-offset:2px;}
+.card.sel{border-color:var(--lq);box-shadow:0 0 0 1px var(--lq),0 0 18px color-mix(in srgb,var(--lq) 30%,transparent);}
+.card svg{display:block;width:100%;height:auto;}
+.c-num{position:absolute;top:8px;left:10px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);}
+.c-name{font-family:var(--font-display);font-weight:700;font-size:15px;line-height:1.15;}
+.c-meta{display:flex;justify-content:space-between;gap:6px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+.c-meta .t{color:var(--tc);}
+.star{position:absolute;top:4px;right:4px;width:30px;height:30px;border:none;background:none;cursor:pointer;color:var(--text-muted);border-radius:8px;display:grid;place-items:center;}
+.star svg{width:18px;height:18px;}
+.star:hover{color:var(--text-primary);}
+.star[aria-pressed=true]{color:#FFDD57;}
+.star[aria-pressed=true] svg path{fill:currentColor;}
+.star:focus-visible{outline:2px solid var(--lq);}
+.empty{grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:13px;padding:30px 10px;}
+.foot{font-size:12px;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border);padding-top:14px;}
+.toast{font-size:12px;color:var(--good);min-height:1em;}
+
+/* Сама цистерна (SVG) */
+.tk .glass{fill:color-mix(in srgb,var(--lq) 7%,#0B1022);}
+.tk .outline{fill:none;stroke:color-mix(in srgb,var(--lq) 45%,#9CA6C4);stroke-width:2.2;stroke-linejoin:round;transition:stroke .3s;}
+.tk .wave{animation:tk-wave 3.2s linear infinite;}
+.tk .wave.f{fill:var(--lq);opacity:.92;}
+.tk .wave.b{fill:color-mix(in srgb,var(--lq) 55%,#000);animation-duration:4.8s;animation-direction:reverse;}
+@keyframes tk-wave{from{translate:0 0;}to{translate:-40px 0;}}
+.tk .sheen{fill:#fff;opacity:.13;}
+.tk .bub{fill:#fff;opacity:0;animation:tk-bub var(--dur,3s) ease-in infinite;animation-delay:var(--dl,0s);}
+@keyframes tk-bub{0%{translate:0 0;opacity:0;}15%{opacity:.55;}85%{opacity:.4;}100%{translate:var(--sx,0px) calc(var(--d) * -1px);opacity:0;}}
+.tk .mark{stroke:#fff;stroke-width:1;stroke-dasharray:3 4;opacity:.14;fill:none;}
+.tk .m{fill:#3A4468;}
+.tk .m2{fill:#232B4E;}
+.tk .m3{fill:#4B5680;}
+.tk .rv{fill:#7A84A6;}
+.tk .st{stroke:#3A4468;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.tk .st2{stroke:#4B5680;fill:none;stroke-linecap:round;}
+.tk .gl{stroke:#fff;stroke-width:3.5;stroke-linecap:round;fill:none;opacity:.2;}
+.tk .fc{stroke:#fff;stroke-width:1;fill:none;opacity:.28;}
+.tk .soil{fill:#2A2118;}
+.tk .soil-d{fill:#3B2E20;}
+.tk .grass{stroke:#3B6D3A;stroke-width:3;fill:none;}
+.tk .hot{stroke:#D85A30;stroke-width:3;fill:none;stroke-dasharray:6 4;opacity:.8;}
+.tk .frost{fill:#CFF4FF;opacity:.7;}
+.tk .led{fill:#1B223F;stroke:#070A16;stroke-width:1;transition:fill .25s;}
+.tk .led.on{fill:var(--lq);}
+.tk .blade{transform-box:fill-box;transform-origin:center;animation:tk-spin 0.9s linear infinite;}
+@keyframes tk-spin{0%{transform:scaleX(1);}25%{transform:scaleX(.15);}50%{transform:scaleX(-1);}75%{transform:scaleX(-.15);}100%{transform:scaleX(1);}}
+/* Низкий уровень: контур красный и пульсирует прозрачностью (анимация цвета через color-mix даёт в Chrome ложные оттенки). */
+.tk.low .outline{stroke:var(--bad);animation:tk-low 1.6s ease-in-out infinite;}
+@keyframes tk-low{50%{opacity:.35;}}
+.tk.full .outline{stroke:var(--bad);}
+body[data-glow] .tk .liq{filter:drop-shadow(0 0 5px var(--lq));}
+@media (prefers-reduced-motion:reduce){ .tk .wave,.tk .bub,.tk .blade,.tk.low .outline{animation:none;} }
+
+@media (max-width:760px){
+  .preview{grid-template-columns:1fr;padding:14px;gap:12px;}
+  .pv-stage{max-width:260px;margin:0 auto;width:100%;}
+  .pv-name{font-size:23px;}
+  .controls{position:static;gap:12px;padding:10px 12px;}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:8px;}
+  h1{font-size:24px;}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="eyebrow">Индустриальный пояс · Каталог оборудования</div>
+    <h1>Резервуары для жидкостей</h1>
+    <div class="sub">20 вариантов ёмкостей, не привязанных к конкретному ресурсу. Жидкость ниже — только для примера: в игре цвет возьмётся от того, что хранится в баке. Ёмкость и технологический уровень у каждого варианта — предложение для баланса, их можно менять.</div>
+  </header>
+
+  <div class="controls" role="group" aria-label="Параметры просмотра">
+    <div class="ctl fill-ctl">
+      <label class="ctl-label" for="fill">Наполнение</label>
+      <input type="range" id="fill" min="0" max="100" step="1" value="65">
+      <span class="fill-val" id="fillVal">65%</span>
+    </div>
+    <div class="ctl">
+      <span class="ctl-label">Жидкость</span>
+      <div class="swatches" id="swatches"></div>
+    </div>
+    <div class="ctl">
+      <button class="btn" id="shakeBtn" type="button">Встряхнуть</button>
+      <button class="btn" id="randBtn" type="button" aria-pressed="false">Разные уровни</button>
+    </div>
+  </div>
+
+  <section class="preview" id="preview" aria-live="polite"></section>
+
+  <div class="bar">
+    <div class="filters" id="filters"></div>
+    <div class="ctl">
+      <span class="toast" id="toast"></span>
+      <button class="btn" id="copyBtn" type="button">Скопировать избранное</button>
+    </div>
+  </div>
+  <div class="grid" id="grid"></div>
+
+  <div class="foot">Звёздочкой отмечайте понравившиеся варианты — список сохраняется в этом браузере. Кнопка «Скопировать избранное» кладёт номера и названия в буфер обмена, чтобы потом перенести их в игру. Уровень ниже 15% подсвечивается пульсацией контура, полный бак — красным контуром, как на складе игры.</div>
+</div>
+
+<script>
+// ---------- Данные ----------
+const TIERS=['var(--tier0)','var(--tier1)','var(--tier2)','var(--tier3)','var(--tier4)'];
+const CATS={basic:'Базовые',ind:'Промышленные',lab:'Научные',exo:'Экзотические'};
+const LIQUIDS=[
+  {id:'water',name:'Вода',c:'#49B8F0'},
+  {id:'oil',name:'Нефть',c:'#9C8752'},
+  {id:'fuel',name:'Топливо',c:'#F2A93B'},
+  {id:'acid',name:'Кислота',c:'#9BE15D'},
+  {id:'plasma',name:'Плазма',c:'#C07CF4',glow:true},
+  {id:'cryo',name:'Криоген',c:'#8FE9F5',glow:true},
+  {id:'melt',name:'Расплав',c:'#FF6A3D',glow:true},
+];
+
+// Мелкие помощники для деталей
+const rivets=(xs,y,r=1.6)=>xs.map(x=>`<circle class="rv" cx="${x}" cy="${y}" r="${r}"/>`).join('');
+const range=(a,b,s)=>{const o=[];for(let x=a;x<=b;x+=s)o.push(x);return o;};
+
+// Каждая цистерна описана в координатах viewBox 0 0 160 160:
+//  clip — контур внутреннего объёма (он же маска жидкости и стекло),
+//  top/bottom — y уровня 100% и 0%, cx/w — середина и ширина для пузырьков,
+//  back — детали позади (опоры, грунт), front — металл поверх, inner — детали внутри объёма поверх жидкости,
+//  onLiquid — то, что плавает на поверхности (понтонная крыша), outline — свой контур, если не совпадает с clip,
+//  leds — пороги индикаторов уровня (в %), calm — меньшие волны.
+const TANKS=[
+ {id:'capsule',name:'Стеклянная капсула',cat:'basic',tier:1,cap:2500,
+  desc:'Вертикальный колпак из армированного стекла со стальными торцами. Хорошо видно содержимое, подходит для небольших запасов рядом с производством.',
+  clip:'M52 38 A28 28 0 0 1 108 38 V118 A28 28 0 0 1 52 118 Z',top:10,bottom:146,cx:80,w:50,
+  front:'<rect class="m" x="46" y="3" width="68" height="11" rx="3"/><rect class="m2" x="50" y="14" width="60" height="3"/><rect class="m" x="46" y="142" width="68" height="11" rx="3"/><rect class="m2" x="50" y="139" width="60" height="3"/>'+
+    rivets([54,66,80,94,106],8.5)+rivets([54,66,80,94,106],147.5)+'<rect class="m" x="50" y="76" width="60" height="4" opacity=".6"/><path class="gl" d="M62 42 V112"/>'},
+ {id:'riveted',name:'Клёпаный бак',cat:'basic',tier:0,cap:1500,
+  desc:'Самый простой стальной бак из листов на заклёпках. Дёшев в постройке, с краном слива у днища. Стартовый вариант для воды.',
+  clip:'M40 24 H120 V144 H40 Z',top:24,bottom:144,cx:80,w:76,
+  front:'<rect class="m" x="34" y="15" width="92" height="10" rx="3"/><rect class="m" x="34" y="142" width="92" height="10" rx="3"/>'+
+    '<rect class="m" x="37" y="62" width="86" height="5"/><rect class="m" x="37" y="104" width="86" height="5"/>'+
+    rivets(range(46,114,17),64.5)+rivets(range(46,114,17),106.5)+rivets(range(42,118,19),20)+rivets(range(42,118,19),147)+
+    '<rect class="m" x="120" y="128" width="14" height="7"/><rect class="m3" x="132" y="123" width="7" height="17" rx="2"/><path class="st" stroke-width="3" d="M135.5 123 V116 H144"/>'},
+ {id:'sphere',name:'Сферическая цистерна',cat:'ind',tier:2,cap:12000,
+  desc:'Шар на трёх опорах — максимум объёма при минимуме металла и равномерная нагрузка на стенки. Для газов под давлением и больших запасов.',
+  clip:'M80 20 A50 50 0 1 1 79.99 20 Z',top:20,bottom:120,cx:80,w:80,
+  back:'<path class="st" stroke-width="5" d="M50 106 L38 152 M110 106 L122 152 M80 118 V152"/><path class="st" stroke-width="2" d="M44 130 L80 140 L116 130"/><rect class="m" x="28" y="150" width="104" height="6" rx="2"/>',
+  front:'<rect class="m" x="72" y="9" width="16" height="12" rx="2"/><rect class="m3" x="68" y="7" width="24" height="4" rx="1"/><path class="st2" stroke-width="2.5" d="M31 72 H129" opacity=".75"/>'+rivets([40,58,80,102,120],72,1.4)+'<path class="gl" d="M48 48 Q54 34 68 28"/>'},
+ {id:'horizontal',name:'Горизонтальная ёмкость',cat:'ind',tier:1,cap:5000,
+  desc:'Лежачий цилиндр на двух ложементах. Низкий центр тяжести, удобно ставить в ряд вдоль стены цеха.',
+  clip:'M38 62 H122 A22 38 0 0 1 122 138 H38 A22 38 0 0 1 38 62 Z',top:62,bottom:138,cx:80,w:120,
+  back:'<path class="m" d="M40 128 L52 128 L58 154 L34 154 Z"/><path class="m" d="M108 128 L120 128 L126 154 L102 154 Z"/><rect class="m2" x="26" y="152" width="108" height="4" rx="2"/>',
+  front:'<path class="st2" stroke-width="3" d="M58 63 V137 M102 63 V137"/><rect class="m" x="72" y="50" width="16" height="13" rx="2"/><rect class="m3" x="69" y="47" width="22" height="4" rx="1"/>'+
+    '<path class="st" stroke-width="3" d="M140 100 H152 V116"/><rect class="m3" x="148" y="114" width="8" height="6" rx="1"/><path class="gl" d="M44 74 H116"/>'},
+ {id:'floatroof',name:'Резервуар с плавающей крышей',cat:'ind',tier:3,cap:50000,
+  desc:'Широкий вертикальный резервуар, крыша-понтон лежит прямо на жидкости и ходит вместе с уровнем — меньше испарения. Для нефти и топлива в больших объёмах.',
+  clip:'M18 58 H142 V146 H18 Z',top:64,bottom:146,cx:80,w:118,calm:true,
+  onLiquid:'<rect class="m" x="-40" y="-6" width="240" height="7"/><rect class="m3" x="20" y="-8" width="120" height="3" rx="1"/><path class="st" stroke-width="2" d="M50 -8 V-16 M110 -8 V-16"/>'+rivets(range(28,132,13),-3,1.2),
+  front:'<rect class="m" x="13" y="50" width="134" height="9" rx="2"/><rect class="m" x="13" y="144" width="134" height="9" rx="2"/>'+
+    '<path class="st" stroke-width="2.5" d="M142 146 L154 120 M142 124 L154 98 M142 102 L154 76 M142 80 L152 58"/><path class="st" stroke-width="1.5" d="M148 132 L154 120 M148 110 L154 98 M148 88 L154 76"/>'+
+    '<path class="st2" stroke-width="2" d="M18 102 H142" opacity=".5"/>'},
+ {id:'dewar',name:'Криогенный дьюар',cat:'lab',tier:3,cap:1200,
+  desc:'Сосуд с двойными стенками и вакуумной прослойкой. Держит сжиженные газы, пока работает охлаждение. На горловине — предохранительный клапан.',
+  clip:'M56 36 H104 V136 Q104 140 100 140 H60 Q56 140 56 136 Z',top:36,bottom:140,cx:80,w:44,
+  back:'<path d="M44 34 Q44 22 56 22 H104 Q116 22 116 34 V140 Q116 152 104 152 H56 Q44 152 44 140 Z" fill="#141A34" stroke="#4B5680" stroke-width="2.2"/>'+
+    '<path d="M50 30 H110 V144 H50 Z" fill="none" stroke="#2B3563" stroke-width="1" stroke-dasharray="2 3"/>',
+  front:'<rect class="m" x="68" y="8" width="24" height="16" rx="2"/><rect class="m3" x="62" y="6" width="36" height="5" rx="2"/><circle cx="80" cy="4" r="0" />'+
+    '<path class="st" stroke-width="3" d="M92 14 H104 V6"/><circle class="m3" cx="104" cy="5" r="3.5"/>'+
+    '<circle class="frost" cx="47" cy="60" r="1.2"/><circle class="frost" cx="113" cy="84" r="1.4"/><circle class="frost" cx="49" cy="118" r="1"/><circle class="frost" cx="112" cy="40" r="1"/><circle class="frost" cx="114" cy="130" r="1.2"/>'+
+    '<path class="gl" d="M62 44 V96"/>'},
+ {id:'flask',name:'Колба-реактор',cat:'lab',tier:2,cap:800,
+  desc:'Круглодонная колба с узким горлом и пробкой-затвором. Лабораторный масштаб: реагенты, катализаторы, опытные партии.',
+  clip:'M71 16 H89 V60 A46 46 0 1 1 71 60 Z',top:16,bottom:150,cx:80,w:80,
+  front:'<rect class="m" x="65" y="6" width="30" height="11" rx="2"/><rect class="m3" x="69" y="2" width="22" height="5" rx="1"/>'+
+    '<path class="st2" stroke-width="1.2" d="M71 26 H76 M71 34 H76 M71 42 H76 M71 50 H76"/><path class="gl" d="M52 92 Q54 76 66 68"/><ellipse class="m" cx="80" cy="152" rx="30" ry="4"/>'},
+ {id:'crystal',name:'Кристаллический контейнер',cat:'exo',tier:4,cap:5000,
+  desc:'Огранённая оболочка из синтетического кристалла на опорном кольце. Материал поздних технологий, поэтому бак нарочно выглядит не как металл.',
+  clip:'M80 8 L126 46 L112 144 L48 144 L34 46 Z',top:8,bottom:144,cx:80,w:76,
+  front:'<path class="fc" d="M34 46 L80 62 L126 46 M80 62 V144 M80 8 V62 M48 144 L80 62 L112 144"/><rect class="m" x="40" y="143" width="80" height="9" rx="3"/><rect class="m2" x="52" y="151" width="56" height="4" rx="2"/>'},
+ {id:'barrel',name:'Стальная бочка',cat:'basic',tier:0,cap:200,
+  desc:'Бочка на 200 единиц с рёбрами жёсткости и пробкой. Самая маленькая ёмкость: для временного хранения и перевозки вручную.',
+  clip:'M48 22 Q43 84 48 146 H112 Q117 84 112 22 Z',top:22,bottom:146,cx:80,w:60,
+  front:'<rect class="m" x="44" y="17" width="72" height="7" rx="3"/><rect class="m" x="44" y="144" width="72" height="7" rx="3"/>'+
+    '<path class="st" stroke-width="5" d="M46 62 H114 M46 106 H114"/><rect class="m3" x="92" y="12" width="11" height="6" rx="1"/><path class="gl" d="M58 30 Q55 84 58 138"/>'},
+ {id:'tower',name:'Водонапорная башня',cat:'ind',tier:1,cap:6000,
+  desc:'Бак на решётчатой опоре с конической крышей. Высота даёт напор без насосов — жилые модули получают воду самотёком.',
+  clip:'M42 32 H118 V72 Q80 92 42 72 Z',top:32,bottom:82,cx:80,w:72,
+  back:'<path class="st" stroke-width="4" d="M48 76 L38 154 M112 76 L122 154 M70 84 L66 154 M90 84 L94 154"/>'+
+    '<path class="st" stroke-width="1.6" d="M44 100 L91 118 M116 100 L69 118 M41 124 L93 140 M119 124 L67 140 M43 108 H117 M40 132 H120"/><rect class="m" x="30" y="152" width="100" height="5" rx="2"/>',
+  front:'<path class="m" d="M36 33 L80 8 L124 33 Z"/><rect class="m3" x="76" y="3" width="8" height="8" rx="1"/><rect class="m" x="38" y="30" width="84" height="5" rx="1"/><path class="st" stroke-width="3" d="M80 86 V152"/>'},
+ {id:'transport',name:'Транспортная цистерна',cat:'ind',tier:2,cap:4000,
+  desc:'Цистерна на колёсной платформе. Может считаться передвижным хранилищем: развозит жидкость между удалёнными модулями.',
+  clip:'M34 54 H126 A26 26 0 0 1 126 106 H34 A26 26 0 0 1 34 54 Z',top:54,bottom:106,cx:80,w:132,
+  back:'<rect class="m" x="14" y="106" width="132" height="9" rx="2"/><path class="st" stroke-width="3" d="M14 110 H4"/>',
+  front:'<circle class="m" cx="36" cy="126" r="13"/><circle class="m" cx="64" cy="126" r="13"/><circle class="m" cx="120" cy="126" r="13"/>'+
+    '<circle class="m3" cx="36" cy="126" r="5"/><circle class="m3" cx="64" cy="126" r="5"/><circle class="m3" cx="120" cy="126" r="5"/>'+
+    '<rect class="m" x="72" y="44" width="16" height="11" rx="2"/><rect class="m3" x="69" y="41" width="22" height="4" rx="1"/>'+
+    '<path class="st2" stroke-width="3" d="M52 55 V105 M108 55 V105"/><path class="st" stroke-width="2" d="M140 60 V104 M146 64 V100 M140 70 H146 M140 80 H146 M140 90 H146"/><path class="gl" d="M30 64 H130"/>'},
+ {id:'hex',name:'Гекс-ячейка',cat:'exo',tier:3,cap:7000,
+  desc:'Шестигранный модуль — такие ячейки стыкуются друг с другом в сотовый блок без зазоров. Для плотной застройки базы.',
+  clip:'M80 16 L137 49 V115 L80 148 L23 115 V49 Z',top:16,bottom:148,cx:80,w:100,
+  front:'<path d="M80 26 L128 54 V110 L80 138 L32 110 V54 Z" fill="none" stroke="#fff" stroke-width="1" opacity=".18"/>'+
+    '<circle class="rv" cx="80" cy="20" r="2.2"/><circle class="rv" cx="133" cy="51" r="2.2"/><circle class="rv" cx="133" cy="113" r="2.2"/><circle class="rv" cx="80" cy="144" r="2.2"/><circle class="rv" cx="27" cy="113" r="2.2"/><circle class="rv" cx="27" cy="51" r="2.2"/>'+
+    '<rect class="m" x="66" y="146" width="28" height="9" rx="2"/>'},
+ {id:'ibc',name:'Еврокуб IBC',cat:'basic',tier:0,cap:1000,
+  desc:'Пластиковый куб в стальной обрешётке на поддоне. Ставится штабелем, перевозится погрузчиком, снизу кран.',
+  clip:'M38 34 H122 V136 H38 Z',top:34,bottom:136,cx:80,w:80,
+  front:'<path class="st" stroke-width="3.5" d="M36 34 V138 M59 34 V138 M80 34 V138 M101 34 V138 M124 34 V138 M36 34 H124 M36 60 H124 M36 86 H124 M36 112 H124 M36 138 H124"/>'+
+    '<rect class="m" x="30" y="140" width="100" height="7" rx="1"/><rect class="m" x="32" y="147" width="14" height="8"/><rect class="m" x="73" y="147" width="14" height="8"/><rect class="m" x="114" y="147" width="14" height="8"/>'+
+    '<rect class="m3" x="70" y="24" width="20" height="10" rx="2"/><rect class="m3" x="74" y="128" width="12" height="9" rx="2"/>'},
+ {id:'silo',name:'Силос с конусным дном',cat:'ind',tier:2,cap:8000,
+  desc:'Цилиндр с конусом снизу на четырёх опорах. Содержимое сливается под собственным весом до последней капли.',
+  clip:'M44 22 H116 V96 L88 128 H72 L44 96 Z',top:22,bottom:128,cx:80,w:68,
+  back:'<path class="st" stroke-width="5" d="M48 94 L40 154 M112 94 L120 154"/><path class="st" stroke-width="1.6" d="M46 118 L78 130 M114 118 L82 130"/><rect class="m" x="30" y="152" width="100" height="5" rx="2"/>',
+  front:'<path class="m" d="M42 23 Q80 4 118 23 Z"/><rect class="m3" x="74" y="6" width="12" height="7" rx="1"/><path class="st2" stroke-width="3" d="M44 48 H116 M44 74 H116"/>'+
+    '<rect class="m" x="74" y="128" width="12" height="12"/><circle class="m3" cx="80" cy="144" r="5"/><path class="gl" d="M54 30 V88"/>'},
+ {id:'rods',name:'Батарея трубок',cat:'lab',tier:3,cap:900,
+  desc:'Три узкие колонны на общих коллекторах — уровень во всех одинаковый. Похожа на топливную сборку, подходит для активных и опасных жидкостей.',
+  clip:'M40 30 A9 9 0 0 1 58 30 V130 A9 9 0 0 1 40 130 Z M71 30 A9 9 0 0 1 89 30 V130 A9 9 0 0 1 71 130 Z M102 30 A9 9 0 0 1 120 30 V130 A9 9 0 0 1 102 130 Z',top:21,bottom:139,cx:80,w:70,
+  front:'<rect class="m" x="32" y="10" width="96" height="13" rx="3"/><rect class="m" x="32" y="138" width="96" height="13" rx="3"/>'+rivets([38,64,96,122],16.5)+rivets([38,64,96,122],144.5)+
+    '<path class="st2" stroke-width="3" d="M38 60 H60 M69 60 H91 M100 60 H122 M38 100 H60 M69 100 H91 M100 100 H122"/><path class="gl" stroke-width="2" d="M45 32 V126 M76 32 V126 M107 32 V126"/>'},
+ {id:'twin',name:'Сообщающиеся баки',cat:'lab',tier:1,cap:3000,
+  desc:'Два бака, соединённые трубой у дна, с запорным вентилем. Уровень выравнивается сам — удобно делить запас между двумя цехами.',
+  clip:'M22 30 H70 V124 H90 V30 H138 V140 H90 V134 H70 V140 H22 Z',
+  outline:'M22 30 H70 V124 H90 V30 H138 V140 H90 V134 H70 V140 H22 Z',top:30,bottom:140,cx:80,w:112,
+  front:'<rect class="m" x="17" y="22" width="58" height="9" rx="2"/><rect class="m" x="85" y="22" width="58" height="9" rx="2"/><rect class="m" x="17" y="139" width="58" height="9" rx="2"/><rect class="m" x="85" y="139" width="58" height="9" rx="2"/>'+
+    '<path class="st" stroke-width="3" d="M80 124 V112"/><circle cx="80" cy="108" r="7" fill="none" stroke="#4B5680" stroke-width="3"/><path class="st2" stroke-width="2" d="M73 108 H87 M80 101 V115"/><path class="gl" d="M30 38 V130 M98 38 V130"/>'},
+ {id:'drop',name:'Каплевидный бак',cat:'exo',tier:2,cap:3500,
+  desc:'Обтекаемая капля с клапаном на вершине. Форма уменьшает площадь стенок у дна, где давление больше, — бак прочнее при том же весе.',
+  clip:'M80 12 C80 12 128 66 128 102 A48 44 0 0 1 32 102 C32 66 80 12 80 12 Z',top:14,bottom:146,cx:80,w:80,
+  front:'<rect class="m" x="74" y="3" width="12" height="11" rx="2"/><rect class="m3" x="70" y="2" width="20" height="4" rx="1"/><path class="gl" d="M48 96 Q52 68 70 42"/>'+
+    '<ellipse cx="80" cy="150" rx="26" ry="5" fill="none" stroke="#3A4468" stroke-width="3.5"/>'},
+ {id:'underground',name:'Подземный резервуар',cat:'ind',tier:2,cap:10000,
+  desc:'Заглублённая ёмкость: над поверхностью только люк и дыхательный клапан. Защищена от перепадов температуры и не занимает место на базе.',
+  clip:'M28 76 H132 A12 12 0 0 1 144 88 V134 A12 12 0 0 1 132 146 H28 A12 12 0 0 1 16 134 V88 A12 12 0 0 1 28 76 Z',top:76,bottom:146,cx:80,w:124,
+  back:'<rect class="soil" x="0" y="60" width="160" height="100"/>'+[[12,70],[40,66],[70,69],[100,65],[130,70],[150,66],[6,150],[150,150],[8,110],[152,120],[30,154],[128,155],[92,153]].map(([x,y])=>`<circle class="soil-d" cx="${x}" cy="${y}" r="2.2"/>`).join('')+
+    '<path class="grass" d="M0 60 H160"/>',
+  front:'<rect class="m" x="40" y="46" width="14" height="31"/><rect class="m3" x="35" y="42" width="24" height="6" rx="2"/><rect class="m" x="110" y="40" width="7" height="37"/><path class="m3" d="M104 40 H123 L113.5 32 Z"/>'},
+ {id:'sections',name:'Секционный бак',cat:'basic',tier:1,cap:2000,
+  desc:'Бак, разделённый на четыре отсека, со световыми индикаторами уровня. В игре так удобно показывать запас «делениями».',
+  clip:'M42 18 H118 V146 H42 Z',top:18,bottom:146,cx:80,w:72,leds:[12.5,37.5,62.5,87.5],
+  front:'<rect class="m" x="36" y="10" width="88" height="9" rx="2"/><rect class="m" x="36" y="145" width="88" height="9" rx="2"/>'+
+    '<rect class="m" x="40" y="48" width="80" height="4"/><rect class="m" x="40" y="80" width="80" height="4"/><rect class="m" x="40" y="112" width="80" height="4"/>'+
+    '<rect class="m2" x="123" y="20" width="14" height="124" rx="3"/>',
+  ledPos:[129,97,65,33]},
+ {id:'mixer',name:'Реактор с мешалкой',cat:'lab',tier:4,cap:2500,
+  desc:'Котёл с греющей рубашкой и мотор-мешалкой: лопасти крутятся внутри. Для переработки — смешивания, нагрева, реакций.',
+  clip:'M36 36 H124 V118 Q124 146 80 146 Q36 146 36 118 Z',top:36,bottom:146,cx:80,w:80,
+  back:'<path class="hot" d="M30 44 V118 Q30 152 80 152 Q130 152 130 118 V44"/>',
+  inner:'<path class="st" stroke-width="3" d="M80 30 V124"/><rect class="m3 blade" x="60" y="121" width="40" height="6" rx="2"/><rect class="m3 blade" x="66" y="84" width="28" height="5" rx="2" style="animation-delay:-.3s"/>',
+  front:'<rect class="m" x="28" y="27" width="104" height="10" rx="2"/>'+rivets(range(34,126,13),32)+'<rect class="m" x="68" y="7" width="24" height="20" rx="3"/><rect class="m3" x="72" y="11" width="16" height="3"/><rect class="m3" x="72" y="17" width="16" height="3"/>'+
+    '<path class="st" stroke-width="3" d="M124 60 H140 V40"/><circle class="m3" cx="140" cy="36" r="5"/><path class="gl" d="M44 46 V110"/>'},
+];
+
+// ---------- Состояние ----------
+function load(k,d){ try{ const v=localStorage.getItem('tanks.'+k); return v==null?d:JSON.parse(v); }catch(e){ return d; } }
+function save(k,v){ try{ localStorage.setItem('tanks.'+k,JSON.stringify(v)); }catch(e){} }
+let level=65, randomMode=false, filter='all';
+let liquid=load('liquid','water'); if(!LIQUIDS.some(l=>l.id===liquid)) liquid='water';
+let favs=new Set(load('favs',[]).filter(id=>TANKS.some(t=>t.id===id)));
+let selId=load('sel','capsule'); if(!TANKS.some(t=>t.id===selId)) selId='capsule';
+const randLevels={};
+const tankById=id=>TANKS.find(t=>t.id===id);
+const fmt=n=>Math.round(n).toLocaleString('ru-RU');
+
+// Волна шириной 280 (с запасом по краям на наклон), период 20 — CSS-сдвиг на 40 зацикливается без шва.
+const WAVE=(()=>{let d='M-60 0';for(let x=-60;x<=220;x+=10)d+=` Q${x+5} ${((x/10)%2===0?-3.2:3.2)} ${x+10} 0`;return d+' V240 H-60 Z';})();
+
+// ---------- Рендер одной цистерны ----------
+// Экземпляры (карточки + большой просмотр) живут в списке inst; уровень, наклон и индикаторы
+// правятся в одном requestAnimationFrame-цикле, а DOM не пересоздаётся.
+let inst=[], uidSeq=0;
+function tankSvg(t,withBubbles){
+  const uid='k'+(++uidSeq);
+  const H=t.bottom-t.top;
+  const marks=[25,50,75].map(p=>`<path class="mark" d="M0 ${(t.bottom-H*p/100).toFixed(1)} H160"/>`).join('');
+  let bubbles='';
+  if(withBubbles!==false){
+    for(let i=0;i<7;i++){
+      const x=(t.cx-t.w/2+6+Math.random()*(t.w-12)).toFixed(1);
+      const depth=Math.min(H,24+Math.random()*H*0.8);
+      bubbles+=`<circle class="bub" cx="${x}" cy="${depth.toFixed(1)}" r="${(1+Math.random()*1.6).toFixed(1)}" style="--d:${(depth-3).toFixed(0)};--dur:${(2.4+Math.random()*2.6).toFixed(1)}s;--dl:-${(Math.random()*5).toFixed(1)}s;--sx:${(Math.random()*6-3).toFixed(1)}px"/>`;
+    }
+  }
+  const leds=(t.leds||[]).map((th,i)=>`<rect class="led" data-th="${th}" x="126" y="${t.ledPos[i]-12}" width="8" height="22" rx="2"/>`).join('');
+  const svg=`<svg class="tk" viewBox="0 0 160 160" role="img" aria-label="${t.name}">
+    <defs><clipPath id="${uid}"><path d="${t.clip}"/></clipPath></defs>
+    ${t.back||''}
+    <path class="glass" d="${t.clip}"/>
+    <g clip-path="url(#${uid})">
+      <g class="liq">
+        <path class="wave b" d="${WAVE}" transform="translate(0,-3)"/>
+        <path class="wave f" d="${WAVE}"/>
+        <rect class="sheen" x="-60" y="3" width="280" height="2"/>
+        ${bubbles}
+        ${t.onLiquid||''}
+      </g>
+      ${marks}
+      ${t.inner||''}
+    </g>
+    <path class="outline" d="${t.outline||t.clip}"/>
+    ${t.front||''}${leds}
+  </svg>`;
+  return {uid,svg};
+}
+function register(root,t){
+  const svg=root.querySelector('svg.tk');
+  const o={t,svg,liq:svg.querySelector('.liq'),leds:[...svg.querySelectorAll('.led')],cur:-1,amp:0,phase:Math.random()*6,pctEl:null,metaEl:null};
+  inst.push(o); return o;
+}
+function targetFor(t){ return randomMode ? randLevels[t.id] : level; }
+
+// ---------- Большой просмотр ----------
+const previewEl=document.getElementById('preview');
+function renderPreview(){
+  inst=inst.filter(o=>!o.preview);
+  const t=tankById(selId), idx=TANKS.indexOf(t);
+  const {svg}=tankSvg(t);
+  const fav=favs.has(t.id);
+  previewEl.style.setProperty('--tc',TIERS[t.tier]);
+  previewEl.innerHTML=
+    `<div class="pv-stage">${svg}<div class="pv-pct" id="pvPct"></div></div>
+     <div class="pv-info">
+       <div class="pv-top"><span class="pv-num">№ ${String(idx+1).padStart(2,'0')} / ${TANKS.length}</span>
+         <span class="badge" style="--c:${TIERS[t.tier]}">T${t.tier}</span><span class="badge" style="--c:var(--text-secondary)">${CATS[t.cat]}</span></div>
+       <h2 class="pv-name">${t.name}</h2>
+       <p class="pv-desc">${t.desc}</p>
+       <div class="specs">
+         <div class="spec"><div class="spec-l">Ёмкость</div><div class="spec-v">${fmt(t.cap)} ед.</div></div>
+         <div class="spec"><div class="spec-l">Сейчас в баке</div><div class="spec-v" id="pvAmt">—</div></div>
+         <div class="spec"><div class="spec-l">Свободно</div><div class="spec-v" id="pvFree">—</div></div>
+       </div>
+       <div class="pv-actions">
+         <button class="btn" type="button" data-nav="-1" aria-label="Предыдущая цистерна">‹ Назад</button>
+         <button class="btn" type="button" data-nav="1" aria-label="Следующая цистерна">Далее ›</button>
+         <button class="btn${fav?' on':''}" type="button" data-fav="${t.id}" aria-pressed="${fav}">${fav?'В избранном':'В избранное'}</button>
+       </div>
+     </div>`;
+  const o=register(previewEl,t); o.preview=true;
+  o.pctEl=previewEl.querySelector('#pvPct'); o.amtEl=previewEl.querySelector('#pvAmt'); o.freeEl=previewEl.querySelector('#pvFree');
+}
+previewEl.addEventListener('click',e=>{
+  const nav=e.target.closest('[data-nav]');
+  if(nav){ const i=TANKS.findIndex(t=>t.id===selId); select(TANKS[(i+Number(nav.dataset.nav)+TANKS.length)%TANKS.length].id,true); return; }
+  const f=e.target.closest('[data-fav]'); if(f) toggleFav(f.dataset.fav);
+});
+
+// ---------- Сетка ----------
+const gridEl=document.getElementById('grid');
+const STAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+function visibleTanks(){
+  if(filter==='fav') return TANKS.filter(t=>favs.has(t.id));
+  if(filter==='all') return TANKS;
+  return TANKS.filter(t=>t.cat===filter);
+}
+function renderGrid(){
+  inst=inst.filter(o=>o.preview);
+  const list=visibleTanks();
+  if(!list.length){ gridEl.innerHTML='<div class="empty">'+(filter==='fav'?'Пока ничего не отмечено — нажмите звёздочку на карточке.':'Нет цистерн в этой группе.')+'</div>'; return; }
+  gridEl.innerHTML=list.map(t=>{
+    const idx=TANKS.indexOf(t), fav=favs.has(t.id);
+    return `<div class="card${t.id===selId?' sel':''}" role="button" tabindex="0" data-id="${t.id}" style="--tc:${TIERS[t.tier]}" aria-label="${t.name}, T${t.tier}, ${fmt(t.cap)} единиц">
+      <span class="c-num">${String(idx+1).padStart(2,'0')}</span>
+      <button class="star" type="button" data-fav="${t.id}" aria-pressed="${fav}" aria-label="${fav?'Убрать из избранного':'В избранное'}">${STAR}</button>
+      ${tankSvg(t).svg}
+      <div class="c-name">${t.name}</div>
+      <div class="c-meta"><span class="t">T${t.tier} · ${fmt(t.cap)}</span><span class="p">—</span></div>
+    </div>`;
+  }).join('');
+  gridEl.querySelectorAll('.card').forEach(c=>{ const o=register(c,tankById(c.dataset.id)); o.metaEl=c.querySelector('.c-meta .p'); });
+}
+gridEl.addEventListener('click',e=>{
+  const f=e.target.closest('[data-fav]');
+  if(f){ e.stopPropagation(); toggleFav(f.dataset.fav); return; }
+  const c=e.target.closest('.card'); if(c) select(c.dataset.id,false);
+});
+gridEl.addEventListener('keydown',e=>{
+  if(e.target.classList.contains('card') && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); select(e.target.dataset.id,false); }
+});
+function select(id,scrollCard){
+  selId=id; save('sel',id);
+  gridEl.querySelectorAll('.card').forEach(c=>c.classList.toggle('sel',c.dataset.id===id));
+  renderPreview();
+  if(scrollCard){ const c=gridEl.querySelector('.card[data-id="'+id+'"]'); if(c) c.scrollIntoView({block:'nearest',behavior:'smooth'}); }
+  else previewEl.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+function toggleFav(id){
+  favs.has(id)?favs.delete(id):favs.add(id);
+  save('favs',[...favs]);
+  renderFilters();
+  if(filter==='fav') renderGrid();
+  else gridEl.querySelectorAll('.star[data-fav="'+id+'"]').forEach(s=>{ const on=favs.has(id); s.setAttribute('aria-pressed',on); s.setAttribute('aria-label',on?'Убрать из избранного':'В избранное'); });
+  if(id===selId) renderPreview();
+}
+
+// ---------- Фильтры ----------
+const filtersEl=document.getElementById('filters');
+function renderFilters(){
+  const items=[['all','Все ('+TANKS.length+')']].concat(Object.entries(CATS).map(([k,v])=>[k,v+' ('+TANKS.filter(t=>t.cat===k).length+')']),[['fav','Избранное ('+favs.size+')']]);
+  filtersEl.innerHTML=items.map(([k,v])=>`<button class="chip" type="button" data-f="${k}" aria-pressed="${filter===k}">${v}</button>`).join('');
+}
+filtersEl.addEventListener('click',e=>{ const b=e.target.closest('[data-f]'); if(!b) return; filter=b.dataset.f; renderFilters(); renderGrid(); });
+
+// ---------- Управление ----------
+const fillEl=document.getElementById('fill'), fillVal=document.getElementById('fillVal');
+function setLevel(v){
+  level=v; fillVal.textContent=v+'%'; fillEl.style.setProperty('--p',v+'%');
+  if(randomMode){ randomMode=false; randBtn.classList.remove('on'); randBtn.setAttribute('aria-pressed','false'); }
+}
+fillEl.addEventListener('input',()=>setLevel(Number(fillEl.value)));
+const randBtn=document.getElementById('randBtn');
+randBtn.addEventListener('click',()=>{
+  randomMode=!randomMode;
+  randBtn.classList.toggle('on',randomMode); randBtn.setAttribute('aria-pressed',String(randomMode));
+  if(randomMode) TANKS.forEach(t=>randLevels[t.id]=Math.round(4+Math.random()*96));
+});
+document.getElementById('shakeBtn').addEventListener('click',()=>inst.forEach(o=>o.amp=1));
+
+const swEl=document.getElementById('swatches');
+function applyLiquid(){
+  const l=LIQUIDS.find(x=>x.id===liquid);
+  document.documentElement.style.setProperty('--lq',l.c);
+  if(l.glow) document.body.dataset.glow=''; else delete document.body.dataset.glow;
+  swEl.innerHTML=LIQUIDS.map(x=>`<button class="sw" type="button" style="--c:${x.c}" data-l="${x.id}" aria-pressed="${x.id===liquid}" title="${x.name}" aria-label="${x.name}"></button>`).join('');
+}
+swEl.addEventListener('click',e=>{ const b=e.target.closest('[data-l]'); if(!b) return; liquid=b.dataset.l; save('liquid',liquid); applyLiquid(); });
+
+const toastEl=document.getElementById('toast');
+document.getElementById('copyBtn').addEventListener('click',async()=>{
+  const list=TANKS.filter(t=>favs.has(t.id)).map(t=>String(TANKS.indexOf(t)+1).padStart(2,'0')+' '+t.name+' ('+t.id+')');
+  if(!list.length){ toastEl.style.color='var(--text-muted)'; toastEl.textContent='Избранное пусто'; return; }
+  try{ await navigator.clipboard.writeText(list.join('\n')); toastEl.style.color='var(--good)'; toastEl.textContent='Скопировано: '+list.length; }
+  catch(e){ toastEl.style.color='var(--text-secondary)'; toastEl.textContent=list.map(s=>s.split(' (')[0]).join(', '); }
+  setTimeout(()=>{ toastEl.textContent=''; },4000);
+});
+
+// ---------- Анимация ----------
+// Уровень плавно догоняет цель; резкое изменение уровня (и кнопка «Встряхнуть») раскачивает
+// поверхность: наклон и высота гребней затухают со временем.
+const reduced=window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function frame(ts){
+  const s=ts/1000;
+  for(const o of inst){
+    const t=o.t, target=targetFor(t);
+    if(o.cur<0) o.cur=target;
+    const d=target-o.cur;
+    o.cur+= reduced ? d : d*0.07;
+    if(Math.abs(d)>0.5) o.amp=Math.min(1,o.amp+Math.abs(d)*0.004);
+    o.amp*=0.985;
+    const pct=o.cur;
+    const y=pct<0.4 ? t.bottom+8 : t.bottom-(t.bottom-t.top)*pct/100;
+    const tilt=reduced?0:(t.calm?0.35:1)*o.amp*11*Math.sin(s*5.2+o.phase);
+    const sy=1+(t.calm?0.3:1)*o.amp*1.6;
+    o.liq.setAttribute('transform',`translate(0 ${y.toFixed(2)}) rotate(${tilt.toFixed(2)} ${t.cx} 0) scale(1 ${sy.toFixed(3)})`);
+    o.svg.classList.toggle('low',pct<15);
+    o.svg.classList.toggle('full',pct>=99.5);
+    for(const l of o.leds) l.classList.toggle('on',pct>=Number(l.dataset.th));
+    const shown=Math.round(target);
+    if(o.metaEl){ const txt=shown+'%'; if(o.metaEl.textContent!==txt) o.metaEl.textContent=txt; }
+    if(o.pctEl){
+      const txt=Math.round(pct)+'%'; if(o.pctEl.textContent!==txt) o.pctEl.textContent=txt;
+      const amt=t.cap*shown/100;
+      const a=fmt(amt)+' ед.', f=fmt(t.cap-amt)+' ед.';
+      if(o.amtEl.textContent!==a) o.amtEl.textContent=a;
+      if(o.freeEl.textContent!==f) o.freeEl.textContent=f;
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+applyLiquid(); renderFilters(); renderPreview(); renderGrid(); setLevel(65);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

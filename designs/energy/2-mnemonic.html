@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Энергосистема · Вариант 2 · Мнемосхема</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="energy-core.css">
+<style>
+/* Вариант 2 — «Мнемосхема»: единая схема базы с живыми потоками энергии. Клик по узлу открывает его историю. */
+.m-scheme{position:relative;border-radius:16px;padding:22px 20px;border:1px solid #173A4A;
+  background:radial-gradient(120% 90% at 20% 0%,rgba(79,209,231,.09),transparent 60%),
+    repeating-linear-gradient(0deg,rgba(79,209,231,.045) 0 1px,transparent 1px 28px),repeating-linear-gradient(90deg,rgba(79,209,231,.045) 0 1px,transparent 1px 28px),#070B18;}
+.m-grid{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,190px) minmax(0,1.25fr);grid-template-areas:'src bus cons' 'bat bus cons';gap:26px 70px;align-items:stretch;}
+.m-src{grid-area:src;display:flex;flex-direction:column;gap:34px;}
+.m-bat{grid-area:bat;display:flex;flex-direction:column;gap:22px;}
+.m-bus{grid-area:bus;}
+.m-cons{grid-area:cons;display:flex;flex-direction:column;gap:14px;justify-content:center;}
+.m-flows{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible;}
+.m-flow-base{fill:none;stroke-linecap:round;opacity:.16;}
+.m-flow-dash{fill:none;stroke-linecap:round;stroke-dasharray:1 12;animation:m-dash 1s linear infinite;}
+.m-flow-dash.rev{animation-direction:reverse;}
+@keyframes m-dash{to{stroke-dashoffset:-13;}}
+
+.m-node{position:relative;background:linear-gradient(180deg,rgba(23,29,51,.96),rgba(15,20,36,.96));border:1px solid var(--border-strong);border-radius:12px;padding:11px 13px;cursor:pointer;text-align:left;color:inherit;width:100%;font:inherit;
+  transition:border-color .15s,box-shadow .15s,transform .1s;}
+.m-node:hover{border-color:var(--nc,var(--tier0));}
+.m-node:focus-visible{outline:2px solid var(--tier0);outline-offset:2px;}
+.m-node.sel{border-color:var(--nc,var(--tier0));box-shadow:0 0 0 1px var(--nc,var(--tier0)),0 0 22px color-mix(in srgb,var(--nc,var(--tier0)) 30%,transparent);}
+.m-nh{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.m-nh h3{margin:0;font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:.02em;flex:1;}
+.m-tag{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);}
+.m-big{font-family:var(--font-mono);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.1;}
+.m-of{font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);}
+.m-line{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--text-secondary);padding:1px 0;}
+.m-line b{font-family:var(--font-mono);font-weight:500;color:var(--text-primary);font-variant-numeric:tabular-nums;}
+.m-bar{height:6px;border-radius:3px;background:#0B1022;overflow:hidden;margin:7px 0 5px;box-shadow:inset 0 1px 3px rgba(0,0,0,.6);}
+.m-bar i{display:block;height:100%;background:var(--nc);transition:width .35s;}
+.m-sun{--nc:#FFDD57;}
+.m-solar{--nc:#FFDD57;}
+.m-batt{--nc:#4FD1E7;}
+.m-busn{--nc:#4ADE9B;}
+.m-curt{--nc:#8C93B0;border-style:dashed;padding:8px 12px;}
+.m-curt .m-nh{margin:0;}
+.m-curt.idle{opacity:.5;}
+.m-sunrow{display:flex;align-items:center;gap:12px;}
+.m-sunico{width:54px;height:54px;flex-shrink:0;}
+.m-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(14px,1fr));gap:3px;margin:8px 0 2px;}
+.m-tiles i{aspect-ratio:1.5;border-radius:2px;background:#FFDD57;border:1px solid rgba(255,221,87,.5);transition:opacity .4s;}
+.m-ring{display:block;margin:2px auto 8px;width:118px;height:118px;}
+.m-ring text{font-family:var(--font-mono);fill:var(--text-primary);}
+.m-batrow{display:flex;gap:12px;align-items:center;}
+.m-batico{width:52px;height:78px;flex-shrink:0;}
+.m-group{background:rgba(15,20,36,.92);border:1px solid var(--border);border-left:3px solid var(--nc);border-radius:12px;padding:9px 10px 8px;--nc:var(--tier0);}
+.m-group.sel{border-color:var(--nc);box-shadow:0 0 0 1px var(--nc),0 0 22px color-mix(in srgb,var(--nc) 26%,transparent);}
+.m-gh{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;color:inherit;cursor:pointer;padding:2px 2px 6px;text-align:left;}
+.m-gh h3{margin:0;font-family:var(--font-display);font-weight:700;font-size:15px;flex:1;letter-spacing:.02em;}
+.m-gh b{font-family:var(--font-mono);font-weight:500;font-size:14px;}
+.m-row{display:grid;grid-template-columns:10px minmax(0,1fr) 34px 78px;gap:8px;align-items:center;width:100%;background:none;border:1px solid transparent;border-radius:7px;color:inherit;cursor:pointer;padding:4px 6px;font-size:12.5px;text-align:left;}
+.m-row:hover{background:rgba(255,255,255,.04);}
+.m-row.sel{border-color:var(--rc);background:color-mix(in srgb,var(--rc) 12%,transparent);}
+.m-row i{width:9px;height:9px;border-radius:2px;background:var(--rc);}
+.m-row span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.m-row em{font-style:normal;font-family:var(--font-mono);font-size:11.5px;color:var(--text-muted);text-align:right;}
+.m-row b{font-family:var(--font-mono);font-weight:500;font-size:12px;text-align:right;font-variant-numeric:tabular-nums;}
+.m-rowbar{grid-column:2/5;height:3px;border-radius:2px;background:#0B1022;margin-top:-2px;overflow:hidden;}
+.m-rowbar i{display:block;height:100%;width:0;background:var(--rc);transition:width .35s;border-radius:0;}
+
+.m-hist{background:#0F1424;border:1px solid var(--border);border-radius:14px;padding:14px 16px 12px;display:flex;flex-direction:column;gap:10px;}
+.m-hh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.m-hh h2{margin:0;font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.02em;}
+.m-hh p{margin:0;font-size:12px;color:var(--text-secondary);flex:1;min-width:200px;}
+.m-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;}
+.m-stat{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:8px 11px;}
+.m-stat-l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);}
+.m-stat-v{font-family:var(--font-mono);font-size:17px;font-weight:500;margin-top:2px;white-space:nowrap;}
+.m-hint{font-size:12px;color:var(--text-muted);}
+
+@media (max-width:860px){
+  .m-scheme{padding:14px 12px;}
+  .m-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:'src' 'bus' 'bat' 'cons';gap:34px;}
+  .m-src{gap:34px;}
+}
+</style>
+</head>
+<body>
+<div class="en-page">
+  <header>
+    <a class="en-back" href="index.html">← Все варианты</a>
+    <div class="en-eyebrow">Вариант 2 · Мнемосхема</div>
+    <h1 class="en-h1">Схема энергосистемы базы</h1>
+    <p class="en-sub">Как энергия идёт от солнца через шину к потребителям и аккумуляторам: толщина и скорость потока показывают мощность. Нажмите на любой узел, чтобы увидеть его историю за час, сутки, неделю, месяц или три месяца.</p>
+  </header>
+  <div id="ctl"></div>
+
+  <section class="m-scheme" id="scheme">
+    <svg class="m-flows" id="flows" aria-hidden="true"></svg>
+    <div class="m-grid">
+      <div class="m-src">
+        <button type="button" class="m-node m-sun" id="nSun" data-sel="solar">
+          <div class="m-sunrow">
+            <svg class="m-sunico" viewBox="0 0 54 54" aria-hidden="true">
+              <g id="sunRays" style="transform-origin:27px 27px;animation:m-spin 26s linear infinite">
+                <path d="M27 3v8M27 43v8M3 27h8M43 27h8M10 10l5.7 5.7M38.3 38.3L44 44M44 10l-5.7 5.7M15.7 38.3L10 44" stroke="#FFDD57" stroke-width="3" stroke-linecap="round"/></g>
+              <circle id="sunDisc" cx="27" cy="27" r="11" fill="#FFDD57"/>
+              <circle id="moonCut" cx="32" cy="23" r="10" fill="#0F1424" opacity="0"/>
+            </svg>
+            <div style="flex:1;min-width:0"><div class="m-nh" style="margin:0"><h3>Солнце</h3></div>
+              <div class="m-big" id="sunPct">—</div><div class="m-of" id="sunTxt">—</div></div>
+          </div>
+        </button>
+        <button type="button" class="m-node m-solar sel" id="nSolar" data-sel="solar">
+          <div class="m-nh"><h3>Солнечные панели</h3><span class="m-tag" id="solCnt">×—</span></div>
+          <div class="m-big" id="solGen">—</div><div class="m-of" id="solOf">—</div>
+          <div class="m-bar"><i id="solBar" style="width:0"></i></div>
+          <div class="m-tiles" id="solTiles"></div>
+          <div class="m-line"><span>Выработано за период</span><b id="solEn">—</b></div>
+        </button>
+      </div>
+
+      <div class="m-bus">
+        <button type="button" class="m-node m-busn" id="nBus" data-sel="bus" style="height:100%;display:flex;flex-direction:column;justify-content:center">
+          <div class="m-nh"><h3>Шина базы</h3></div>
+          <svg class="m-ring" id="ring" viewBox="0 0 118 118" aria-hidden="true">
+            <circle cx="59" cy="59" r="48" fill="none" stroke="#0B1022" stroke-width="12"/>
+            <circle id="ringArc" cx="59" cy="59" r="48" fill="none" stroke="#4ADE9B" stroke-width="12" stroke-linecap="round" transform="rotate(-90 59 59)" stroke-dasharray="0 302"/>
+            <text id="ringPct" x="59" y="58" text-anchor="middle" font-size="22" font-weight="500">—</text>
+            <text x="59" y="76" text-anchor="middle" font-size="10" style="fill:#9CA6C4">обеспечено</text>
+          </svg>
+          <div class="m-line"><span>Потребность</span><b id="busDem">—</b></div>
+          <div class="m-line"><span>Получено</span><b id="busSup">—</b></div>
+          <div class="m-line"><span>Выработка</span><b id="busGen">—</b></div>
+          <div class="m-line"><span>Акк. поток</span><b id="busFlow">—</b></div>
+          <div class="m-line"><span>Автономия</span><b id="busAuto">—</b></div>
+          <div style="margin-top:8px;font-size:11.5px" id="busState"></div>
+        </button>
+      </div>
+
+      <div class="m-bat">
+        <button type="button" class="m-node m-batt" id="nBat" data-sel="batt">
+          <div class="m-nh"><h3>Аккумуляторы</h3><span class="m-tag" id="batCnt">×—</span></div>
+          <div class="m-batrow">
+            <svg class="m-batico" viewBox="0 0 52 78" aria-hidden="true">
+              <rect x="17" y="1" width="18" height="6" rx="2" fill="#4B5680"/>
+              <rect x="4" y="7" width="44" height="68" rx="6" fill="#0B1022" stroke="#4B5680" stroke-width="2.5"/>
+              <clipPath id="batClip"><rect x="7" y="10" width="38" height="62" rx="3"/></clipPath>
+              <rect id="batLevel" x="7" y="72" width="38" height="0" fill="#4FD1E7" clip-path="url(#batClip)" opacity=".9"/>
+              <path id="batBolt" d="M28 22 L16 44 H25 L21 62 L36 38 H27 Z" fill="#fff" opacity=".85"/>
+            </svg>
+            <div style="flex:1;min-width:0"><div class="m-big" id="batJ">—</div><div class="m-of" id="batOf">—</div>
+              <div class="m-bar"><i id="batBar" style="width:0"></i></div>
+              <div class="m-of" id="batFlowTxt">—</div></div>
+          </div>
+          <div class="m-line" style="margin-top:6px"><span>В кВт·ч</span><b id="batKwh">—</b></div>
+        </button>
+        <button type="button" class="m-node m-curt idle" id="nCurt" data-sel="curt">
+          <div class="m-nh"><h3>Сброс излишка</h3><span class="m-big" style="font-size:15px" id="curtV">—</span></div>
+        </button>
+      </div>
+
+      <div class="m-cons" id="cons"></div>
+    </div>
+  </section>
+
+  <div id="periods"></div>
+  <section class="m-hist">
+    <div class="m-hh"><h2 id="hTitle">—</h2><p id="hSub"></p></div>
+    <div class="en-legend" id="hLegend"></div>
+    <div id="hChart"></div>
+    <div class="m-stats" id="hStats"></div>
+    <div class="m-hint">Подсказка: наведите курсор на график — покажется точное значение и игровое время.</div>
+  </section>
+</div>
+
+<style>@keyframes m-spin{to{transform:rotate(360deg);}}</style>
+<script src="energy-core.js"></script>
+<script>
+(function(){
+var $=function(id){ return document.getElementById(id); }, F=EN.fmt;
+EN.mountControls($('ctl')); EN.mountPeriods($('periods'));
+var sel='solar', flows=[], nodeEls={};
+
+/* ---------- потребители справа ---------- */
+function buildCons(){
+  var html='';
+  EN.GROUPS.forEach(function(g){
+    var list=EN.CONSUMERS.filter(function(c){ return c.group===g.id&&EN.counts[c.id]>0; }); if(!list.length) return;
+    html+='<div class="m-group" id="grp_'+g.id+'" style="--nc:'+g.color+'"><button type="button" class="m-gh" data-sel="g_'+g.id+'"><h3>'+g.name+'</h3><b id="gv_'+g.id+'">—</b></button>';
+    list.forEach(function(c){
+      html+='<button type="button" class="m-row" id="row_'+c.id+'" data-sel="'+c.id+'" style="--rc:'+c.color+'"><i></i><span>'+c.name+'</span><em>×'+EN.counts[c.id]+'</em><b id="rv_'+c.id+'">—</b><div class="m-rowbar"><i id="rb_'+c.id+'"></i></div></button>';
+    });
+    html+='</div>';
+  });
+  $('cons').innerHTML=html;
+}
+function buildTiles(){
+  var n=Math.min(EN.counts.solar,24), h=''; for(var i=0;i<n;i++) h+='<i></i>'; $('solTiles').innerHTML=h;
+}
+
+/* ---------- потоки ---------- */
+var svg=$('flows'), NS='http://www.w3.org/2000/svg';
+function mkFlow(fromId,toId,color,fn){
+  var base=document.createElementNS(NS,'path'), dash=document.createElementNS(NS,'path');
+  base.setAttribute('class','m-flow-base'); base.setAttribute('stroke',color); dash.setAttribute('class','m-flow-dash'); dash.setAttribute('stroke',color);
+  svg.appendChild(base); svg.appendChild(dash);
+  flows.push({from:fromId,to:toId,base:base,dash:dash,fn:fn,color:color,lastDur:0});
+}
+function buildFlows(){
+  svg.innerHTML=''; flows=[];
+  mkFlow('nSun','nSolar','#FFDD57',function(){ return {i:EN.cur.sun,rev:false}; });
+  mkFlow('nSolar','nBus','#FFDD57',function(){ var c=EN.cur; return {i:c.nameplate>0?c.gen/c.nameplate:0,rev:false}; });
+  mkFlow('nBus','nBat','#4FD1E7',function(){ var c=EN.cur, ref=Math.max(c.nameplate,c.demand,1); return {i:Math.min(1,Math.abs(c.flow)/ref*1.6),rev:c.flow<0}; });
+  mkFlow('nBat','nCurt','#8C93B0',function(){ var c=EN.cur; return {i:c.nameplate>0?Math.min(1,c.curtail/c.nameplate*1.6):0,rev:false}; });
+  EN.GROUPS.forEach(function(g){
+    if(!$('grp_'+g.id)) return;
+    var ids=EN.CONSUMERS.filter(function(c){ return c.group===g.id; }).map(function(c){ return c.id; });
+    var inst=ids.reduce(function(a,id){ return a+(EN.counts[id]||0)*EN.CONSUMERS.filter(function(c){return c.id===id;})[0].kw; },0);
+    mkFlow('nBus','grp_'+g.id,g.color,function(){ var now=ids.reduce(function(a,id){ return a+(EN.cur.cons[id]||0); },0); return {i:inst>0?now/inst:0,rev:false}; });
+  });
+}
+function layoutFlows(){
+  var host=$('scheme').getBoundingClientRect(), stacked=window.innerWidth<=860;
+  svg.setAttribute('viewBox','0 0 '+host.width+' '+host.height);
+  var firstGrp=true;
+  flows.forEach(function(f){
+    var A=$(f.from), B=$(f.to); if(!A||!B) return;
+    var a=A.getBoundingClientRect(), b=B.getBoundingClientRect(), d;
+    if(stacked){
+      if(f.to.indexOf('grp_')===0){ if(!firstGrp){ f.base.setAttribute('d',''); f.dash.setAttribute('d',''); return; } firstGrp=false; }
+      if(f.from==='nBus'&&f.to==='nBat'){ }
+      var cx=(Math.max(a.left,b.left)+Math.min(a.right,b.right))/2-host.left, y1=a.bottom-host.top, y2=b.top-host.top;
+      if(f.to==='nCurt'){ y1=a.bottom-host.top; y2=b.top-host.top; cx=(Math.max(a.left,b.left)+Math.min(a.right,b.right))/2-host.left; }
+      d='M'+cx+' '+y1+' L'+cx+' '+y2;
+    }else if(a.left<b.right&&b.left<a.right){          // вертикальная связь
+      var cx2=(Math.max(a.left,b.left)+Math.min(a.right,b.right))/2-host.left;
+      var y1v=(a.top<b.top?a.bottom:a.top)-host.top, y2v=(a.top<b.top?b.top:b.bottom)-host.top;
+      d='M'+cx2+' '+y1v+' L'+cx2+' '+y2v;
+    }else{                                              // горизонтальная связь: точки на одной высоте
+      var leftToRight=a.right<=b.left, xa=(leftToRight?a.right:a.left)-host.left, xb=(leftToRight?b.left:b.right)-host.left;
+      var yc=(b.height>a.height?(a.top+a.height/2):(b.top+b.height/2))-host.top;
+      var lo=Math.max(a.top,b.top)-host.top+14, hi=Math.min(a.bottom,b.bottom)-host.top-14;
+      var y= hi>=lo ? Math.min(hi,Math.max(lo,yc)) : yc;
+      var ya=(a.top+a.height/2)-host.top, yb=(b.top+b.height/2)-host.top;
+      if(b.height>a.height) yb=Math.min(b.bottom-host.top-14,Math.max(b.top-host.top+14,ya)); else ya=Math.min(a.bottom-host.top-14,Math.max(a.top-host.top+14,yb));
+      var mx=(xa+xb)/2;
+      d='M'+xa+' '+ya+' C'+mx+' '+ya+' '+mx+' '+yb+' '+xb+' '+yb;
+    }
+    f.base.setAttribute('d',d); f.dash.setAttribute('d',d);
+  });
+}
+function animateFlows(){
+  flows.forEach(function(f){
+    var r=f.fn(), i=Math.max(0,Math.min(1,r.i)), on=i>0.01, w=2+7*Math.sqrt(i), dur=Math.max(.35,1.7-1.35*i);
+    f.base.setAttribute('stroke-width',w+4); f.base.style.opacity=on?'.2':'.07';
+    f.dash.setAttribute('stroke-width',Math.max(2.5,w*0.8)); f.dash.style.opacity=on?'1':'0';
+    f.dash.style.strokeDasharray='0.5 '+(9+w*0.6);
+    if(Math.abs(dur-f.lastDur)>0.06){ f.dash.style.animationDuration=dur+'s'; f.lastDur=dur; }
+    f.dash.classList.toggle('rev',!!r.rev);
+  });
+}
+
+/* ---------- живые значения узлов ---------- */
+function live(){
+  var c=EN.cur;
+  // солнце
+  $('sunPct').textContent=F.pct(c.sun*100); $('sunTxt').textContent=(c.sun>0?'День':'Ночь')+' · '+EN.clockStr(c.clock);
+  $('sunDisc').style.opacity=Math.max(.25,c.sun); $('sunRays').style.opacity=Math.max(.1,c.sun); $('moonCut').setAttribute('opacity',c.sun>0?0:1);
+  $('sunDisc').setAttribute('fill',c.sun>0?'#FFDD57':'#C9D2EE');
+  // панели
+  $('solCnt').textContent='×'+EN.counts.solar; $('solGen').textContent=F.power(c.gen).text; $('solOf').textContent='из '+F.power(c.nameplate).text+' установленных';
+  $('solBar').style.width=(c.nameplate>0?c.gen/c.nameplate*100:0).toFixed(1)+'%';
+  var tiles=$('solTiles').children; for(var i=0;i<tiles.length;i++) tiles[i].style.opacity=(0.12+0.88*c.sun).toFixed(2);
+  // шина
+  var pct=c.frac*100; $('ringPct').textContent=F.pct(pct,pct<99.5&&pct>0?1:0);
+  var arc=$('ringArc'); arc.setAttribute('stroke-dasharray',(302*c.frac).toFixed(1)+' 302'); arc.setAttribute('stroke',c.frac>=.999?'#4ADE9B':c.frac>=.5?'#F0B93D':'#F4557B');
+  $('busDem').textContent=F.power(c.demand).text; $('busSup').textContent=F.power(c.supply).text; $('busGen').textContent=F.power(c.gen).text;
+  $('busFlow').textContent=Math.abs(c.flow)<1?'0':(c.flow>0?'+':'−')+F.power(Math.abs(c.flow)).text;
+  $('busAuto').textContent=c.demand>1?F.dur(c.stored/c.demand):'∞';
+  $('busState').innerHTML= c.frac>=.999?'<span style="color:var(--good)">● Норма</span>' : c.frac<.02?'<span style="color:var(--bad)">● Блэкаут</span>' : '<span style="color:#F0B93D">● Просадка</span>';
+  // аккумулятор
+  $('batCnt').textContent=EN.counts.bat?'×'+EN.counts.bat:'базовый блок'; $('batJ').textContent=F.stored(c.stored).text; $('batOf').textContent='из '+F.stored(c.cap).text;
+  $('batBar').style.width=c.pct.toFixed(1)+'%'; $('batKwh').textContent=F.energy(c.stored).text+' / '+F.energy(c.cap).text;
+  var h=62*c.pct/100; $('batLevel').setAttribute('y',72-h); $('batLevel').setAttribute('height',h); $('batLevel').setAttribute('fill',c.pct<15?'#F4557B':'#4FD1E7');
+  $('batBolt').style.opacity=Math.abs(c.flow)<1?.2:.9;
+  $('batFlowTxt').textContent= Math.abs(c.flow)<1?'Без изменений' : c.flow>0?'Заряд +'+F.power(c.flow).text+' · полон через '+F.dur((c.cap-c.stored)/c.flow) : 'Разряд −'+F.power(-c.flow).text+' · пуст через '+F.dur(c.stored/-c.flow);
+  // сброс
+  $('curtV').textContent=c.curtail>1?F.power(c.curtail).text:'нет'; $('nCurt').classList.toggle('idle',c.curtail<=1);
+  // потребители
+  EN.GROUPS.forEach(function(g){
+    var el=$('gv_'+g.id); if(!el) return;
+    var sum=0; EN.CONSUMERS.forEach(function(x){ if(x.group===g.id) sum+=c.cons[x.id]||0; }); el.textContent=F.power(sum).text;
+  });
+  EN.CONSUMERS.forEach(function(x){
+    var v=$('rv_'+x.id); if(!v) return; var now=c.cons[x.id]||0, inst=EN.counts[x.id]*x.kw;
+    v.textContent=F.power(now).text; $('rb_'+x.id).style.width=(inst>0?now/inst*100:0).toFixed(0)+'%';
+  });
+}
+
+/* ---------- история выбранного узла ---------- */
+var chart=EN.chart($('hChart'),{kind:'line',unit:'power',height:280,series:[]}), legendSeries=[];
+function cfgFor(id){
+  var recipe=EN.CONSUMERS.filter(function(c){return c.id===id;})[0], grp=EN.GROUPS.filter(function(g){return 'g_'+g.id===id;})[0];
+  if(id==='solar') return {title:'Солнечные панели',sub:'Выработка, сброс излишка и установленная мощность всех панелей базы.',unit:'power',kind:'line',stack:false,key:'gen',
+      series:[{key:'gen',label:'Выработка',color:'#FFDD57',fill:true},{key:'curtail',label:'Сброс излишка',color:'#8C93B0',width:1.2},{key:'nameplate',label:'Установленная мощность',color:'#FFDD57',dash:[5,4],width:1.1}]};
+  if(id==='bus') return {title:'Шина базы: обеспечение',sub:'Сколько энергии просили потребители и сколько им реально досталось. Красное — нехватка.',unit:'power',kind:'line',stack:false,key:'supply',
+      series:[{key:'supply',label:'Получено',color:'#4ADE9B',fill:true},{key:'demand',label:'Потребность',color:'#B9C2E0',dash:[4,3],width:1.3}],between:{top:'demand',bottom:'supply',color:'#F4557B'}};
+  if(id==='batt') return {title:'Аккумуляторы: заряд',sub:'Запас энергии в джоулях. Пунктир — полная ёмкость всех аккумуляторов.',unit:'joule',kind:'line',stack:false,key:'stored',stored:true,
+      series:[{key:'stored',label:'Заряд',color:'#4FD1E7',fill:true},{key:'capKWh',label:'Ёмкость',color:'#4FD1E7',dash:[5,4],width:1.1}]};
+  if(id==='curt') return {title:'Сброс излишка',sub:'Энергия, которую некуда было девать: аккумуляторы полны, а панели ещё дают ток.',unit:'power',kind:'line',stack:false,key:'curtail',
+      series:[{key:'curtail',label:'Сброс',color:'#8C93B0',fill:true}]};
+  if(grp){ var list=EN.CONSUMERS.filter(function(c){ return c.group===grp.id&&EN.counts[c.id]>0; });
+    return {title:grp.name,sub:'Потребление всех установок группы, по видам.',unit:'power',kind:'area',stack:true,key:'g_'+grp.id,
+      series:list.map(function(c){ return {key:c.id,label:c.name,color:c.color}; })}; }
+  if(recipe) return {title:recipe.name,sub:'Потребление установок этого вида: '+EN.counts[recipe.id]+' шт. по '+F.power(recipe.kw).text+' при полной загрузке.',unit:'power',kind:'line',stack:false,key:recipe.id,
+      series:[{key:recipe.id,label:recipe.name,color:recipe.color,fill:true}]};
+}
+var cfg=null;
+function stat(l,v){ return '<div class="m-stat"><div class="m-stat-l">'+l+'</div><div class="m-stat-v">'+v+'</div></div>'; }
+function renderHist(rebuild){
+  if(rebuild||!cfg){
+    cfg=cfgFor(sel)||cfgFor('solar');
+    var o=chart.o; o.kind=cfg.kind; o.stack=cfg.stack; o.unit=cfg.unit; o.series=cfg.series; o.between=cfg.between||null; o.refs=[];
+    $('hTitle').textContent=cfg.title; $('hSub').textContent=cfg.sub;
+    EN.legend($('hLegend'),cfg.series,function(){ chart.draw(); });
+  }
+  chart.draw();
+  var p=EN.period, s=EN.stat(cfg.key,p), h='';
+  if(cfg.stored){ h=stat('Среднее',F.stored(s.mean).text)+stat('Минимум',F.stored(s.min).text)+stat('Максимум',F.stored(s.max).text)+stat('Сейчас',F.stored(EN.cur.stored).text)+stat('Ёмкость',F.stored(EN.cur.cap).text); }
+  else{
+    h=stat('Среднее',F.power(s.mean).text)+stat('Пик',F.power(s.max).text)+stat('Минимум',F.power(s.min).text)+stat('Энергия '+EN.PMAP[p].phrase,F.energy(s.sum).text);
+    if(cfg.key==='supply'){ var d=EN.stat('demand',p); h+=stat('Обеспеченность',F.pct(d.sum>0?s.sum/d.sum*100:100,1))+stat('Минут дефицита',String(EN.deficitMinutes(p))); }
+    if(cfg.key==='gen'){ var cu=EN.stat('curtail',p); h+=stat('Сброшено',F.energy(cu.sum).text); }
+  }
+  $('hStats').innerHTML=h;
+  $('solEn').textContent=F.energy(EN.stat('gen',p).sum).text;
+}
+function mark(){
+  document.querySelectorAll('[data-sel]').forEach(function(b){
+    var on=b.dataset.sel===sel||(sel==='solar'&&b.id==='nSun'&&false);
+    b.classList.toggle('sel',b.id==='nSun'?false:on);
+  });
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-sel]'); if(!b) return;
+  sel=b.dataset.sel; mark(); renderHist(true);
+});
+
+/* ---------- цикл ---------- */
+var dirty=true, lastHeavy=0, lastLayout=0;
+EN.on('data',function(){ dirty=true; });
+EN.on('period',function(){ dirty=true; lastHeavy=0; });
+EN.on('reset',function(){ buildCons(); buildTiles(); buildFlows(); mark(); dirty=true; lastHeavy=0; renderHist(true); layoutFlows(); });
+EN.on('frame',function(){
+  live(); animateFlows();
+  var now=performance.now();
+  if(now-lastLayout>400){ lastLayout=now; layoutFlows(); }
+  if(dirty&&now-lastHeavy>400){ dirty=false; lastHeavy=now; renderHist(false); }
+});
+window.addEventListener('resize',layoutFlows);
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(layoutFlows);
+EN.start();
+})();
+</script>
+</body>
+</html>

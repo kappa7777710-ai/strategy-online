@@ -1,0 +1,5 @@
+/* Вкладка «Навыки». */
+.skill-prod-list{display:flex;flex-direction:column;gap:4px;margin-top:2px;}
+.skill-prod-row{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;font-size:10.5px;color:var(--text-muted);}
+.skill-prod-name{color:var(--text-secondary);font-weight:600;min-width:90px;}
+.skill-prod-total{font-family:var(--font-mono);color:var(--text-primary);margin-left:auto;}

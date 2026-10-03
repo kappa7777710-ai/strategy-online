@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Рабочие — Пульт диспетчера</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="workers-core.css">
+<style>
+.dp-grid{display:grid;grid-template-columns:300px 1fr;gap:14px;align-items:start;}
+@media (max-width:880px){ .dp-grid{grid-template-columns:1fr;} }
+
+.console{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:14px;position:sticky;top:14px;}
+.console h3{margin:0;font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-secondary);}
+.console-pop{display:flex;align-items:center;gap:12px;}
+.console-stats{display:flex;flex-direction:column;gap:6px;font-size:12px;}
+.console-stats .row{display:flex;justify-content:space-between;}
+.console-stats .row b{font-family:var(--font-mono);color:var(--text-primary);}
+.console-stats .row b.bad{color:var(--bad);}
+.console-warn{font-size:11.5px;color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent);border:1px solid color-mix(in srgb,var(--bad) 35%,transparent);border-radius:8px;padding:8px 10px;}
+.console-cost{font-size:11px;color:var(--text-muted);}
+
+.table{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.trow-head{display:grid;grid-template-columns:1.4fr .9fr .9fr 1.4fr 28px;gap:10px;padding:9px 14px;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);}
+.trow{display:grid;grid-template-columns:1.4fr .9fr .9fr 1.4fr 28px;gap:10px;padding:12px 14px;align-items:center;border-bottom:1px solid var(--border);cursor:pointer;}
+.trow:hover{background:var(--card-hover);}
+.trow:last-child{border-bottom:none;}
+.trow-cls{display:flex;align-items:center;gap:9px;}
+.trow-dot{width:9px;height:9px;border-radius:50%;background:var(--c);flex-shrink:0;}
+.trow-name{font-family:var(--font-display);font-weight:600;font-size:14px;}
+.trow-sub{font-size:10.5px;color:var(--text-muted);font-family:var(--font-mono);}
+.trow-metric{font-family:var(--font-mono);font-size:13px;}
+.trow-metric small{display:block;font-family:var(--font-body);font-size:10px;color:var(--text-muted);}
+.trow-metric.ok{color:var(--good);} .trow-metric.warn{color:var(--tier1);} .trow-metric.bad{color:var(--bad);}
+.trow-needs{display:flex;flex-direction:column;gap:3px;}
+.trow-needs .bar{height:5px;}
+.trow-chev{font-size:12px;color:var(--text-muted);text-align:center;transition:transform .15s;}
+.trow.open .trow-chev{transform:rotate(90deg);}
+
+.detail{display:none;padding:4px 14px 18px;border-bottom:1px solid var(--border);background:#0D1120;}
+.detail.open{display:block;}
+.detail-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;margin-top:4px;}
+@media (max-width:720px){ .detail-grid{grid-template-columns:1fr;} }
+.need-list{display:flex;flex-direction:column;gap:6px;}
+.need-row{display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--text-secondary);}
+.need-row .lbl{width:128px;flex-shrink:0;}
+.need-row .bar{flex:1;}
+.need-row .pct{width:34px;text-align:right;font-family:var(--font-mono);flex-shrink:0;}
+.stock-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;}
+.svc{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--c);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:5px;}
+.svc-name{font-family:var(--font-display);font-weight:600;font-size:12.5px;}
+.svc-recipe{font-size:10.5px;color:var(--text-muted);line-height:1.4;}
+.svc .bar{height:4px;}
+.svc-foot{display:flex;justify-content:space-between;font-size:10.5px;color:var(--text-secondary);}
+.hous-card{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--c);border-radius:8px;padding:10px 12px;font-size:12px;display:flex;flex-direction:column;gap:5px;}
+.hous-card b{font-family:var(--font-display);font-size:13.5px;}
+.sec-title{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);margin:0 0 7px;}
+</style>
+</head>
+<body>
+<div class="wk-page">
+  <a class="wk-back" href="index.html">← все варианты</a>
+  <div class="wk-eyebrow">Вкладка «Рабочие» · Вариант 1</div>
+  <h1 class="wk-h1">Пульт диспетчера</h1>
+  <p class="wk-sub">Плотная командная сводка: слева — консоль набора персонала с других планет (ползунок бонусных пайков), справа — таблица классов. Строка разворачивается кликом и показывает нужды, запасы и сервисные постройки, не уводя со страницы. Для игрока, которому важны цифры и контроль, без лишней графики.</p>
+
+  <div class="kpi-row" id="kpis"></div>
+
+  <div class="dp-grid">
+    <div class="console" id="console"></div>
+    <div class="table" id="table"></div>
+  </div>
+
+  <p class="footnote">Чем выше класс персонала, тем меньше строк разворачивается одновременно нужно — таблица одинаково хорошо держит и 1 класс (как сейчас в игре), и 4+ по мере открытия новых тиров.</p>
+</div>
+
+<script src="workers-data.js"></script>
+<script>
+const D=WORKERS_DATA;
+document.getElementById('kpis').innerHTML=
+  '<div class="kpi"><div class="kpi-l">Всего рабочих</div><div class="kpi-v">'+D.hr.total+'</div></div>'+
+  '<div class="kpi"><div class="kpi-l">Работают</div><div class="kpi-v">'+D.hr.assigned+'</div></div>'+
+  '<div class="kpi"><div class="kpi-l">Свободны</div><div class="kpi-v">'+D.hr.free+'</div></div>'+
+  '<div class="kpi"><div class="kpi-l">Потолок найма</div><div class="kpi-v">'+D.hr.ceilPerDay+'<small> чел/сутки</small></div></div>';
+
+const r=D.recruit, pct=Math.round(r.pop/r.cap*100);
+document.getElementById('console').innerHTML=
+  '<h3>Набор с других планет</h3>'+
+  '<div class="console-pop"><div class="ring" style="--p:'+pct+';--c:var(--class1)"><span>'+pct+'%</span></div>'+
+  '<div style="font-size:12px;color:var(--text-secondary)">'+r.pop+' / '+r.cap+' мест занято<br>жильём класса 1</div></div>'+
+  '<div class="console-stats">'+
+    '<div class="row"><span>Потолок найма</span><b>'+(r.maxRatePerDay).toFixed(1)+' чел/сутки</b></div>'+
+    '<div class="row"><span>Текущая скорость</span><b class="'+(r.short?'bad':'')+'">'+r.actualRate.toFixed(2)+' чел/ч</b></div>'+
+    '<div class="row"><span>Свободных мест</span><b>'+r.room+'</b></div>'+
+  '</div>'+
+  (r.short?'<div class="console-warn">Не хватает пайков — набор идёт медленнее потолка.</div>':'')+
+  '<div><label style="font-size:11.5px;color:var(--text-secondary)">Бонусные пайки</label>'+
+    '<div class="slider-row" style="margin-top:6px"><input type="range" id="rslider" min="0" max="100" value="'+r.rationLevel+'"><span class="mono" id="rval" style="width:36px;text-align:right">'+r.rationLevel+'%</span></div></div>'+
+  '<div class="console-cost">Цена переезда: '+r.cost.water+' H₂O + '+r.cost.ration+' Паёк на человека</div>';
+
+document.getElementById('rslider').addEventListener('input',e=>{ document.getElementById('rval').textContent=e.target.value+'%'; });
+
+function needsRows(c){
+  return c.needs.map(n=>{
+    const barColor = n.fraction>0.95?'var(--good)':(n.fraction>0.5?'var(--'+c.color+')':'var(--bad)');
+    return '<div class="need-row"><span class="lbl">'+n.label+(n.weight?' · '+Math.round(n.weight*100)+'%':(n.min?' · min':''))+'</span>'+
+      '<div class="bar"><i style="width:'+Math.round(n.fraction*100)+'%;background:'+barColor+'"></i></div>'+
+      '<span class="pct mono">'+Math.round(n.fraction*100)+'%</span></div>';
+  }).join('');
+}
+function stockChips(c){
+  return c.stock.map(s=>'<span class="chip"><span style="width:7px;height:7px;border-radius:50%;background:var(--'+s.colorVar+')"></span>'+s.name+' <b>'+s.amount+'</b> <span class="'+(s.rate>=0?'pos':'neg')+'">'+(s.rate>=0?'+':'')+s.rate.toFixed(2)+'/с</span></span>').join('');
+}
+function svcCards(c){
+  return c.services.map(sv=>{
+    const label=REASON_LABELS_DEMO[sv.state]||sv.state;
+    return '<div class="svc" style="--c:var(--'+c.color+')"><div class="svc-name">'+sv.name+'</div><div class="svc-recipe">'+sv.recipe+'</div>'+
+      '<div class="bar"><i style="width:'+Math.round(sv.util*100)+'%;background:var(--'+c.color+')"></i></div>'+
+      '<div class="svc-foot"><span>'+label+'</span><span>×'+sv.count+'</span></div></div>';
+  }).join('');
+}
+
+const rows=D.classes.map((c,i)=>{
+  const prod=Math.round(c.staffing*c.satisfaction*100);
+  const prodCls=prod>=70?'ok':(prod>=40?'warn':'bad');
+  const staffCls=c.staffing>0.95?'ok':(c.staffing>0.6?'warn':'bad');
+  return '<div class="trow" data-i="'+i+'">'+
+      '<div class="trow-cls"><span class="trow-dot" style="--c:var(--'+c.color+')"></span><div><div class="trow-name">'+c.name+'</div><div class="trow-sub">'+(c.recruited?'набор с планет':'внутренний рост')+'</div></div></div>'+
+      '<div class="trow-metric '+staffCls+'">'+Math.floor(c.assigned)+' / '+Math.floor(c.demand)+'<small>занято/потр.</small></div>'+
+      '<div class="trow-metric '+prodCls+'">'+prod+'%<small>производит.</small></div>'+
+      '<div class="trow-needs">'+c.needs.map(n=>'<div class="bar"><i style="width:'+Math.round(n.fraction*100)+'%;background:'+(n.fraction>0.95?'var(--good)':(n.fraction>0.5?'var(--'+c.color+')':'var(--bad)'))+'"></i></div>').join('')+'</div>'+
+      '<div class="trow-chev">▸</div>'+
+    '</div>'+
+    '<div class="detail" data-d="'+i+'"><div class="detail-grid">'+
+      '<div><p class="sec-title">Нужды и запасы</p>'+needsRows(c)+'<div class="stock-row">'+stockChips(c)+'</div></div>'+
+      '<div><p class="sec-title">Жильё и постройки</p>'+
+        '<div class="hous-card" style="--c:var(--'+c.color+')"><b>'+c.housing.name+'</b><span>Построено: '+c.housing.count+' · мест: '+c.housing.totalCap+'</span></div>'+
+        '<div class="svc-grid" style="margin-top:8px">'+svcCards(c)+'</div>'+
+      '</div>'+
+    '</div></div>';
+}).join('');
+
+document.getElementById('table').innerHTML=
+  '<div class="trow-head"><span>Класс</span><span>Занято</span><span>Произв.</span><span>Нужды</span><span></span></div>'+rows;
+
+document.querySelectorAll('.trow').forEach(row=>{
+  row.addEventListener('click',()=>{
+    const i=row.dataset.i;
+    const det=document.querySelector('.detail[data-d="'+i+'"]');
+    const willOpen=!det.classList.contains('open');
+    document.querySelectorAll('.detail.open').forEach(d=>d.classList.remove('open'));
+    document.querySelectorAll('.trow.open').forEach(r=>r.classList.remove('open'));
+    if(willOpen){ det.classList.add('open'); row.classList.add('open'); }
+  });
+});
+document.querySelector('.trow').click();
+</script>
+</body>
+</html>

@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Отдел кадров — 5 концепций</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Unbounded:wght@400;600;800&family=Exo+2:wght@300;400;600;800&family=Oswald:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ОБЩЕЕ: переключатель концепций, фишки ресурсов (как в игре — НЕ меняются)
+   ============================================================ */
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#07080d;color:#e9ecf7;font-family:'Manrope',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.switcher{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 16px;background:rgba(7,8,13,.86);backdrop-filter:blur(10px);border-bottom:1px solid #1d2133}
+.switcher .ttl{font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#9ca6c4;margin-right:8px}
+.switcher button{font:600 13px 'Manrope',sans-serif;color:#c9cfe3;background:#121522;border:1px solid #262b3f;border-radius:999px;padding:7px 14px;cursor:pointer;transition:.2s}
+.switcher button b{color:#6c7699;margin-right:6px}
+.switcher button:hover{border-color:#4b5680}
+.switcher button.on{background:#e9ecf7;color:#0a0d18;border-color:#e9ecf7}
+.switcher button.on b{color:#0a0d18}
+.switcher .note{margin-left:auto;font-size:11.5px;color:#6c7699}
+.variant{display:none;min-height:calc(100vh - 54px)}
+.variant.on{display:block}
+
+/* Фишка ресурса — копия .chip из css/base.css (ресурсы не трогаем) */
+.chip{--card:#171D33;--border:#293150;--ink:#0A0D18;display:flex;gap:9px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--chip-color);border-radius:8px;padding:9px 10px;min-width:150px;font-family:'Manrope',sans-serif;color:#E9ECF7;text-align:left}
+.chip-body{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.chip-name{font-size:11.5px;color:#9CA6C4;line-height:1.25}
+.chip-amt{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;font-variant-numeric:tabular-nums}
+.chip-rate{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#606A8A}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+
+.photo-slot{position:absolute;left:12px;bottom:12px;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:4px;background:rgba(0,0,0,.55);color:rgba(255,255,255,.7);border:1px dashed rgba(255,255,255,.3);pointer-events:none}
+details.prompt{margin-top:14px;font-size:12.5px}
+details.prompt summary{cursor:pointer;opacity:.75}
+details.prompt p{font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.55;opacity:.8;margin:8px 0 0}
+input[type=range]{width:100%}
+@media (prefers-reduced-motion:reduce){*{animation-duration:0s!important;animation-iteration-count:1!important}}
+
+/* ============================================================
+   1 · ИМПЕРСКАЯ КАНЦЕЛЯРИЯ — монументальный ар-деко, бордо + золото
+   ============================================================ */
+.v1{--gold:#D9B26A;--gold2:#F3D38A;--blood:#5E0F17;--bg:#0B0708;--ink:#F4E9D4;background:radial-gradient(1200px 600px at 30% 0%,#22090d 0%,#0B0708 60%);color:var(--ink)}
+.v1 .wrap{max-width:1240px;margin:0 auto;padding:28px 20px 60px}
+.v1 .crest{display:flex;align-items:center;gap:16px;margin-bottom:22px}
+.v1 .crest svg{width:46px;height:46px;color:var(--gold)}
+.v1 .eyebrow{font:600 11px 'Manrope';letter-spacing:.32em;text-transform:uppercase;color:var(--gold)}
+.v1 h1{font:900 clamp(28px,4vw,46px)/1 'Playfair Display',serif;margin:4px 0 0;letter-spacing:.01em}
+.v1 h2{font:700 20px 'Playfair Display',serif;margin:0 0 14px;color:var(--gold2)}
+.v1 .grid{display:grid;grid-template-columns:1.55fr 1fr;gap:18px}
+.v1 .hero{position:relative;border:1px solid rgba(217,178,106,.35);outline:1px solid rgba(217,178,106,.12);outline-offset:5px;overflow:hidden;min-height:420px;background:#07050a}
+.v1 .hero svg{display:block;width:100%;height:100%;position:absolute;inset:0}
+.v1 .side{display:flex;flex-direction:column;gap:14px}
+.v1 .plaque{position:relative;padding:18px 20px;background:linear-gradient(180deg,rgba(217,178,106,.08),rgba(217,178,106,.02));border:1px solid rgba(217,178,106,.3)}
+.v1 .plaque::before,.v1 .plaque::after{content:"";position:absolute;width:10px;height:10px;border:1px solid var(--gold)}
+.v1 .plaque::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.v1 .plaque::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+.v1 .big3{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.v1 .big3>div{text-align:center;padding:6px 4px;border-left:1px solid rgba(217,178,106,.25)}
+.v1 .big3>div:first-child{border-left:0}
+.v1 .big3 b{display:block;font:700 40px/1 'Playfair Display',serif;color:var(--gold2);font-variant-numeric:lining-nums tabular-nums}
+.v1 .big3 span{font:600 10px 'Manrope';letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+.v1 .meter{height:14px;border:1px solid var(--gold);padding:2px;margin:10px 0 6px}
+.v1 .meter i{display:block;height:100%;background:repeating-linear-gradient(90deg,var(--gold2) 0 6px,var(--gold) 6px 8px);transition:width .6s}
+.v1 .row{display:flex;justify-content:space-between;font-size:13px;opacity:.85;margin:4px 0}
+.v1 .row b{font-family:'JetBrains Mono',monospace;color:var(--gold2);font-weight:500}
+.v1 .decree{font:italic 600 15px/1.5 'Playfair Display',serif;opacity:.85;margin:0 0 12px}
+.v1 input[type=range]{-webkit-appearance:none;appearance:none;height:2px;background:linear-gradient(90deg,var(--gold) var(--p,60%),rgba(217,178,106,.25) var(--p,60%));margin:14px 0}
+.v1 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;transform:rotate(45deg);background:var(--blood);border:2px solid var(--gold2);box-shadow:0 0 14px rgba(243,211,138,.6);cursor:pointer}
+.v1 input[type=range]::-moz-range-thumb{width:18px;height:18px;transform:rotate(45deg);background:var(--blood);border:2px solid var(--gold2);border-radius:0;cursor:pointer}
+.v1 .btn{font:700 12px 'Manrope';letter-spacing:.2em;text-transform:uppercase;color:#1a0b05;background:linear-gradient(180deg,var(--gold2),var(--gold));border:0;padding:12px 18px;cursor:pointer;width:100%;clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,10px 100%,0 50%)}
+.v1 .btn:hover{filter:brightness(1.1)}
+.v1 .lower{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:18px}
+.v1 .reg{list-style:none;margin:0;padding:0;max-height:260px;overflow:hidden}
+.v1 .reg li{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid rgba(217,178,106,.15);font-size:13.5px}
+.v1 .reg li.new{animation:v1in .9s cubic-bezier(.2,.9,.2,1)}
+.v1 .seal{flex:none;width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#a3202d,#5E0F17 70%);display:grid;place-items:center;font:900 13px 'Playfair Display';color:var(--gold2);box-shadow:inset 0 0 0 2px rgba(0,0,0,.25)}
+.v1 .reg small{display:block;opacity:.55;font-size:11px}
+.v1 .reg time{margin-left:auto;font:500 11px 'JetBrains Mono';opacity:.55}
+@keyframes v1in{from{opacity:0;transform:translateX(-24px);background:rgba(217,178,106,.25)}to{opacity:1;transform:none;background:transparent}}
+.v1 .need{margin:10px 0}
+.v1 .need .row{opacity:1}
+.v1 .chips{margin-top:12px}
+/* сцена */
+.v1-beam{transform-box:view-box;animation:v1sweep 9s ease-in-out infinite alternate;mix-blend-mode:screen}
+.v1-beam.r{animation-delay:-4.5s}
+@keyframes v1sweep{from{transform:rotate(-22deg)}to{transform:rotate(22deg)}}
+.v1-win{animation:v1flick 6s infinite}
+@keyframes v1flick{0%,100%{opacity:.95}47%{opacity:.95}50%{opacity:.25}53%{opacity:.9}}
+.v1-banner{transform-box:fill-box;transform-origin:50% 0;animation:v1sway 5s ease-in-out infinite alternate}
+.v1-banner.b2{animation-delay:-2.5s}
+@keyframes v1sway{from{transform:skewX(-3deg) scaleX(.97)}to{transform:skewX(3deg) scaleX(1.02)}}
+.v1-emb{transform-box:fill-box;transform-origin:center;animation:v1pulse 3.2s ease-in-out infinite}
+@keyframes v1pulse{50%{opacity:.35;transform:scale(1.25)}}
+.v1-shuttle{animation:v1land 14s cubic-bezier(.45,0,.2,1) infinite}
+@keyframes v1land{0%{transform:translate(260px,-140px) rotate(-14deg)}28%{transform:translate(0,0) rotate(0)}62%{transform:translate(0,0)}100%{transform:translate(-300px,-160px) rotate(10deg)}}
+.v1-flame{animation:v1fl .12s infinite alternate;transform-box:fill-box;transform-origin:50% 0}
+@keyframes v1fl{to{transform:scaleY(.6);opacity:.7}}
+.v1-blink{animation:v1bl 1.6s steps(1) infinite}
+@keyframes v1bl{50%{opacity:0}}
+
+/* ============================================================
+   2 · ТЕРМИНАЛ ПРИБЫТИЯ — космопорт, табло split-flap, янтарь
+   ============================================================ */
+.v2{--amber:#FFB020;--amber2:#FFD27A;--bg:#0A0A0A;--line:#232323;background:#0A0A0A;color:#EDEDED;font-family:'Manrope'}
+.v2 .wrap{max-width:1240px;margin:0 auto;padding:26px 20px 60px}
+.v2 .top{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+.v2 h1{font:800 clamp(26px,4vw,44px)/1 'Unbounded',sans-serif;margin:0;letter-spacing:-.02em}
+.v2 h1 span{color:var(--amber)}
+.v2 .gate{font:500 12px 'JetBrains Mono';color:#8a8a8a;text-transform:uppercase;letter-spacing:.12em}
+.v2 .gate b{color:var(--amber);font-weight:700}
+.v2 .hero{position:relative;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#141008 0%,#0d0d0d 70%);border:1px solid var(--line);aspect-ratio:16/7;min-height:280px}
+.v2 .hero svg{width:100%;height:100%;display:block}
+.v2 .board{margin-top:18px;background:#050505;border:1px solid var(--line);border-radius:18px;padding:16px;overflow-x:auto}
+.v2 .board-h,.v2 .board-r{display:grid;grid-template-columns:70px 90px 130px 1fr 130px;gap:10px;min-width:640px}
+.v2 .board-h{font:600 10px 'JetBrains Mono';letter-spacing:.18em;color:#6b6b6b;text-transform:uppercase;padding:0 0 10px}
+.v2 .board-r{padding:4px 0}
+.v2 .flap{display:flex;gap:2px}
+.v2 .flap i{font:700 15px/26px 'JetBrains Mono';font-style:normal;width:17px;height:26px;text-align:center;background:linear-gradient(180deg,#1c1c1c 50%,#151515 50%);color:var(--amber2);border-radius:3px;position:relative}
+.v2 .flap i::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#000}
+.v2 .flap i.f{animation:v2flip .08s linear}
+@keyframes v2flip{from{transform:rotateX(70deg)}to{transform:none}}
+.v2 .st-ok{color:#48e08a}
+.v2 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+.v2 .card{background:#111;border:1px solid var(--line);border-radius:18px;padding:18px}
+.v2 .card .k{font:600 10px 'JetBrains Mono';letter-spacing:.18em;color:#777;text-transform:uppercase}
+.v2 .card .v{font:800 34px/1.1 'Unbounded';margin-top:8px;font-variant-numeric:tabular-nums}
+.v2 .card .v small{font-size:13px;color:#777;font-weight:400}
+.v2 .two{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-top:14px}
+.v2 .panel{background:#111;border:1px solid var(--line);border-radius:18px;padding:20px}
+.v2 .panel h3{font:600 15px 'Unbounded';margin:0 0 14px}
+.v2 .lane{height:10px;border-radius:99px;background:#1d1d1d;overflow:hidden;margin:8px 0}
+.v2 .lane i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--amber2));box-shadow:0 0 18px var(--amber);transition:width .6s}
+.v2 .mono{font:500 12px 'JetBrains Mono';color:#9a9a9a}
+.v2 .mono b{color:#fff;font-weight:500}
+.v2 input[type=range]{-webkit-appearance:none;appearance:none;height:34px;background:transparent;margin:10px 0}
+.v2 input[type=range]::-webkit-slider-runnable-track{height:34px;border-radius:99px;background:repeating-linear-gradient(90deg,#222 0 2px,transparent 2px 12px),#161616}
+.v2 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:64px;height:34px;border-radius:99px;background:var(--amber);box-shadow:0 0 24px rgba(255,176,32,.6);cursor:pointer}
+.v2 input[type=range]::-moz-range-track{height:34px;border-radius:99px;background:#161616}
+.v2 input[type=range]::-moz-range-thumb{width:64px;height:34px;border-radius:99px;background:var(--amber);border:0}
+.v2 .btn{font:700 13px 'Unbounded';background:var(--amber);color:#111;border:0;border-radius:99px;padding:13px 20px;cursor:pointer;width:100%;margin-top:12px}
+.v2-pad-l{animation:v2chase 1.2s steps(1) infinite}
+@keyframes v2chase{0%,49%{opacity:1}50%,100%{opacity:.15}}
+.v2-radar{transform-box:fill-box;transform-origin:50% 100%;animation:v2rad 3s linear infinite}
+@keyframes v2rad{0%{transform:scaleX(1)}50%{transform:scaleX(-1)}100%{transform:scaleX(1)}}
+.v2-glass{animation:v2glow 4s ease-in-out infinite alternate}
+@keyframes v2glow{to{opacity:.6}}
+
+/* ============================================================
+   3 · ГОЛО-ШТАБ — голографическая проекция, стекло, циан/маджента
+   ============================================================ */
+.v3{--c:#3EF2FF;--m:#FF3EC8;--bg:#030A12;background:radial-gradient(900px 500px at 70% 10%,rgba(62,242,255,.12),transparent 60%),radial-gradient(700px 500px at 0% 100%,rgba(255,62,200,.10),transparent 60%),#030A12;color:#DDF9FF;font-family:'Exo 2',sans-serif}
+.v3 .wrap{max-width:1240px;margin:0 auto;padding:26px 20px 60px;display:grid;grid-template-columns:270px 1fr 290px;gap:16px}
+.v3 .head{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.v3 h1{font:800 clamp(24px,3.4vw,38px)/1 'Exo 2';margin:0;letter-spacing:.06em;text-transform:uppercase;background:linear-gradient(90deg,var(--c),#fff 50%,var(--m));-webkit-background-clip:text;background-clip:text;color:transparent}
+.v3 .tag{font:400 12px 'JetBrains Mono';color:var(--c);border:1px solid rgba(62,242,255,.4);padding:6px 10px;border-radius:6px}
+.v3 .glass{background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.015));border:1px solid rgba(62,242,255,.22);border-radius:16px;padding:16px;backdrop-filter:blur(8px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.v3 .glass h3{margin:0 0 12px;font:600 12px 'Exo 2';letter-spacing:.2em;text-transform:uppercase;color:var(--c)}
+.v3 .stage{position:relative;min-height:560px;border-radius:20px;overflow:hidden;border:1px solid rgba(62,242,255,.15);background:radial-gradient(circle at 50% 85%,rgba(62,242,255,.18),transparent 50%)}
+.v3 .stage svg{position:absolute;inset:0;width:100%;height:100%}
+.v3 .col{display:flex;flex-direction:column;gap:16px}
+.v3 .kpi{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid rgba(62,242,255,.12)}
+.v3 .kpi:last-child{border:0}
+.v3 .kpi span{font-size:12px;opacity:.7;text-transform:uppercase;letter-spacing:.12em}
+.v3 .kpi b{font:300 30px 'Exo 2';color:#fff;text-shadow:0 0 18px var(--c)}
+.v3 .gauge{display:block;margin:0 auto;width:200px;height:200px}
+.v3 .gauge text{font-family:'Exo 2';fill:#fff}
+.v3 input[type=range]{-webkit-appearance:none;appearance:none;height:4px;border-radius:4px;background:linear-gradient(90deg,var(--c),var(--m));margin:16px 0 6px}
+.v3 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#030A12;border:2px solid #fff;box-shadow:0 0 0 4px rgba(62,242,255,.3),0 0 20px var(--c);cursor:pointer}
+.v3 input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#030A12;border:2px solid #fff}
+.v3 .small{font-size:12px;opacity:.7;line-height:1.5}
+.v3 .feed{list-style:none;margin:0;padding:0;font:400 12px 'JetBrains Mono'}
+.v3 .feed li{padding:7px 0;border-bottom:1px dashed rgba(62,242,255,.15);display:flex;gap:8px}
+.v3 .feed li::before{content:"▸";color:var(--m)}
+.v3 .feed li.new{animation:v3glitch .7s steps(6)}
+@keyframes v3glitch{0%{opacity:0;transform:translateX(8px);color:var(--m)}30%{opacity:1;transform:translateX(-4px)}60%{transform:translateX(2px);color:var(--c)}100%{transform:none}}
+.v3 .bar{height:6px;border-radius:6px;background:rgba(62,242,255,.12);overflow:hidden;margin:6px 0 12px}
+.v3 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--c),var(--m));box-shadow:0 0 12px var(--c);transition:width .6s}
+.v3 .btn{width:100%;font:600 13px 'Exo 2';letter-spacing:.14em;text-transform:uppercase;color:var(--c);background:rgba(62,242,255,.08);border:1px solid var(--c);border-radius:10px;padding:12px;cursor:pointer;transition:.2s}
+.v3 .btn:hover{background:rgba(62,242,255,.2);box-shadow:0 0 24px rgba(62,242,255,.35)}
+.v3-draw{stroke-dasharray:1;stroke-dashoffset:1;animation:v3draw 2.4s ease forwards}
+@keyframes v3draw{to{stroke-dashoffset:0}}
+.v3-scan{animation:v3scan 4s linear infinite}
+@keyframes v3scan{from{transform:translateY(380px)}to{transform:translateY(-40px)}}
+.v3-ring{animation:v3ring 6s linear infinite}
+@keyframes v3ring{to{stroke-dashoffset:-200}}
+.v3-flick{animation:v3fk 7s infinite}
+@keyframes v3fk{0%,100%{opacity:1}92%{opacity:1}93%{opacity:.4}94%{opacity:1}96%{opacity:.6}97%{opacity:1}}
+.v3-mote{animation:v3up linear infinite}
+@keyframes v3up{from{transform:translateY(0);opacity:0}20%{opacity:1}to{transform:translateY(-260px);opacity:0}}
+
+/* ============================================================
+   4 · ЛИЧНОЕ ДЕЛО — светлая швейцарская типографика, бумага + оранжевый
+   ============================================================ */
+.v4{--paper:#EFEBE3;--ink:#121212;--acc:#FF4D12;--mute:#7a756c;background:var(--paper);color:var(--ink);font-family:'Manrope'}
+.v4 .wrap{max-width:1240px;margin:0 auto;padding:28px 20px 60px}
+.v4 .mast{display:grid;grid-template-columns:1fr auto;align-items:end;border-bottom:3px solid var(--ink);padding-bottom:12px;gap:16px}
+.v4 h1{font:800 clamp(34px,6.5vw,86px)/.88 'Unbounded';letter-spacing:-.04em;margin:0}
+.v4 h1 em{font-style:normal;color:var(--acc)}
+.v4 .meta{font:500 11px 'JetBrains Mono';text-align:right;line-height:1.7;text-transform:uppercase}
+.v4 .grid{display:grid;grid-template-columns:1.25fr 1fr;gap:0;border-bottom:1px solid var(--ink)}
+.v4 .art{position:relative;border-right:1px solid var(--ink);min-height:470px}
+.v4 .art svg{position:absolute;inset:0;width:100%;height:100%}
+.v4 .art .photo-slot{background:rgba(255,255,255,.7);color:#333;border-color:#999}
+.v4 .nums{display:grid;grid-template-columns:1fr 1fr}
+.v4 .num{padding:18px;border-bottom:1px solid var(--ink);border-right:1px solid var(--ink)}
+.v4 .num:nth-child(2n){border-right:0}
+.v4 .num .k{font:600 10.5px 'JetBrains Mono';text-transform:uppercase;letter-spacing:.1em;color:var(--mute)}
+.v4 .num .v{font:800 56px/1 'Unbounded';letter-spacing:-.04em;margin-top:10px;font-variant-numeric:tabular-nums}
+.v4 .num .v.acc{color:var(--acc)}
+.v4 .num .v small{font-size:16px;color:var(--mute);letter-spacing:0}
+.v4 .ctrl{padding:18px}
+.v4 .ctrl h3,.v4 .sec h3{font:700 13px 'Unbounded';margin:0 0 10px;text-transform:uppercase}
+.v4 .ticks{display:flex;justify-content:space-between;font:500 10px 'JetBrains Mono';color:var(--mute)}
+.v4 input[type=range]{-webkit-appearance:none;appearance:none;height:2px;background:var(--ink);margin:18px 0 8px}
+.v4 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:var(--acc);border:3px solid var(--paper);box-shadow:0 0 0 1px var(--ink);cursor:pointer}
+.v4 input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--acc);border:3px solid var(--paper)}
+.v4 .lower{display:grid;grid-template-columns:1.25fr 1fr;border-bottom:1px solid var(--ink)}
+.v4 .sec{padding:18px}
+.v4 .sec+.sec{border-left:1px solid var(--ink)}
+.v4 .files{position:relative;height:260px}
+.v4 .file{position:absolute;inset:0 auto auto 0;width:min(420px,100%);background:#fff;border:1px solid var(--ink);padding:16px 18px;box-shadow:6px 6px 0 var(--ink);transition:transform .5s,opacity .5s}
+.v4 .file .fid{font:500 11px 'JetBrains Mono';color:var(--mute)}
+.v4 .file .fn{font:800 22px 'Unbounded';letter-spacing:-.02em;margin:6px 0}
+.v4 .file dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:10px 0 0;font-size:13px}
+.v4 .file dt{color:var(--mute)}
+.v4 .file dd{margin:0;font-weight:600}
+.v4 .stamp{position:absolute;right:18px;top:22px;font:800 18px 'Unbounded';color:var(--acc);border:3px solid var(--acc);padding:4px 10px;transform:rotate(-12deg);opacity:0;mix-blend-mode:multiply}
+.v4 .file.new{animation:v4slide .5s cubic-bezier(.2,.9,.2,1)}
+.v4 .file.new .stamp{animation:v4stamp .35s .45s cubic-bezier(.3,1.6,.5,1) forwards}
+.v4 .file.old .stamp{opacity:.9}
+@keyframes v4slide{from{transform:translate(40px,-30px) rotate(4deg);opacity:0}}
+@keyframes v4stamp{from{opacity:0;transform:rotate(-12deg) scale(3)}to{opacity:.9;transform:rotate(-12deg) scale(1)}}
+.v4 .need{display:grid;grid-template-columns:80px 1fr 44px;gap:10px;align-items:center;font-size:13px;margin:8px 0}
+.v4 .need .tr{height:8px;background:repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 8px)}
+.v4 .need .tr i{display:block;height:100%;background:var(--acc)}
+.v4 .need b{font:600 12px 'JetBrains Mono';text-align:right}
+.v4 .btn{font:700 12px 'Unbounded';text-transform:uppercase;background:var(--ink);color:var(--paper);border:0;padding:14px 18px;cursor:pointer;width:100%;margin-top:14px}
+.v4 .btn:hover{background:var(--acc)}
+.v4-win{transition:fill .4s}
+.v4-win.lit{fill:#FF4D12}
+.v4-win.pop{animation:v4pop .8s ease}
+@keyframes v4pop{0%{fill:#fff}30%{fill:#FFD34D}100%{fill:#FF4D12}}
+.v4-lift{animation:v4lift 7s ease-in-out infinite}
+@keyframes v4lift{0%,10%{transform:translateY(0)}45%,55%{transform:translateY(var(--lift,-150px))}90%,100%{transform:translateY(0)}}
+.v4-marq{animation:v4m 8s linear infinite}
+@keyframes v4m{to{transform:translateX(-50%)}}
+
+/* ============================================================
+   5 · УЛЕЙ — биокупол колонии, соты, поток переселенцев
+   ============================================================ */
+.v5{--g:#B7F34A;--a:#FFB547;--bg:#0D0F0C;background:radial-gradient(900px 600px at 50% 0%,#1a2310 0%,#0D0F0C 60%);color:#EAF2DC;font-family:'Manrope'}
+.v5 .wrap{max-width:1240px;margin:0 auto;padding:26px 20px 60px}
+.v5 .head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.v5 h1{font:600 clamp(30px,4.6vw,54px)/1 'Oswald';text-transform:uppercase;margin:0;letter-spacing:.02em}
+.v5 h1 span{color:var(--g)}
+.v5 .sub{font-size:13px;opacity:.65;max-width:52ch}
+.v5 .hero{position:relative;border-radius:28px;overflow:hidden;background:linear-gradient(180deg,#121a0d,#0a0c08);border:1px solid #243018;aspect-ratio:16/7;min-height:300px}
+.v5 .hero svg{width:100%;height:100%;display:block}
+.v5 .float{position:absolute;top:16px;right:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.v5 .pill{background:rgba(13,15,12,.7);backdrop-filter:blur(8px);border:1px solid #2c3a1e;border-radius:99px;padding:8px 14px;font-size:12px}
+.v5 .pill b{font:500 16px 'Oswald';color:var(--g);margin-left:6px}
+.v5 .grid{display:grid;grid-template-columns:1fr 1.1fr;gap:16px;margin-top:16px}
+.v5 .panel{background:#12160f;border:1px solid #243018;border-radius:22px;padding:20px}
+.v5 .panel h3{font:500 18px 'Oswald';text-transform:uppercase;margin:0 0 12px;letter-spacing:.04em}
+.v5 .hexes{display:flex;flex-wrap:wrap;gap:3px 2px;padding-left:2px}
+.v5 .hex{width:22px;height:25px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#1f2917;transition:background .4s}
+.v5 .hex.on{background:var(--g)}
+.v5 .hex.work{background:#7fae2c}
+.v5 .hex.new{animation:v5hex 1s ease}
+@keyframes v5hex{0%{transform:scale(.2);background:#fff}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+.v5 .legend{display:flex;gap:16px;font-size:12px;opacity:.75;margin-top:10px;flex-wrap:wrap}
+.v5 .legend i{display:inline-block;width:10px;height:11px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);margin-right:6px;vertical-align:-1px}
+.v5 .flow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.v5 .flow div{background:#0d100b;border-radius:14px;padding:12px}
+.v5 .flow span{font-size:11px;opacity:.6;text-transform:uppercase;letter-spacing:.1em}
+.v5 .flow b{display:block;font:500 26px 'Oswald';color:var(--g)}
+.v5 input[type=range]{-webkit-appearance:none;appearance:none;height:12px;border-radius:12px;background:linear-gradient(90deg,var(--g) var(--p,60%),#1f2917 var(--p,60%));margin:14px 0}
+.v5 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#0D0F0C;border:4px solid var(--g);cursor:pointer}
+.v5 input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#0D0F0C;border:4px solid var(--g)}
+.v5 .btn{font:500 15px 'Oswald';letter-spacing:.08em;text-transform:uppercase;background:var(--g);color:#0D0F0C;border:0;border-radius:14px;padding:13px;cursor:pointer;width:100%;margin-top:14px}
+.v5 .toast{position:absolute;left:50%;top:18px;transform:translateX(-50%);background:var(--g);color:#0D0F0C;font-weight:700;font-size:13px;border-radius:99px;padding:7px 14px;opacity:0;pointer-events:none;white-space:nowrap}
+.v5 .toast.show{animation:v5t 2.4s ease}
+@keyframes v5t{0%{opacity:0;transform:translate(-50%,-10px)}15%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+.v5-pulse{animation:v5p 3s ease-in-out infinite}
+@keyframes v5p{50%{opacity:.45}}
+.v5-flow{animation:v5dash 1.4s linear infinite}
+@keyframes v5dash{to{stroke-dashoffset:-28}}
+.v5-ship{animation:v5ship 9s ease-in-out infinite}
+@keyframes v5ship{0%{transform:translate(-60px,-120px);opacity:0}15%{opacity:1}35%,65%{transform:translate(0,0);opacity:1}85%{opacity:1}100%{transform:translate(80px,-140px);opacity:0}}
+
+@media (max-width:980px){
+  .v1 .grid,.v1 .lower,.v2 .two,.v4 .grid,.v4 .lower,.v5 .grid{grid-template-columns:1fr}
+  .v2 .cards{grid-template-columns:1fr 1fr}
+  .v3 .wrap{grid-template-columns:1fr}
+  .v3 .stage{min-height:420px}
+  .v4 .art{border-right:0;border-bottom:1px solid var(--ink);min-height:380px}
+  .v4 .sec+.sec{border-left:0;border-top:1px solid var(--ink)}
+  .switcher .note{display:none}
+}
+@media (max-width:520px){
+  .v1 .big3 b{font-size:30px}
+  .v4 .num .v{font-size:40px}
+  .v2 .card .v{font-size:26px}
+}
+</style>
+</head>
+<body>
+
+<nav class="switcher" id="switcher">
+  <span class="ttl">Отдел кадров</span>
+  <button data-v="1"><b>1</b>Имперская канцелярия</button>
+  <button data-v="2"><b>2</b>Терминал прибытия</button>
+  <button data-v="3"><b>3</b>Голо-штаб</button>
+  <button data-v="4"><b>4</b>Личное дело</button>
+  <button data-v="5"><b>5</b>Улей</button>
+  <span class="note">Макет · данные симулируются (×2400) · в игру не внедрено</span>
+</nav>
+
+<!-- ======================= 1 · ИМПЕРСКАЯ КАНЦЕЛЯРИЯ ======================= -->
+<section class="variant v1" id="v1">
+<div class="wrap">
+  <div class="crest">
+    <svg viewBox="0 0 48 48" fill="currentColor"><path d="M24 2l5 14h15l-12 9 5 15-13-9-13 9 5-15L4 16h15z" opacity=".9"/><circle cx="24" cy="24" r="5" fill="#0B0708"/></svg>
+    <div><div class="eyebrow">Департамент переселения · Имперский отдел кадров</div><h1>Канцелярия найма</h1></div>
+  </div>
+  <div class="grid">
+    <div class="hero">
+      <svg viewBox="0 0 640 420" preserveAspectRatio="xMidYMax slice" aria-label="Здание имперского отдела кадров">
+        <defs>
+          <linearGradient id="v1sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050307"/><stop offset=".65" stop-color="#1b080c"/><stop offset="1" stop-color="#3a1410"/></linearGradient>
+          <linearGradient id="v1beam" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#F3D38A" stop-opacity=".45"/><stop offset="1" stop-color="#F3D38A" stop-opacity="0"/></linearGradient>
+          <linearGradient id="v1stone" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#17110f"/><stop offset=".5" stop-color="#2d2420"/><stop offset="1" stop-color="#110c0b"/></linearGradient>
+          <radialGradient id="v1glow"><stop offset="0" stop-color="#FFE3A3"/><stop offset=".5" stop-color="#F3B54A" stop-opacity=".6"/><stop offset="1" stop-color="#F3B54A" stop-opacity="0"/></radialGradient>
+          <linearGradient id="v1ban" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4a0b12"/><stop offset=".5" stop-color="#8e1a26"/><stop offset="1" stop-color="#4a0b12"/></linearGradient>
+        </defs>
+        <rect width="640" height="420" fill="url(#v1sky)"/>
+        <g id="v1stars"></g>
+        <circle cx="530" cy="70" r="34" fill="#3a1b17" opacity=".7"/><circle cx="522" cy="64" r="34" fill="#0d0607" opacity=".85"/>
+        <g class="v1-beam l" style="transform-origin:190px 330px"><polygon points="186,330 194,330 250,-20 130,-20" fill="url(#v1beam)"/></g>
+        <g class="v1-beam r" style="transform-origin:450px 330px"><polygon points="446,330 454,330 510,-20 390,-20" fill="url(#v1beam)"/></g>
+        <!-- здание -->
+        <rect x="110" y="330" width="420" height="40" fill="url(#v1stone)" stroke="#D9B26A" stroke-opacity=".35"/>
+        <rect x="160" y="245" width="320" height="85" fill="url(#v1stone)" stroke="#D9B26A" stroke-opacity=".35"/>
+        <rect x="215" y="155" width="210" height="90" fill="url(#v1stone)" stroke="#D9B26A" stroke-opacity=".4"/>
+        <rect x="268" y="72" width="104" height="83" fill="url(#v1stone)" stroke="#D9B26A" stroke-opacity=".45"/>
+        <g id="v1deco"></g>
+        <rect x="262" y="66" width="116" height="6" fill="#D9B26A" opacity=".8"/>
+        <rect x="209" y="150" width="222" height="5" fill="#D9B26A" opacity=".6"/>
+        <rect x="154" y="240" width="332" height="5" fill="#D9B26A" opacity=".5"/>
+        <!-- мачта -->
+        <rect x="364" y="26" width="2" height="40" fill="#D9B26A" opacity=".6"/><circle cx="365" cy="25" r="2.6" fill="#ff4a3a" class="v1-blink"/>
+        <!-- эмблема -->
+        <circle cx="320" cy="198" r="40" fill="url(#v1glow)" class="v1-emb"/>
+        <circle cx="320" cy="198" r="24" fill="#2a0b10" stroke="#F3D38A" stroke-width="2"/>
+        <path d="M320 180l4.6 12.6H338l-10.8 8 4.2 13-11.4-8.2-11.4 8.2 4.2-13-10.8-8h13.4z" fill="#F3D38A"/>
+        <!-- знамёна -->
+        <g class="v1-banner"><path d="M228 160h28v128l-14-12-14 12z" fill="url(#v1ban)"/><path d="M231 160v120M253 160v120" stroke="#D9B26A" stroke-width="1.2" opacity=".8"/><circle cx="242" cy="196" r="6" fill="none" stroke="#F3D38A" stroke-width="1.5"/></g>
+        <g class="v1-banner b2"><path d="M384 160h28v128l-14-12-14 12z" fill="url(#v1ban)"/><path d="M387 160v120M409 160v120" stroke="#D9B26A" stroke-width="1.2" opacity=".8"/><circle cx="398" cy="196" r="6" fill="none" stroke="#F3D38A" stroke-width="1.5"/></g>
+        <!-- врата и лестница -->
+        <path d="M298 330v-30a22 22 0 0 1 44 0v30z" fill="url(#v1glow)"/>
+        <path d="M298 330v-30a22 22 0 0 1 44 0v30" fill="none" stroke="#F3D38A" stroke-width="1.5"/>
+        <polygon points="298,330 342,330 372,370 268,370" fill="#1c1513"/>
+        <g stroke="#D9B26A" stroke-opacity=".3"><line x1="292" y1="338" x2="348" y2="338"/><line x1="286" y1="346" x2="354" y2="346"/><line x1="280" y1="354" x2="360" y2="354"/><line x1="274" y1="362" x2="366" y2="362"/></g>
+        <!-- земля -->
+        <rect y="370" width="640" height="50" fill="#0f0a09"/>
+        <line x1="0" y1="370" x2="640" y2="370" stroke="#D9B26A" stroke-opacity=".25"/>
+        <g stroke="#D9B26A" stroke-opacity=".08"><line x1="320" y1="370" x2="0" y2="420"/><line x1="320" y1="370" x2="160" y2="420"/><line x1="320" y1="370" x2="480" y2="420"/><line x1="320" y1="370" x2="640" y2="420"/></g>
+        <!-- переселенцы -->
+        <g id="v1people"></g>
+        <!-- шаттл -->
+        <g transform="translate(320 50)"><g class="v1-shuttle">
+          <path class="v1-flame" d="M-10 12l4 16 3-16zM4 12l3 16 3-16z" fill="#FFB547"/>
+          <path d="M-26 8h52l-8-12h-36z" fill="#2c2420" stroke="#D9B26A" stroke-width="1"/>
+          <path d="M-14 -4l6-12h16l6 12z" fill="#3d322c" stroke="#D9B26A" stroke-width="1"/>
+          <rect x="-6" y="-12" width="12" height="4" fill="#FFE3A3" opacity=".9"/>
+          <rect x="-30" y="8" width="60" height="4" fill="#D9B26A"/>
+        </g></g>
+      </svg>
+      <span class="photo-slot">заглушка → фото-рендер</span>
+    </div>
+    <div class="side">
+      <div class="plaque">
+        <div class="big3">
+          <div><b data-k="pop">0</b><span>Подданных</span></div>
+          <div><b data-k="assigned">0</b><span>На службе</span></div>
+          <div><b data-k="free">0</b><span>В резерве</span></div>
+        </div>
+      </div>
+      <div class="plaque">
+        <h2>Указ о наборе</h2>
+        <p class="decree">«Повелеваем принимать переселенцев не более <span data-k="ceilDay">0</span> душ в сутки, выдавая каждому норму на дорогу».</p>
+        <div class="meter"><i data-w="popPct"></i></div>
+        <div class="row"><span>Заселено</span><b><span data-k="pop">0</span> / <span data-k="cap">0</span></b></div>
+        <div class="row"><span>Скорость найма</span><b><span data-k="rateDay">0</span> чел/сут</span></b></div>
+        <div class="row"><span>До полного штата</span><b data-k="eta">—</b></div>
+        <input type="range" class="js-slider" min="0" max="100" aria-label="Бонусные пайки">
+        <div class="row"><span>Бонусные пайки</span><b><span data-k="ratePct">0</span>%</b></div>
+      </div>
+      <button class="btn" data-act="house">Возвести жилой блок · +24 места</button>
+    </div>
+  </div>
+  <div class="lower">
+    <div class="plaque">
+      <h2>Реестр прибывших</h2>
+      <ul class="reg" id="v1reg"></ul>
+    </div>
+    <div class="plaque">
+      <h2>Довольство подданных</h2>
+      <div class="need"><div class="row"><span>Вода · вес 50%</span><b data-k="satW">100%</b></div><div class="meter"><i data-w="satW"></i></div></div>
+      <div class="need"><div class="row"><span>Паёк · вес 50%</span><b data-k="satR">100%</b></div><div class="meter"><i data-w="satR"></i></div></div>
+      <div class="row" style="margin-top:12px"><span>Производительность</span><b><span data-k="prod">0</span>%</b></div>
+    </div>
+    <div class="plaque">
+      <h2>Подорожная норма</h2>
+      <p class="decree" style="font-size:13.5px">Каждый переселенец: 6 H₂O + 2 пайка — двухдневная норма в пути.</p>
+      <div class="chips" data-chips></div>
+      <details class="prompt"><summary>Промпт для фото-рендера</summary><p>Monumental imperial art-deco administration tower on an alien desert planet at dusk, stepped ziggurat silhouette, dark basalt and brushed brass, two long crimson banners with golden star emblem, glowing arched gateway with grand staircase, searchlights sweeping a dusty red sky, small shuttle landing on the roof pad, tiny colonists queuing at the gates, cinematic wide shot, volumetric light, photorealistic, 35mm, ultra detailed</p></details>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ======================= 2 · ТЕРМИНАЛ ПРИБЫТИЯ ======================= -->
+<section class="variant v2" id="v2">
+<div class="wrap">
+  <div class="top">
+    <div><div class="gate">Колония · Терминал <b>T-01</b> · Отдел кадров</div><h1>Прибытие <span>рабочих</span></h1></div>
+    <div class="gate">Посадочная площадка <b>открыта</b> · жилых блоков: <b data-k="houses">0</b></div>
+  </div>
+  <div class="hero">
+    <svg viewBox="0 0 640 280" preserveAspectRatio="xMidYMid slice" aria-label="Терминал прибытия">
+      <defs>
+        <linearGradient id="v2sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a0a0a"/><stop offset="1" stop-color="#2a1a06"/></linearGradient>
+        <linearGradient id="v2glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD27A" stop-opacity=".55"/><stop offset="1" stop-color="#FFB020" stop-opacity=".15"/></linearGradient>
+        <linearGradient id="v2cone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD27A" stop-opacity="0"/><stop offset="1" stop-color="#FFD27A" stop-opacity=".22"/></linearGradient>
+      </defs>
+      <rect width="640" height="280" fill="url(#v2sky)"/>
+      <g id="v2stars"></g>
+      <path d="M0 214 L90 196 L170 206 L260 188 L360 204 L470 192 L560 206 L640 196 V280 H0Z" fill="#141008"/>
+      <rect y="268" width="640" height="12" fill="#0d0b07"/>
+      <line x1="0" y1="268" x2="640" y2="268" stroke="#FFB020" stroke-opacity=".3"/>
+      <!-- башня -->
+      <rect x="44" y="120" width="18" height="148" fill="#1b1b1b"/>
+      <path d="M30 104h46l-6 18H36z" fill="#262626" stroke="#FFB020" stroke-opacity=".5"/>
+      <rect x="38" y="108" width="30" height="8" fill="url(#v2glass)" class="v2-glass"/>
+      <rect x="51" y="86" width="4" height="18" fill="#333"/>
+      <path class="v2-radar" d="M53 86 L72 76 L72 82 Z" fill="#FFB020"/>
+      <circle cx="53" cy="84" r="2" fill="#ff3b30" class="v2-pad-l"/>
+      <!-- терминал -->
+      <path d="M78 268V196q130-34 270 0V268z" fill="#161616" stroke="#FFB020" stroke-opacity=".35"/>
+      <path d="M86 262V202q122-28 254 0V262z" fill="url(#v2glass)" class="v2-glass"/>
+      <g id="v2mull" stroke="#0a0a0a" stroke-width="2"></g>
+      <rect x="238" y="236" width="26" height="32" fill="#FFE7B0"/>
+      <rect x="70" y="190" width="290" height="5" rx="2" fill="#2a2a2a"/>
+      <text x="213" y="184" fill="#FFB020" font-family="JetBrains Mono" font-size="10" letter-spacing="3" text-anchor="middle">ОТДЕЛ КАДРОВ · ПРИБЫТИЕ</text>
+      <!-- площадка -->
+      <ellipse cx="470" cy="268" rx="90" ry="12" fill="#1c1a14" stroke="#FFB020" stroke-opacity=".4"/>
+      <ellipse cx="470" cy="268" rx="60" ry="8" fill="none" stroke="#FFB020" stroke-opacity=".25" stroke-dasharray="6 6"/>
+      <g id="v2pad"></g>
+      <path d="M455 120 H485 L560 268 H380Z" fill="url(#v2cone)" class="v2-glass"/>
+      <!-- корабль (SMIL, общий цикл 10с) -->
+      <g>
+        <g>
+          <path d="M-46 0 L-30 -20 H34 L48 -2 L40 8 H-40Z" fill="#2b2b2b" stroke="#FFB020" stroke-width="1"/>
+          <path d="M-20 -20 L-12 -32 H14 L22 -20Z" fill="#3a3a3a" stroke="#FFB020" stroke-width="1"/>
+          <rect x="-8" y="-29" width="16" height="5" fill="#FFD27A"/>
+          <g fill="#FFD27A"><rect x="-30" y="-12" width="5" height="4"/><rect x="-20" y="-12" width="5" height="4"/><rect x="18" y="-12" width="5" height="4"/><rect x="28" y="-12" width="5" height="4"/></g>
+          <rect x="-6" y="-14" width="12" height="20" fill="#0a0a0a"><animate attributeName="height" dur="10s" repeatCount="indefinite" keyTimes="0;.4;.43;.75;.78;1" values="0;0;20;20;0;0"/></rect>
+          <path d="M-36 8 l-6 22 h8 l4 -22zM30 8 l4 22 h8 l-6 -22z" fill="#FFB020" opacity=".85"><animate attributeName="opacity" dur="10s" repeatCount="indefinite" keyTimes="0;.38;.4;.78;.8;1" values=".9;.9;0;0;.9;.9"/></path>
+          <path d="M-40 8v14M40 8v14" stroke="#555" stroke-width="2"/>
+        </g>
+        <animateTransform attributeName="transform" type="translate" dur="10s" repeatCount="indefinite" keyTimes="0;.28;.4;.78;.86;1" values="780 40;470 200;470 238;470 238;470 190;-140 20" calcMode="spline" keySplines=".3 0 .4 1;.4 0 .6 1;0 0 1 1;.4 0 .6 1;.5 0 .9 .6"/>
+      </g>
+      <g id="v2pax"></g>
+    </svg>
+    <span class="photo-slot">заглушка → фото-рендер</span>
+  </div>
+
+  <div class="board" aria-label="Табло прибытия">
+    <div class="board-h"><span>Время</span><span>Рейс</span><span>Откуда</span><span>Сотрудник</span><span>Статус</span></div>
+    <div id="v2board"></div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="k">Всего рабочих</div><div class="v" data-k="pop">0</div></div>
+    <div class="card"><div class="k">Работают</div><div class="v" data-k="assigned">0</div></div>
+    <div class="card"><div class="k">Свободны</div><div class="v" data-k="free">0</div></div>
+    <div class="card"><div class="k">Поток</div><div class="v"><span data-k="rateDay">0</span><small> чел/сут</small></div></div>
+  </div>
+
+  <div class="two">
+    <div class="panel">
+      <h3>Пропускная способность</h3>
+      <div class="mono">Заселено <b data-k="pop">0</b> / <b data-k="cap">0</b> · свободных мест <b data-k="room">0</b> · до полного штата <b data-k="eta">—</b></div>
+      <div class="lane"><i data-w="popPct"></i></div>
+      <div class="mono" style="margin-top:16px">Бонусные пайки — <b><span data-k="ratePct">0</span>%</b> от потолка <b data-k="ceilDay">0</b> чел/сут</div>
+      <input type="range" class="js-slider" min="0" max="100" aria-label="Бонусные пайки">
+      <div class="mono">Билет одного рабочего: 6 H₂O + 2 пайка</div>
+      <div class="chips" data-chips style="margin-top:12px"></div>
+    </div>
+    <div class="panel">
+      <h3>Быт на станции</h3>
+      <div class="mono">Вода · вес 50% — <b data-k="satW">0</b></div><div class="lane"><i data-w="satW"></i></div>
+      <div class="mono">Паёк · вес 50% — <b data-k="satR">0</b></div><div class="lane"><i data-w="satR"></i></div>
+      <div class="mono" style="margin-top:14px">Производительность <b><span data-k="prod">0</span>%</b></div>
+      <button class="btn" data-act="house">Построить жилой блок +24</button>
+      <details class="prompt"><summary>Промпт для фото-рендера</summary><p>Futuristic spaceport arrivals terminal on a barren amber-lit planet at night, curved glass facade glowing warm orange, small control tower with rotating radar, cargo-passenger shuttle landing on a circular pad with chasing beacon lights, workers in coveralls walking from the ship to the terminal door, retro split-flap board inside, cinematic, photorealistic, anamorphic lens, light dust haze</p></details>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ======================= 3 · ГОЛО-ШТАБ ======================= -->
+<section class="variant v3" id="v3">
+<div class="wrap">
+  <div class="head"><h1>Отдел кадров // голо-штаб</h1><span class="tag">HR-NODE 01 · LINK STABLE</span></div>
+  <div class="col">
+    <div class="glass">
+      <h3>Персонал</h3>
+      <div class="kpi"><span>Всего</span><b data-k="pop">0</b></div>
+      <div class="kpi"><span>Работают</span><b data-k="assigned">0</b></div>
+      <div class="kpi"><span>Свободны</span><b data-k="free">0</b></div>
+      <div class="kpi"><span>Мест</span><b data-k="cap">0</b></div>
+    </div>
+    <div class="glass">
+      <h3>Быт</h3>
+      <div class="small">Вода · 50% — <span data-k="satW">0</span></div><div class="bar"><i data-w="satW"></i></div>
+      <div class="small">Паёк · 50% — <span data-k="satR">0</span></div><div class="bar"><i data-w="satR"></i></div>
+      <div class="small">Производительность: <b data-k="prod">0</b>%</div>
+    </div>
+  </div>
+  <div class="stage">
+    <svg viewBox="70 20 500 520" preserveAspectRatio="xMidYMid meet" aria-label="Голограмма здания отдела кадров">
+      <defs>
+        <linearGradient id="v3scan" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3EF2FF" stop-opacity="0"/><stop offset=".5" stop-color="#3EF2FF" stop-opacity=".55"/><stop offset="1" stop-color="#3EF2FF" stop-opacity="0"/></linearGradient>
+        <radialGradient id="v3base"><stop offset="0" stop-color="#3EF2FF" stop-opacity=".5"/><stop offset="1" stop-color="#3EF2FF" stop-opacity="0"/></radialGradient>
+        <clipPath id="v3clip"><g id="v3clipg"></g></clipPath>
+        <pattern id="v3grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#3EF2FF" stroke-opacity=".08"/></pattern>
+      </defs>
+      <rect width="640" height="560" fill="url(#v3grid)"/>
+      <ellipse cx="320" cy="470" rx="230" ry="70" fill="url(#v3base)"/>
+      <ellipse cx="320" cy="470" rx="200" ry="58" fill="none" stroke="#3EF2FF" stroke-opacity=".6" stroke-dasharray="4 10" class="v3-ring"/>
+      <ellipse cx="320" cy="470" rx="160" ry="46" fill="none" stroke="#FF3EC8" stroke-opacity=".6" stroke-dasharray="30 12" class="v3-ring" style="animation-direction:reverse;animation-duration:9s"/>
+      <ellipse cx="320" cy="470" rx="236" ry="70" fill="none" stroke="#3EF2FF" stroke-opacity=".25"/>
+      <g class="v3-flick">
+        <g id="v3tower"></g>
+        <g clip-path="url(#v3clip)"><rect class="v3-scan" x="0" y="0" width="640" height="40" fill="url(#v3scan)"/></g>
+      </g>
+      <g id="v3motes"></g>
+      <g id="v3orbit"></g>
+      <g font-family="JetBrains Mono" font-size="10" fill="#3EF2FF">
+        <line x1="400" y1="170" x2="450" y2="122" stroke="#3EF2FF" stroke-opacity=".5"/><text x="430" y="112">ПРИЁМ: <tspan data-k="rateDay">0</tspan>/сут</text>
+        <line x1="230" y1="300" x2="180" y2="252" stroke="#FF3EC8" stroke-opacity=".5"/><text x="100" y="244" fill="#FF3EC8">ЖИЛЬЁ: <tspan data-k="pop">0</tspan>/<tspan data-k="cap">0</tspan></text>
+      </g>
+    </svg>
+    <span class="photo-slot">заглушка → фото-рендер</span>
+  </div>
+  <div class="col">
+    <div class="glass">
+      <h3>Поток найма</h3>
+      <svg class="gauge" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="78" fill="none" stroke="rgba(62,242,255,.12)" stroke-width="12" stroke-dasharray="367 491" transform="rotate(135 100 100)"/>
+        <circle id="v3arc" cx="100" cy="100" r="78" fill="none" stroke="url(#v3g)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 491" transform="rotate(135 100 100)" style="transition:stroke-dasharray .5s"/>
+        <defs><linearGradient id="v3g"><stop offset="0" stop-color="#3EF2FF"/><stop offset="1" stop-color="#FF3EC8"/></linearGradient></defs>
+        <text x="100" y="98" text-anchor="middle" font-size="40" font-weight="300" data-k="rateDay">0</text>
+        <text x="100" y="122" text-anchor="middle" font-size="11" opacity=".6">чел / сутки</text>
+        <text x="100" y="168" text-anchor="middle" font-size="10" opacity=".5">потолок <tspan data-k="ceilDay">0</tspan></text>
+      </svg>
+      <input type="range" class="js-slider" min="0" max="100" aria-label="Бонусные пайки">
+      <div class="small">Бонусные пайки: <b data-k="ratePct">0</b>% · до полного штата <b data-k="eta">—</b></div>
+      <div class="chips" data-chips style="margin-top:12px"></div>
+    </div>
+    <div class="glass">
+      <h3>Входящие</h3>
+      <ul class="feed" id="v3feed"></ul>
+      <button class="btn" data-act="house" style="margin-top:12px">+ Жилой блок</button>
+      <details class="prompt"><summary>Промпт для фото-рендера</summary><p>Holographic projection of a sleek isometric sci-fi HR headquarters tower hovering above a circular holo-table in a dark command room, cyan and magenta light, scanline sweeping up the building, rotating rings of light at the base, floating data particles, glass UI panels around, photorealistic CGI, shallow depth of field, octane render</p></details>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ======================= 4 · ЛИЧНОЕ ДЕЛО ======================= -->
+<section class="variant v4" id="v4">
+<div class="wrap">
+  <div class="mast">
+    <h1>Отдел<br><em>кадров</em></h1>
+    <div class="meta">Колония · вкладка «Рабочие»<br>Форма К-1 · штатное расписание<br>Одно окно = один сотрудник</div>
+  </div>
+  <div class="grid">
+    <div class="art">
+      <svg viewBox="0 0 640 470" preserveAspectRatio="xMidYMid meet" aria-label="Здание отдела кадров, окна загораются по числу рабочих">
+        <g id="v4scene"></g>
+      </svg>
+      <span class="photo-slot">заглушка → фото-рендер</span>
+    </div>
+    <div>
+      <div class="nums">
+        <div class="num"><div class="k">Всего рабочих</div><div class="v" data-k="pop">0</div></div>
+        <div class="num"><div class="k">Свободны</div><div class="v acc" data-k="free">0</div></div>
+        <div class="num"><div class="k">Работают</div><div class="v" data-k="assigned">0</div></div>
+        <div class="num"><div class="k">Поток / сутки</div><div class="v"><span data-k="rateDay">0</span><small> из <span data-k="ceilDay">0</span></small></div></div>
+      </div>
+      <div class="ctrl">
+        <h3>Бонусные пайки · <span data-k="ratePct">0</span>%</h3>
+        <input type="range" class="js-slider" min="0" max="100" aria-label="Бонусные пайки">
+        <div class="ticks"><span>0 — набор стоит</span><span>до штата: <b data-k="eta">—</b></span><span>100 — потолок</span></div>
+        <p style="font-size:13px;color:var(--mute);margin:14px 0 10px">Переезд одного рабочего — 6 H₂O + 2 пайка.</p>
+        <div class="chips" data-chips></div>
+      </div>
+    </div>
+  </div>
+  <div class="lower">
+    <div class="sec">
+      <h3>Последнее личное дело</h3>
+      <div class="files" id="v4files"></div>
+    </div>
+    <div class="sec">
+      <h3>Быт</h3>
+      <div class="need"><span>Вода</span><div class="tr"><i data-w="satW"></i></div><b data-k="satW">0</b></div>
+      <div class="need"><span>Паёк</span><div class="tr"><i data-w="satR"></i></div><b data-k="satR">0</b></div>
+      <div class="need"><span>Мест</span><div class="tr"><i data-w="popPct"></i></div><b data-k="cap">0</b></div>
+      <p style="font-size:13px;margin:14px 0 0">Производительность — <b><span data-k="prod">0</span>%</b>. Жилых блоков: <b data-k="houses">0</b>.</p>
+      <button class="btn" data-act="house">Построить жилой блок →</button>
+      <details class="prompt"><summary>Промпт для фото-рендера</summary><p>Minimalist architectural model of a modular colony HR office building, white concrete and black steel frame, isometric view on warm off-white paper background, windows lit with vivid orange light one by one, glass elevator on the side, rooftop LED ticker, clean studio lighting, soft shadows, photorealistic architectural visualization</p></details>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ======================= 5 · УЛЕЙ ======================= -->
+<section class="variant v5" id="v5">
+<div class="wrap">
+  <div class="head">
+    <div><h1>Отдел кадров · <span>Улей</span></h1></div>
+    <div class="sub">Биокупол принимает переселенцев с посадочной площадки и распределяет их по сотам жилых блоков. Каждая сота — один рабочий.</div>
+  </div>
+  <div class="hero">
+    <svg viewBox="0 0 640 280" preserveAspectRatio="xMidYMid slice" aria-label="Купол отдела кадров">
+      <defs>
+        <radialGradient id="v5dome" cx=".5" cy="1"><stop offset="0" stop-color="#B7F34A" stop-opacity=".45"/><stop offset=".7" stop-color="#B7F34A" stop-opacity=".08"/><stop offset="1" stop-color="#B7F34A" stop-opacity=".02"/></radialGradient>
+        <radialGradient id="v5halo"><stop offset="0" stop-color="#B7F34A" stop-opacity=".35"/><stop offset="1" stop-color="#B7F34A" stop-opacity="0"/></radialGradient>
+        <path id="v5tube" d="M110 250 C170 250 190 250 236 250 M236 250 L404 250 C450 250 470 250 540 236"/>
+        <path id="v5route" d="M110 252 C170 252 190 252 236 252 L404 252 C450 252 470 252 540 238"/>
+      </defs>
+      <g id="v5stars"></g>
+      <path d="M0 240 Q160 222 320 236 T640 230 V280 H0Z" fill="#141b0e"/>
+      <ellipse cx="320" cy="252" rx="190" ry="40" fill="url(#v5halo)" class="v5-pulse"/>
+      <!-- трубы -->
+      <use href="#v5tube" fill="none" stroke="#2d3b1f" stroke-width="12" stroke-linecap="round"/>
+      <use href="#v5tube" fill="none" stroke="#B7F34A" stroke-opacity=".5" stroke-width="2" stroke-dasharray="4 10" class="v5-flow"/>
+      <!-- площадка -->
+      <ellipse cx="86" cy="254" rx="46" ry="8" fill="#1d2615" stroke="#FFB547" stroke-opacity=".5"/>
+      <g transform="translate(86 230)"><g class="v5-ship">
+        <path d="M-22 6 L-14 -8 H14 L22 6 Z" fill="#2a3320" stroke="#FFB547" stroke-width="1"/>
+        <rect x="-6" y="-14" width="12" height="6" rx="2" fill="#FFB547"/>
+        <path d="M-12 6 l-3 12 h6zM12 6 l3 12 h-6z" fill="#FFB547" opacity=".7"/>
+      </g></g>
+      <!-- купол -->
+      <g id="v5domeg"></g>
+      <!-- соты жилья справа -->
+      <g id="v5cells"></g>
+      <!-- поток людей по трубе -->
+      <g id="v5flow"></g>
+    </svg>
+    <div class="float">
+      <span class="pill">Население<b data-k="pop">0</b></span>
+      <span class="pill">Поток<b><span data-k="rateDay">0</span>/сут</b></span>
+      <span class="pill">Свободно мест<b data-k="room">0</b></span>
+    </div>
+    <div class="toast" id="v5toast">+1 рабочий</div>
+    <span class="photo-slot">заглушка → фото-рендер</span>
+  </div>
+  <div class="grid">
+    <div class="panel">
+      <h3>Соты жилья · <span data-k="pop">0</span> / <span data-k="cap">0</span></h3>
+      <div class="hexes" id="v5hexes"></div>
+      <div class="legend"><span><i style="background:#7fae2c"></i>Работают</span><span><i style="background:var(--g)"></i>Свободны</span><span><i style="background:#1f2917"></i>Пустые места</span></div>
+      <button class="btn" data-act="house">Вырастить жилой блок · +24 соты</button>
+    </div>
+    <div class="panel">
+      <h3>Приток переселенцев</h3>
+      <div class="flow">
+        <div><span>Потолок</span><b><span data-k="ceilDay">0</span></b></div>
+        <div><span>Сейчас</span><b><span data-k="rateDay">0</span></b></div>
+        <div><span>До штата</span><b data-k="eta">—</b></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span>Бонусные пайки</span><b><span data-k="ratePct">0</span>%</b></div>
+      <input type="range" class="js-slider" min="0" max="100" aria-label="Бонусные пайки">
+      <div style="font-size:13px;opacity:.7;margin-bottom:12px">Вода <b data-k="satW">0</b> · Паёк <b data-k="satR">0</b> · Производительность <b><span data-k="prod">0</span>%</b> · переезд: 6 H₂O + 2 пайка</div>
+      <div class="chips" data-chips></div>
+      <details class="prompt"><summary>Промпт для фото-рендера</summary><p>Bio-dome colony recruitment center on a dark alien steppe, geodesic glass dome glowing lime green from within, transparent connector tubes with tiny figures walking through them toward hexagonal habitat modules, small shuttle landing on a pad with amber lights, night sky with faint aurora, photorealistic, cinematic wide angle, volumetric glow</p></details>
+    </div>
+  </div>
+</div>
+</section>
+
+<script>
+/* =================== ОБЩАЯ СИМУЛЯЦИЯ (мок, логика как в core.js) =================== */
+const SVGNS='http://www.w3.org/2000/svg';
+const HOUSE_CAP=24, RECRUIT_PER_DAY_PER_HOUSE=10, COST={water:6,ration:2}, SPEED=2400, DEMAND=34;
+const S={houses:2,pop:24,slider:.6,water:412,ration:96,frac:0};
+const RES={
+  water:{name:'Вода',color:'#49B8F0',icon:'<path d="M10 2C10 2 4 10.5 4 14A6 6 0 0 0 16 14C16 10.5 10 2 10 2Z" opacity="0.9"/><ellipse cx="8.1" cy="9.6" rx="1.1" ry="1.8" transform="rotate(-20 8.1 9.6)"/>'},
+  ration:{name:'Паёк',color:'#C9A24B',icon:'<rect x="3" y="7" width="14" height="10" rx="1.3" opacity="0.9"/><path d="M3.5 7c0-2.4 1.8-4 4-4h5c2.2 0 4 1.6 4 4" fill="none" stroke="currentColor" stroke-width="1.3" opacity="0.6"/><path d="M3 9.6h14" style="stroke:var(--ink)" stroke-width="1" opacity="0.3"/><circle cx="10" cy="13.3" r="1.6" style="fill:var(--ink)" opacity="0.35"/>'}
+};
+const SUR=['Ковалёв','Орлова','Сато','Мирзоев','Брандт','Ли','Нуриева','Окафор','Яковлев','Хансен','Петрова','Рахимов','Гарсия','Ким','Волков','Эрдоган','Соколова','Нгуен','Абрамов','Линд'];
+const INI='АБВГДЕИКЛМНОПРСТЮЯ';
+const ORIG=['Церера','Ганимед','Титан','Марс-2','Европа','Каллисто','Веста','Ио','Тритон','Паллада'];
+const SKILL=['Сварщик','Бурильщик','Агроном','Грузчик','Монтажник','Повар','Оператор','Механик'];
+let seq=417;
+function makeWorker(){
+  const r=a=>a[Math.floor(Math.random()*a.length)];
+  seq++;
+  const d=new Date();
+  return {name:r(SUR)+' '+r(INI)+'.',origin:r(ORIG),skill:r(SKILL),id:String(seq).padStart(5,'0'),
+    flight:'K'+(100+Math.floor(Math.random()*899)),age:21+Math.floor(Math.random()*30),
+    time:String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+}
+const cap=()=>S.houses*HOUSE_CAP;
+const ceilDay=()=>S.houses*RECRUIT_PER_DAY_PER_HOUSE;
+function derived(){
+  const c=cap(), pop=Math.floor(S.pop), room=Math.max(0,c-S.pop);
+  const resOK=S.water>=COST.water&&S.ration>=COST.ration;
+  const rateDay=room>0&&resOK?ceilDay()*S.slider:0;
+  const assigned=Math.min(pop,DEMAND), free=pop-assigned;
+  const satW=S.water>0?1:0, satR=S.ration>0?1:0, staffing=Math.min(1,pop/DEMAND);
+  const eta=rateDay>0?(room/rateDay):Infinity;
+  const fmtEta=eta===Infinity?'—':(eta<1?Math.ceil(eta*24)+' ч':eta.toFixed(1)+' дн');
+  return {pop,cap:c,room:Math.floor(room),assigned,free,ceilDay:ceilDay(),rateDay:rateDay.toFixed(1),
+    ratePct:Math.round(S.slider*100),water:Math.floor(S.water),ration:Math.floor(S.ration),houses:S.houses,
+    eta:fmtEta,satW:Math.round(satW*100)+'%',satR:Math.round(satR*100)+'%',
+    prod:Math.round(staffing*(satW*.5+satR*.5)*100),
+    useW:(rateDay/24*COST.water).toFixed(2),useR:(rateDay/24*COST.ration).toFixed(2),
+    w:{popPct:c?pop/c*100:0,satW:satW*100,satR:satR*100},_rate:rateDay};
+}
+const hooks=[], arriveHooks=[];
+function update(){
+  const D=derived();
+  document.querySelectorAll('[data-k]').forEach(el=>{const v=D[el.dataset.k];if(v!==undefined&&el.textContent!=String(v))el.textContent=v;});
+  document.querySelectorAll('[data-w]').forEach(el=>{el.style.width=D.w[el.dataset.w]+'%';});
+  document.querySelectorAll('.js-slider').forEach(el=>{if(document.activeElement!==el)el.value=D.ratePct;el.style.setProperty('--p',D.ratePct+'%');});
+  hooks.forEach(h=>h(D));
+}
+function tick(){
+  const D=derived();
+  const dtDays=.2*SPEED/86400;
+  S.water+=0.9; S.ration+=0.3; // производство колонии (упрощённо)
+  S.frac+=D._rate*dtDays;
+  while(S.frac>=1 && S.pop<cap() && S.water>=COST.water && S.ration>=COST.ration){
+    S.frac-=1; S.pop+=1; S.water-=COST.water; S.ration-=COST.ration;
+    const w=makeWorker(); arriveHooks.forEach(h=>h(w));
+  }
+  if(S.pop>=cap()) S.frac=0;
+  update();
+}
+document.addEventListener('input',e=>{
+  if(!e.target.classList.contains('js-slider'))return;
+  S.slider=e.target.value/100; update();
+});
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act="house"]'); if(!b)return;
+  S.houses++; hooks.forEach(h=>h(derived(),'house')); update();
+});
+function chipHtml(rid){
+  const R=RES[rid];
+  return '<div class="chip" style="--chip-color:'+R.color+'"><div><svg viewBox="0 0 20 20" width="26" height="26" style="color:'+R.color+'" fill="currentColor">'+R.icon+'</svg></div>'+
+    '<div class="chip-body"><div class="chip-name">'+R.name+'</div><div class="chip-amt" data-k="'+rid+'">0</div>'+
+    '<div class="chip-rate">Паёк: −<span data-k="'+(rid==='water'?'useW':'useR')+'">0</span>/ч</div></div></div>';
+}
+document.querySelectorAll('[data-chips]').forEach(el=>el.innerHTML=chipHtml('water')+chipHtml('ration'));
+function el(tag,attrs,parent){const n=document.createElementNS(SVGNS,tag);for(const k in attrs)n.setAttribute(k,attrs[k]);if(parent)parent.appendChild(n);return n;}
+function stars(id,n,w,h){const g=document.getElementById(id);for(let i=0;i<n;i++)el('circle',{cx:Math.random()*w,cy:Math.random()*h,r:Math.random()*1.1+.2,fill:'#fff',opacity:(Math.random()*.6+.15).toFixed(2)},g);}
+
+/* ---------- 1 · Империя ---------- */
+(function(){
+  stars('v1stars',90,640,250);
+  const deco=document.getElementById('v1deco');
+  // пилястры и окна
+  [[160,245,320,85,10],[215,155,210,90,7],[268,72,104,83,4]].forEach(([x,y,w,h,n])=>{
+    const step=w/n;
+    for(let i=0;i<=n;i++) el('rect',{x:x+i*step-1.5,y:y+4,width:3,height:h-8,fill:'#D9B26A',opacity:.18},deco);
+    for(let i=0;i<n;i++){
+      const wx=x+i*step+step/2-3.5;
+      for(let r=0;r<Math.floor((h-20)/26);r++){
+        if(y===155&&wx>285&&wx<355)continue; // место эмблемы
+        el('rect',{x:wx,y:y+12+r*26,width:7,height:16,rx:3.5,fill:Math.random()<.75?'#F3C979':'#3a2a1d',class:'v1-win',style:'animation-delay:'+(-Math.random()*6).toFixed(2)+'s;animation-duration:'+(4+Math.random()*6).toFixed(1)+'s'},deco);
+      }
+    }
+  });
+  // переселенцы, идущие к вратам
+  const g=document.getElementById('v1people');
+  const paths=['M-20 392 L296 392 L320 372 L320 334','M660 392 L344 392 L320 372 L320 334'];
+  for(let i=0;i<8;i++){
+    const p=el('g',{},g);
+    el('circle',{cx:0,cy:-11,r:2.6,fill:'#F3D38A'},p);
+    el('rect',{x:-2.4,y:-8,width:4.8,height:8,rx:1.5,fill:'#c79a50'},p);
+    const am=el('animateMotion',{dur:'14s',repeatCount:'indefinite',path:paths[i%2],begin:(-i*1.75)+'s'},p);
+    el('animate',{attributeName:'opacity',dur:'14s',repeatCount:'indefinite',values:'0;1;1;0',keyTimes:'0;.04;.94;1',begin:(-i*1.75)+'s'},p);
+  }
+  const reg=document.getElementById('v1reg');
+  const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+  function add(w,isNew){
+    const li=document.createElement('li'); if(isNew)li.className='new';
+    li.innerHTML='<span class="seal">'+w.name[0]+'</span><span>'+w.name+'<small>'+w.skill+' · с '+w.origin+'</small></span><time>№ '+w.id+'</time>';
+    reg.prepend(li); while(reg.children.length>7)reg.lastChild.remove();
+  }
+  for(let i=0;i<5;i++)add(makeWorker());
+  arriveHooks.push(w=>add(w,true));
+})();
+
+/* ---------- 2 · Терминал ---------- */
+(function(){
+  stars('v2stars',60,640,170);
+  const m=document.getElementById('v2mull');
+  for(let x=100;x<340;x+=18) el('line',{x1:x,y1:196,x2:x,y2:262},m);
+  el('line',{x1:86,y1:230,x2:340,y2:230},m);
+  const pad=document.getElementById('v2pad');
+  for(let i=0;i<12;i++){const a=i/12*Math.PI*2;el('circle',{cx:470+Math.cos(a)*84,cy:268+Math.sin(a)*11,r:2,fill:'#FFB020',class:'v2-pad-l',style:'animation-delay:'+(i*.1)+'s'},pad);}
+  const pax=document.getElementById('v2pax');
+  [.44,.49,.54,.59,.64].forEach((s,i)=>{
+    const g=el('g',{opacity:0},pax);
+    el('circle',{cx:0,cy:-12,r:2.6,fill:'#FFD27A'},g);
+    el('rect',{x:-2.4,y:-9,width:4.8,height:9,rx:1.5,fill:'#e6e6e6'},g);
+    const e=s+.12;
+    el('animateMotion',{dur:'10s',repeatCount:'indefinite',path:'M470 268 L251 268',keyPoints:'0;0;1;1',keyTimes:'0;'+s+';'+e.toFixed(2)+';1',calcMode:'linear'},g);
+    el('animate',{attributeName:'opacity',dur:'10s',repeatCount:'indefinite',values:'0;0;1;1;0;0',keyTimes:'0;'+(s-.001).toFixed(3)+';'+s+';'+(e-.005).toFixed(3)+';'+e.toFixed(2)+';1'},g);
+  });
+  // табло split-flap
+  const board=document.getElementById('v2board');
+  const CH='АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЭЮЯ0123456789-:. ';
+  function flap(text,len){
+    text=text.toUpperCase().padEnd(len).slice(0,len);
+    return '<span class="flap">'+[...text].map(c=>'<i data-c="'+c+'">'+c+'</i>').join('')+'</span>';
+  }
+  function row(w,cls){
+    const r=document.createElement('div'); r.className='board-r';
+    r.innerHTML=flap(w.time,5)+flap(w.flight,4)+flap(w.origin,7)+flap(w.name,14)+'<span class="'+(cls||'')+'">'+flap(cls?'ПРИБЫЛ':'В ПУТИ',7)+'</span>';
+    return r;
+  }
+  function spin(r){
+    r.querySelectorAll('.flap i').forEach((c,i)=>{
+      const fin=c.dataset.c; let n=4+Math.floor(Math.random()*8)+Math.floor(i/3);
+      const t=setInterval(()=>{c.classList.remove('f');void c.offsetWidth;c.classList.add('f');
+        c.textContent=--n<=0?fin:CH[Math.floor(Math.random()*CH.length)];if(n<=0)clearInterval(t);},55);
+    });
+  }
+  const init=[];for(let i=0;i<5;i++)init.push(makeWorker());
+  init.forEach((w,i)=>board.appendChild(row(w,i<5?'st-ok':'')));
+  arriveHooks.push(w=>{const r=row(w,'st-ok');board.prepend(r);spin(r);while(board.children.length>5)board.lastChild.remove();});
+})();
+
+/* ---------- 3 · Голо-штаб ---------- */
+(function(){
+  const T=document.getElementById('v3tower'), C=document.getElementById('v3clipg');
+  const cx=320, cy=470, s=1;
+  const P=(x,y,z)=>[cx+(x-y)*0.866*s, cy+(x+y)*0.5*s - z*s];
+  const pts=a=>a.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ');
+  let delay=0;
+  function box(x,y,z,w,d,h,op){
+    const faces=[
+      [P(x,y+d,z),P(x+w,y+d,z),P(x+w,y+d,z+h),P(x,y+d,z+h)],     // левая
+      [P(x+w,y,z),P(x+w,y+d,z),P(x+w,y+d,z+h),P(x+w,y,z+h)],     // правая
+      [P(x,y,z+h),P(x+w,y,z+h),P(x+w,y+d,z+h),P(x,y+d,z+h)]      // крыша
+    ];
+    faces.forEach((f,i)=>{
+      el('polygon',{points:pts(f),fill:i===2?'rgba(62,242,255,.10)':'rgba(62,242,255,.04)',stroke:'#3EF2FF','stroke-width':1.2,'stroke-opacity':op||.9,pathLength:1,class:'v3-draw',style:'animation-delay:'+delay.toFixed(2)+'s'},T);
+      el('polygon',{points:pts(f)},C);
+    });
+    // этажные линии
+    for(let k=1;k<Math.floor(h/18);k++){
+      const zz=z+k*18;
+      el('polyline',{points:pts([P(x,y+d,zz),P(x+w,y+d,zz),P(x+w,y,zz)]),fill:'none',stroke:'#3EF2FF','stroke-opacity':.28,'stroke-width':.8},T);
+    }
+    // окна-штрихи
+    for(let k=0;k<Math.floor(h/18);k++)for(let j=1;j<Math.floor(w/16);j++){
+      const a=P(x+j*16,y+d,z+k*18+6),b=P(x+j*16,y+d,z+k*18+13);
+      if(Math.random()<.6)el('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:Math.random()<.2?'#FF3EC8':'#3EF2FF','stroke-width':2,'stroke-opacity':.7},T);
+    }
+    delay+=.35;
+  }
+  box(-110,-110,0,220,220,30,.6);
+  box(-80,-80,30,160,160,110);
+  box(-55,-55,140,110,110,90);
+  box(-30,-30,230,60,60,70);
+  box(-6,-6,300,12,12,60,.7);
+  const top=P(0,0,372); el('circle',{cx:top[0],cy:top[1],r:4,fill:'#FF3EC8',class:'v1-blink'},T);
+  // частицы
+  const M=document.getElementById('v3motes');
+  for(let i=0;i<34;i++){const x=180+Math.random()*280,y=380+Math.random()*90;
+    el('rect',{x,y,width:2,height:2,fill:Math.random()<.3?'#FF3EC8':'#3EF2FF',class:'v3-mote',style:'animation-duration:'+(3+Math.random()*5).toFixed(1)+'s;animation-delay:'+(-Math.random()*6).toFixed(1)+'s'},M);}
+  // орбита персонала
+  const O=document.getElementById('v3orbit');
+  const orb='M120 300 a200 60 0 1 0 400 0 a200 60 0 1 0 -400 0';
+  el('path',{d:orb,fill:'none',stroke:'#FF3EC8','stroke-opacity':.25,'stroke-dasharray':'2 6'},O);
+  for(let i=0;i<10;i++){const c=el('circle',{r:3,fill:i%3?'#3EF2FF':'#FF3EC8'},O);
+    el('animateMotion',{dur:'16s',repeatCount:'indefinite',path:orb,begin:(-i*1.6)+'s'},c);}
+  const arc=document.getElementById('v3arc');
+  hooks.push(D=>{const L=367;arc.setAttribute('stroke-dasharray',(L*D._rate/Math.max(1,D.ceilDay)).toFixed(1)+' 491');});
+  const feed=document.getElementById('v3feed');
+  function add(w,isNew){const li=document.createElement('li');if(isNew)li.className='new';
+    li.textContent=w.time+' '+w.id+' '+w.name+' ← '+w.origin;feed.prepend(li);while(feed.children.length>6)feed.lastChild.remove();}
+  for(let i=0;i<5;i++)add(makeWorker());
+  arriveHooks.push(w=>add(w,true));
+})();
+
+/* ---------- 4 · Личное дело ---------- */
+(function(){
+  const scene=document.getElementById('v4scene');
+  const cx=300, cy=335;
+  const K=1.15, P=(x,y,z)=>[cx+(x-y)*0.866*K, cy+(x+y)*0.5*K - z*K];
+  const pts=a=>a.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ');
+  let wins=[];
+  function build(){
+    scene.innerHTML='';wins=[];
+    const c=cap(), cols=6, floors=Math.ceil(c/(cols*2));
+    const W=150,D=150,FH=Math.min(34,220/floors),H=floors*FH+40;
+    // тень и земля
+    el('polygon',{points:pts([P(-W/2-60,-D/2-60,0),P(W/2+60,-D/2-60,0),P(W/2+60,D/2+60,0),P(-W/2-60,D/2+60,0)]),fill:'none',stroke:'#121212','stroke-opacity':.15},scene);
+    el('polygon',{points:pts([P(-W/2,D/2,0),P(W/2,D/2,0),P(W/2+60,D/2+40,0),P(-W/2+60,D/2+40,0)]),fill:'#121212',opacity:.08},scene);
+    const L=[P(-W/2,D/2,0),P(W/2,D/2,0),P(W/2,D/2,H),P(-W/2,D/2,H)];
+    const R=[P(W/2,-D/2,0),P(W/2,D/2,0),P(W/2,D/2,H),P(W/2,-D/2,H)];
+    const T=[P(-W/2,-D/2,H),P(W/2,-D/2,H),P(W/2,D/2,H),P(-W/2,D/2,H)];
+    el('polygon',{points:pts(L),fill:'#fff',stroke:'#121212','stroke-width':1.6},scene);
+    el('polygon',{points:pts(R),fill:'#dcd6cb',stroke:'#121212','stroke-width':1.6},scene);
+    el('polygon',{points:pts(T),fill:'#f7f4ee',stroke:'#121212','stroke-width':1.6},scene);
+    // окна: снизу вверх, по этажу — сначала левый фасад, потом правый
+    const ww=W/cols;
+    for(let f=0;f<floors;f++){
+      const z0=20+f*FH+FH*.22, z1=20+f*FH+FH*.78;
+      for(let i=0;i<cols;i++){
+        const x0=-W/2+i*ww+ww*.22, x1=-W/2+(i+1)*ww-ww*.22;
+        wins.push(el('polygon',{points:pts([P(x0,D/2,z0),P(x1,D/2,z0),P(x1,D/2,z1),P(x0,D/2,z1)]),fill:'#e6e1d8',stroke:'#121212','stroke-width':.8,class:'v4-win'},scene));
+      }
+      for(let i=0;i<cols;i++){
+        const y0=D/2-i*ww-ww*.22, y1=D/2-(i+1)*ww+ww*.22;
+        wins.push(el('polygon',{points:pts([P(W/2,y0,z0),P(W/2,y1,z0),P(W/2,y1,z1),P(W/2,y0,z1)]),fill:'#cfc9bd',stroke:'#121212','stroke-width':.8,class:'v4-win'},scene));
+      }
+    }
+    // лифт на углу
+    const lb=P(W/2,D/2,0);
+    el('line',{x1:lb[0],y1:lb[1],x2:lb[0],y2:lb[1]-H,stroke:'#121212','stroke-width':1},scene);
+    const lift=el('rect',{x:lb[0]-5,y:lb[1]-22,width:10,height:16,fill:'#FF4D12',stroke:'#121212',class:'v4-lift',style:'--lift:'+(-(H-30))+'px'},scene);
+    // вход
+    const d0=P(-12,D/2,0),d1=P(12,D/2,0),d2=P(12,D/2,18),d3=P(-12,D/2,18);
+    el('polygon',{points:pts([d0,d1,d2,d3]),fill:'#121212'},scene);
+    // бегущая строка на крыше
+    const s0=P(0,0,H), sw=130, sx=s0[0]-sw/2, sy=s0[1]-46;
+    el('line',{x1:sx+22,y1:sy+20,x2:sx+22,y2:s0[1]+4,stroke:'#121212','stroke-width':2},scene);
+    el('line',{x1:sx+sw-22,y1:sy+20,x2:sx+sw-22,y2:s0[1]+4,stroke:'#121212','stroke-width':2},scene);
+    el('rect',{x:sx,y:sy,width:sw,height:20,fill:'#121212'},scene);
+    const clip=el('clipPath',{id:'v4clip'},scene); el('rect',{x:sx+3,y:sy,width:sw-6,height:20},clip);
+    const tg=el('g',{'clip-path':'url(#v4clip)'},scene);
+    const txt=el('text',{x:sx,y:sy+14,fill:'#FF4D12','font-family':'JetBrains Mono','font-size':11,'font-weight':700,class:'v4-marq'},tg);
+    txt.textContent=('ПРИЁМ ОТКРЫТ · ОТДЕЛ КАДРОВ · ').repeat(6);
+    // люди у входа
+    const pg=el('g',{},scene);
+    for(let i=0;i<4;i++){const p=el('g',{},pg);
+      el('circle',{cx:0,cy:-11,r:2.6,fill:'#121212'},p);el('rect',{x:-2.2,y:-8,width:4.4,height:8,fill:'#121212'},p);
+      const a=P(-W/2-80,D/2+70,0),b=P(0,D/2+30,0),c2=P(0,D/2,0);
+      el('animateMotion',{dur:'8s',repeatCount:'indefinite',begin:(-i*2)+'s',path:'M'+a.join(' ')+' L'+b.join(' ')+' L'+c2.join(' ')},p);
+      el('animate',{attributeName:'opacity',dur:'8s',repeatCount:'indefinite',begin:(-i*2)+'s',values:'0;1;1;0',keyTimes:'0;.08;.9;1'},p);}
+    // подпись
+    const lab=el('text',{x:24,y:40,'font-family':'Unbounded','font-size':12,'font-weight':600,fill:'#121212'},scene);
+    lab.textContent='Здание ОК · '+floors+' эт. · '+c+' окон';
+    paint(true);
+  }
+  let lit=-1;
+  function paint(silent){
+    const n=Math.floor(S.pop);
+    wins.forEach((w,i)=>{const on=i<n;w.classList.toggle('lit',on);
+      if(!silent&&on&&i>=lit){w.classList.remove('pop');void w.getBBox();w.classList.add('pop');}});
+    lit=n;
+  }
+  build();
+  hooks.push((D,why)=>{if(why==='house')build();else if(Math.floor(S.pop)!==lit)paint();});
+  const files=document.getElementById('v4files');
+  function card(w,isNew){
+    files.querySelectorAll('.file').forEach((f,i)=>{f.classList.remove('new');f.classList.add('old');
+      f.style.transform='translate('+(i+1)*10+'px,'+(i+1)*10+'px)';f.style.opacity=i>1?0:.6;f.style.zIndex=10-i;});
+    while(files.children.length>3)files.lastChild.remove();
+    const d=document.createElement('div');d.className='file'+(isNew?' new':' old');d.style.zIndex=20;
+    d.innerHTML='<div class="fid">ЛИЧНОЕ ДЕЛО № '+w.id+' · '+w.time+'</div><div class="fn">'+w.name+'</div>'+
+      '<dl><dt>Прибыл с</dt><dd>'+w.origin+' · рейс '+w.flight+'</dd><dt>Специальность</dt><dd>'+w.skill+'</dd><dt>Возраст</dt><dd>'+w.age+'</dd><dt>Класс</dt><dd>Разнорабочие</dd></dl>'+
+      '<div class="stamp">ПРИНЯТ</div>';
+    files.prepend(d);
+  }
+  card(makeWorker());
+  arriveHooks.push(w=>card(w,true));
+})();
+
+/* ---------- 5 · Улей ---------- */
+(function(){
+  stars('v5stars',70,640,190);
+  const dome=document.getElementById("v5domeg");
+  const cx=320, cy=252, r=92;
+  el('path',{d:'M'+(cx-r)+' '+cy+' A'+r+' '+r+' 0 0 1 '+(cx+r)+' '+cy+'Z',fill:'url(#v5dome)',stroke:'#B7F34A','stroke-width':1.5},dome);
+  for(let i=1;i<8;i++){const a=i/8*Math.PI, rx=Math.abs(Math.cos(a))*r;
+    el('path',{d:'M'+cx+' '+(cy-r)+' A'+rx.toFixed(1)+' '+r+' 0 0 '+(i<4?0:1)+' '+(cx+Math.cos(a)*r).toFixed(1)+' '+cy,fill:'none',stroke:'#B7F34A','stroke-opacity':.35},dome);}
+  for(let j=1;j<5;j++){const b=j/5*Math.PI/2, y=cy-Math.sin(b)*r, hw=Math.cos(b)*r;
+    el('path',{d:'M'+(cx-hw).toFixed(1)+' '+y.toFixed(1)+' Q'+cx+' '+(y+8)+' '+(cx+hw).toFixed(1)+' '+y.toFixed(1),fill:'none',stroke:'#B7F34A','stroke-opacity':.3},dome);}
+  el('circle',{cx,cy:cy-30,r:26,fill:'#B7F34A',opacity:.25,class:'v5-pulse'},dome);
+  el('rect',{x:cx-14,y:cy-22,width:28,height:22,rx:3,fill:'#0D0F0C',stroke:'#B7F34A'},dome);
+  const t=el('text',{x:cx,y:cy-r-10,'text-anchor':'middle',fill:'#B7F34A','font-family':'Oswald','font-size':11,'letter-spacing':3},dome);t.textContent='ОТДЕЛ КАДРОВ';
+  el('rect',{x:cx-1,y:cy-r-40,width:2,height:22,fill:'#B7F34A',opacity:.6},dome);
+  el('circle',{cx,cy:cy-r-42,r:3,fill:'#FFB547',class:'v1-blink'},dome);
+  // соты
+  const cells=document.getElementById('v5cells');
+  const hx=(x,y,s)=>{let p=[];for(let k=0;k<6;k++){const a=Math.PI/3*k+Math.PI/6;p.push((x+Math.cos(a)*s).toFixed(1)+','+(y+Math.sin(a)*s).toFixed(1));}return p.join(' ');};
+  const pos=[[560,236],[584,222],[584,250],[608,236],[560,208],[608,208],[584,194]];
+  const cellEls=pos.map(([x,y])=>el('polygon',{points:hx(x,y,13),fill:'#1f2917',stroke:'#B7F34A','stroke-opacity':.5},cells));
+  // поток людей по трубе
+  const F=document.getElementById('v5flow');
+  for(let i=0;i<9;i++){const c=el('circle',{r:3,fill:i%3?'#B7F34A':'#FFB547'},F);
+    const m=el('animateMotion',{dur:'7s',repeatCount:'indefinite',begin:(-i*.78)+'s'},c);
+    const mp=el('mpath',{},m);mp.setAttribute('href','#v5route');
+    el('animate',{attributeName:'opacity',dur:'7s',repeatCount:'indefinite',begin:(-i*.78)+'s',values:'0;1;1;0',keyTimes:'0;.05;.92;1'},c);}
+  // соты-сетка в панели
+  const H=document.getElementById('v5hexes');
+  function grid(){
+    const c=cap(); H.innerHTML='';
+    for(let i=0;i<c;i++){const d=document.createElement('div');d.className='hex';H.appendChild(d);}
+    paint();
+  }
+  let last=Math.floor(S.pop);
+  function paint(){
+    const D=derived(), n=D.pop;
+    [...H.children].forEach((h,i)=>{h.className='hex'+(i<D.assigned?' work':(i<n?' on':''))+(i===n-1&&n>last?' new':'');});
+    const lvl=Math.round(D.w.popPct/100*cellEls.length);
+    cellEls.forEach((c,i)=>c.setAttribute('fill',i<lvl?'#B7F34A':'#1f2917'));
+    last=n;
+  }
+  grid();
+  hooks.push((D,why)=>{if(why==='house')grid();else if(D.pop!==last)paint();});
+  const toast=document.getElementById('v5toast');
+  arriveHooks.push(w=>{toast.textContent='+1 · '+w.name+' с '+w.origin;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show');});
+})();
+
+/* ---------- переключатель ---------- */
+const sw=document.getElementById('switcher');
+function show(v){
+  document.querySelectorAll('.variant').forEach(s=>s.classList.toggle('on',s.id==='v'+v));
+  sw.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v==v));
+  try{history.replaceState(null,'','#'+v);}catch(e){}
+}
+sw.addEventListener('click',e=>{const b=e.target.closest('button');if(b)show(b.dataset.v);});
+show((location.hash||'#1').slice(1));
+update();
+setInterval(tick,200);
+</script>
+</body>
+</html>

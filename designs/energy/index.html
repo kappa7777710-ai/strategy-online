@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Энергосистема — 5 вариантов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="energy-core.css">
+<style>
+.g-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;}
+.g-card{display:flex;flex-direction:column;background:linear-gradient(180deg,#171D33,#12172A);border:1px solid var(--border);border-radius:14px;overflow:hidden;text-decoration:none;color:inherit;transition:border-color .15s,transform .12s;}
+.g-card:hover{border-color:var(--tier0);transform:translateY(-2px);}
+.g-card:focus-visible{outline:2px solid var(--tier0);outline-offset:3px;}
+.g-card img{display:block;width:100%;height:auto;aspect-ratio:1240/860;object-fit:cover;background:#0A0D18;border-bottom:1px solid var(--border);}
+.g-body{padding:13px 15px 15px;display:flex;flex-direction:column;gap:6px;}
+.g-n{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:.06em;}
+.g-t{font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.02em;}
+.g-d{font-size:13px;color:var(--text-secondary);}
+.g-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.g-tags span{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--border-strong);color:var(--text-secondary);}
+.g-all{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:13px 16px;font-size:13px;color:var(--text-secondary);}
+.g-all b{color:var(--text-primary);font-weight:500;}
+.g-all ul{margin:6px 0 0;padding-left:18px;} .g-all li{margin:2px 0;}
+</style>
+</head>
+<body>
+<div class="en-page">
+  <header>
+    <div class="en-eyebrow">Индустриальный пояс · Вкладка «Энергия»</div>
+    <h1 class="en-h1">5 вариантов энергосистемы</h1>
+    <p class="en-sub">Все страницы живые: на демо-базе идёт игровое время, растёт история, единицы переключаются сами (кВт → МВт → ГВт, Дж → МДж → ГДж, кВт·ч → МВт·ч → ГВт·ч). Наверху каждой страницы можно выбрать размер базы и скорость времени.</p>
+  </header>
+
+  <section class="g-all">
+    <b>Что есть в каждом варианте:</b>
+    <ul>
+      <li>обеспечение (получено / нужно), производство (сейчас / установлено), заряд аккумулятора в Дж, МДж, ГДж и в кВт·ч;</li>
+      <li>история за час, сутки, неделю, месяц и три месяца по обеспечению, производству, потреблению и заряду;</li>
+      <li>три демо-базы для проверки масштабов: «Старт» (кВт, МДж), «Развитая» и «Промышленная» (МВт, ГДж, ГВт·ч).</li>
+    </ul>
+  </section>
+
+  <section class="g-grid">
+    <a class="g-card" href="1-dispatcher.html"><img src="thumbs/1-dispatcher.jpg" alt="Превью варианта 1" loading="lazy">
+      <div class="g-body"><div class="g-n">ВАРИАНТ 1</div><div class="g-t">Диспетчерская</div>
+      <div class="g-d">Три главные шкалы, вкладки периодов, четыре графика и таблица по каждому источнику и потребителю. Ближе всего к окну электросети из Factorio.</div>
+      <div class="g-tags"><span>плотный</span><span>инженерный</span><span>графики</span></div></div></a>
+    <a class="g-card" href="2-mnemonic.html"><img src="thumbs/2-mnemonic.jpg" alt="Превью варианта 2" loading="lazy">
+      <div class="g-body"><div class="g-n">ВАРИАНТ 2</div><div class="g-t">Мнемосхема</div>
+      <div class="g-d">Схема базы с анимированными потоками: солнце, панели, шина, аккумуляторы, потребители. Нажмите на узел — увидите его историю.</div>
+      <div class="g-tags"><span>наглядный</span><span>анимация</span><span>«как работает»</span></div></div></a>
+    <a class="g-card" href="3-battery.html"><img src="thumbs/3-battery.jpg" alt="Превью варианта 3" loading="lazy">
+      <div class="g-body"><div class="g-n">ВАРИАНТ 3</div><div class="g-t">Батарейный банк</div>
+      <div class="g-d">Стойка ячеек заполняется по очереди, крупный заряд в джоулях, автономия, манометры обеспечения и выработки.</div>
+      <div class="g-tags"><span>заряд в центре</span><span>инфографика</span><span>автономия</span></div></div></a>
+    <a class="g-card" href="4-dial.html"><img src="thumbs/4-dial.jpg" alt="Превью варианта 4" loading="lazy">
+      <div class="g-body"><div class="g-n">ВАРИАНТ 4</div><div class="g-t">Циферблат и календарь</div>
+      <div class="g-d">Суточный циферблат выработки и потребления и тепловая карта «день × час»: где были провалы и излишки за неделю, месяц, три месяца.</div>
+      <div class="g-tags"><span>суточный ритм</span><span>тепловая карта</span><span>закономерности</span></div></div></a>
+    <a class="g-card" href="5-ledger.html"><img src="thumbs/5-ledger.jpg" alt="Превью варианта 5" loading="lazy">
+      <div class="g-body"><div class="g-n">ВАРИАНТ 5</div><div class="g-t">Журнал</div>
+      <div class="g-d">Учёт в кВт·ч: итоги периода со сравнением с прошлым, баланс энергии, таблица по потребителям с графиками и события.</div>
+      <div class="g-tags"><span>учёт</span><span>сравнение периодов</span><span>таблицы</span></div></div></a>
+  </section>
+</div>
+</body>
+</html>

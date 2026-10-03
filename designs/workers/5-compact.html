@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Рабочие — Компактная панель</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="workers-core.css">
+<style>
+.wk-page.narrow{max-width:460px;}
+.hero{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;}
+.hero .ring{width:108px;height:108px;}
+.hero .ring span{font-size:22px;}
+.hero h3{margin:0;font-family:var(--font-display);font-size:15px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;}
+.hero .sub{font-size:12px;color:var(--text-muted);max-width:32ch;}
+.hero-row{display:flex;gap:18px;}
+.hero-row .s{display:flex;flex-direction:column;gap:2px;}
+.hero-row .s b{font-family:var(--font-mono);font-size:15px;}
+.hero-row .s span{font-size:10px;color:var(--text-muted);}
+
+.recruit-strip{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:13px 15px;display:flex;flex-direction:column;gap:8px;}
+.recruit-strip .top{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;}
+.recruit-strip .top b{font-family:var(--font-mono);}
+
+.acc{display:flex;flex-direction:column;gap:9px;}
+.acc-item{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--c);border-radius:12px;overflow:hidden;}
+.acc-head{display:flex;align-items:center;gap:11px;padding:12px 14px;cursor:pointer;}
+.acc-head .badge{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:600;font-size:12px;flex-shrink:0;background:color-mix(in srgb,var(--c) 20%,transparent);color:var(--c);}
+.acc-head .info{flex:1;min-width:0;}
+.acc-head .info b{display:block;font-family:var(--font-display);font-size:14.5px;}
+.acc-head .info span{font-size:11px;color:var(--text-muted);}
+.acc-head .chev{color:var(--text-muted);transition:transform .15s;flex-shrink:0;}
+.acc-item.open .chev{transform:rotate(180deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+.acc-item.open .acc-body{max-height:900px;}
+.acc-body-in{padding:2px 14px 14px;}
+.mini-bar-row{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-secondary);margin-bottom:6px;}
+.mini-bar-row .bar{flex:1;height:5px;}
+.acc-svc{background:var(--panel);border-radius:9px;padding:8px 10px;margin-top:8px;font-size:11.5px;}
+.acc-svc b{display:block;font-size:12.5px;}
+.acc-svc .r{color:var(--text-muted);font-size:10.5px;margin:2px 0 5px;}
+.acc-svc .bar{height:4px;}
+.acc-hous{font-size:11.5px;background:var(--panel);border-radius:9px;padding:8px 10px;margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="wk-page narrow">
+  <a class="wk-back" href="index.html">← все варианты</a>
+  <div class="wk-eyebrow">Вкладка «Рабочие» · Вариант 5</div>
+  <h1 class="wk-h1">Компактная панель</h1>
+  <p class="wk-sub">Мобильный аккордеон на одну колонку: сверху общий «индекс здоровья персонала», затем набор населения в одну полоску и классы — по одному, свёрнутые по умолчанию. Минимум решений на экране одновременно, максимум — по разворачиванию. Лучше всего ляжет на телефон, но так же читаема и на десктопе.</p>
+
+  <div class="hero" id="hero"></div>
+  <div class="recruit-strip" id="recruit"></div>
+  <div class="acc" id="acc"></div>
+
+  <p class="footnote">Открыт всегда максимум один класс — остальные автоматически сворачиваются, чтобы страница не растягивалась бесконечно вниз при росте числа классов.</p>
+</div>
+
+<script src="workers-data.js"></script>
+<script>
+const D=WORKERS_DATA, r=D.recruit;
+const avgProd=Math.round(D.classes.reduce((s,c)=>s+c.staffing*c.satisfaction,0)/D.classes.length*100);
+document.getElementById('hero').innerHTML=
+  '<h3>Индекс персонала</h3>'+
+  '<div class="ring" style="--p:'+avgProd+';--c:'+(avgProd>=70?'var(--good)':(avgProd>=45?'var(--tier1)':'var(--bad)'))+'"><span>'+avgProd+'%</span></div>'+
+  '<div class="sub">Средняя продуктивность по всем классам персонала колонии</div>'+
+  '<div class="hero-row">'+
+    '<div class="s"><b>'+D.hr.total+'</b><span>всего</span></div>'+
+    '<div class="s"><b>'+D.hr.assigned+'</b><span>работают</span></div>'+
+    '<div class="s"><b>'+D.hr.free+'</b><span>свободны</span></div>'+
+  '</div>';
+
+const pct=Math.round(r.pop/r.cap*100);
+document.getElementById('recruit').innerHTML=
+  '<div class="top"><span>Набор с других планет</span><b class="mono">'+r.pop+'/'+r.cap+'</b></div>'+
+  '<div class="bar" style="height:8px"><i style="width:'+pct+'%;background:var(--class1)"></i></div>'+
+  '<div class="top" style="font-size:11px;color:var(--text-muted)"><span>'+r.actualRate.toFixed(2)+' чел/ч'+(r.short?' · не хватает пайков':'')+'</span><span>потолок '+r.maxRatePerDay.toFixed(0)+'/сутки</span></div>'+
+  '<div class="slider-row" style="margin-top:4px"><input type="range" id="rslider" min="0" max="100" value="'+r.rationLevel+'"><span class="mono" id="rval" style="width:34px;text-align:right;font-size:12px">'+r.rationLevel+'%</span></div>';
+document.getElementById('rslider').addEventListener('input',e=>{ document.getElementById('rval').textContent=e.target.value+'%'; });
+
+function needsBars(c){
+  return c.needs.map(n=>'<div class="mini-bar-row"><span style="width:90px;flex-shrink:0">'+n.label+'</span><div class="bar"><i style="width:'+Math.round(n.fraction*100)+'%;background:'+(n.fraction>0.95?'var(--good)':(n.fraction>0.5?'var(--'+c.color+')':'var(--bad)'))+'"></i></div><span class="mono" style="width:30px;text-align:right">'+Math.round(n.fraction*100)+'%</span></div>').join('');
+}
+function svcList(c){
+  return c.services.map(sv=>'<div class="acc-svc"><b>'+sv.name+' <span style="float:right;color:var(--text-muted);font-weight:400">×'+sv.count+'</span></b><div class="r">'+sv.recipe+'</div><div class="bar"><i style="width:'+Math.round(sv.util*100)+'%;background:var(--'+c.color+')"></i></div></div>').join('');
+}
+
+document.getElementById('acc').innerHTML=D.classes.map((c,i)=>{
+  const prod=Math.round(c.staffing*c.satisfaction*100);
+  return '<div class="acc-item'+(i===0?' open':'')+'" data-i="'+i+'" style="--c:var(--'+c.color+')">'+
+    '<div class="acc-head"><div class="badge">'+prod+'%</div>'+
+      '<div class="info"><b>'+c.name+'</b><span>'+Math.floor(c.assigned)+'/'+Math.floor(c.demand)+' занято · штат '+Math.round(c.staffing*100)+'%</span></div>'+
+      '<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>'+
+    '<div class="acc-body"><div class="acc-body-in">'+
+      needsBars(c)+
+      '<div class="acc-hous"><b>'+c.housing.name+'</b> · построено '+c.housing.count+' · мест '+c.housing.totalCap+'</div>'+
+      svcList(c)+
+    '</div></div>'+
+  '</div>';
+}).join('');
+
+document.querySelectorAll('.acc-item').forEach(item=>{
+  item.querySelector('.acc-head').addEventListener('click',()=>{
+    const willOpen=!item.classList.contains('open');
+    document.querySelectorAll('.acc-item.open').forEach(x=>x.classList.remove('open'));
+    if(willOpen) item.classList.add('open');
+  });
+});
+</script>
+</body>
+</html>

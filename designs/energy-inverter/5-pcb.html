@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Плата базы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="inv-base.css">
+<style>
+/* Вариант 5 · «Плата базы»: энергосистема как печатная плата. Инвертор — главный чип,
+   источники и потребители — микросхемы, аккумуляторы — конденсаторы, сброс — резистор,
+   энергия бежит импульсами по золотым дорожкам. */
+:root{
+  --v-bg:#040B0A;--v-card:#0B1615;--v-panel:#0A1413;--v-line:#173230;--v-line2:#25504C;
+  --v-accent:#E3B65A;--v-accent2:#E3B65A;--v-radius:6px;--v-text:#E6F0EE;--v-dim:#8FA9A5;--v-mute:#55716D;
+  --v-pop:linear-gradient(180deg,#10201E,#0A1514);
+  --gold:#E3B65A;--silk:#D8E6E3;--mask:#06201C;
+}
+body{background:#040B0A;}
+.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--v-mute);}
+h1{margin:2px 0 0;font-family:var(--font-display);font-weight:700;font-size:34px;letter-spacing:.06em;}
+h1 span{color:var(--gold);}
+.sub{margin:4px 0 0;color:var(--v-dim);font-size:13px;max-width:72ch;}
+.inv-btn.active{background:var(--gold);border-color:var(--gold);}
+
+/* плата */
+.board{position:relative;border-radius:18px;padding:34px 30px 30px;
+  background:radial-gradient(circle,rgba(227,182,90,.16) 1.2px,transparent 1.6px) 0 0/24px 24px,
+    radial-gradient(70% 60% at 50% 45%,#0B2E29,#06201C 60%,#041613);
+  border:1px solid #1F4A44;box-shadow:inset 0 0 0 10px #06201C,inset 0 0 0 11px rgba(227,182,90,.25),0 30px 80px rgba(0,0,0,.5);}
+.board::before{content:'PWR-BASE · REV 2.0';position:absolute;right:26px;bottom:12px;font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;color:rgba(216,230,227,.35);}
+.board .hole{position:absolute;width:16px;height:16px;border-radius:50%;background:#020605;box-shadow:0 0 0 4px #C9A04A,0 0 0 5px rgba(0,0,0,.4);}
+.grid{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) 300px minmax(0,1fr);grid-template-areas:'src chip cons' 'src store cons';gap:30px 90px;}
+.col-src{grid-area:src;display:flex;flex-direction:column;gap:30px;justify-content:center;}
+.col-cons{grid-area:cons;display:flex;flex-direction:column;gap:22px;justify-content:center;min-width:0;}
+.col-chip{grid-area:chip;display:flex;align-items:center;justify-content:center;}
+.col-store{grid-area:store;display:flex;flex-direction:column;gap:30px;align-items:stretch;}
+#fl{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible;}
+.fl-base{stroke-linecap:round;stroke-linejoin:round;}
+.fl-dash{stroke-linecap:round;filter:drop-shadow(0 0 4px currentColor) drop-shadow(0 0 1px #fff);}
+
+/* шелкография */
+.silk{display:flex;align-items:baseline;gap:8px;margin:0 0 6px 2px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;color:var(--silk);opacity:.8;text-transform:uppercase;white-space:nowrap;}
+.silk b{font-weight:500;color:var(--gold);}
+.silk .i-btn{margin-left:auto;align-self:center;}
+
+/* микросхема */
+.ic{position:relative;}
+.chip{position:relative;background:linear-gradient(180deg,#1C1E22,#0F1013);border-radius:5px;padding:11px 14px;margin:0 9px;
+  box-shadow:0 0 0 1px #000,0 8px 20px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);}
+.chip::before,.chip::after{content:'';position:absolute;top:10px;bottom:10px;width:8px;background:repeating-linear-gradient(180deg,#D9B56A 0 4px,transparent 4px 10px);}
+.chip::before{left:-8px;border-radius:2px 0 0 2px;} .chip::after{right:-8px;}
+.chip .dot{position:absolute;left:8px;top:8px;width:6px;height:6px;border-radius:50%;background:#2A2D33;box-shadow:inset 0 1px 1px rgba(0,0,0,.7);}
+.etch{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;color:#6E737D;text-transform:uppercase;}
+.val{font-family:var(--font-mono);font-weight:500;font-size:22px;color:#F4F1E8;line-height:1.15;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.val small{font-size:12px;color:#8A8F99;margin-left:4px;}
+.of{font-family:var(--font-mono);font-size:11px;color:#8A8F99;}
+.ln{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:#8A8F99;margin-top:3px;}
+.ln b{font-family:var(--font-mono);font-weight:500;color:#E6E3DA;white-space:nowrap;}
+.leds{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-top:8px;}
+.leds i{height:5px;border-radius:1px;background:#24272D;}
+.leds i.on{background:var(--nc);box-shadow:0 0 6px var(--nc);}
+.die{display:grid;grid-template-columns:repeat(auto-fill,minmax(11px,1fr));gap:2px;margin-top:8px;padding:4px;border-radius:3px;background:#0A0B0D;border:1px solid #2A2D33;}
+.die i{aspect-ratio:1.3;background:#2B3A7A;position:relative;}
+.die i::after{content:'';position:absolute;inset:0;background:#FFDD57;opacity:var(--to,1);transition:opacity .5s;}
+.dnp .chip{background:none;box-shadow:none;border:1.5px dashed rgba(216,230,227,.35);}
+.dnp .chip::before,.dnp .chip::after{background:repeating-linear-gradient(180deg,rgba(201,160,74,.45) 0 4px,transparent 4px 10px);}
+.dnp .val{color:#5F7A76;font-size:16px;}
+.dnp .etch{color:#5F7A76;}
+.dnprow{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.pd{display:flex;align-items:center;gap:12px;}
+.lens{width:52px;height:52px;flex-shrink:0;}
+.lens-rays{transform-origin:26px 26px;animation:spin 30s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#nSun .pop-sun{width:min(400px,92vw);}
+
+/* главный чип */
+.qfp{position:relative;width:280px;height:280px;}
+.qfp .body{position:absolute;inset:16px;border-radius:8px;background:linear-gradient(145deg,#24272C,#0D0E11 70%);box-shadow:0 0 0 1px #000,0 16px 40px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.08);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;}
+.qfp .body::before{content:'';position:absolute;inset:10px;border-radius:5px;border:1px solid rgba(255,255,255,.04);}
+.qfp .pins{position:absolute;background:repeating-linear-gradient(90deg,#D9B56A 0 4px,transparent 4px 9px);}
+.qfp .pt,.qfp .pb{left:30px;right:30px;height:16px;} .qfp .pt{top:0;} .qfp .pb{bottom:0;}
+.qfp .pl,.qfp .pr{top:30px;bottom:30px;width:16px;background:repeating-linear-gradient(180deg,#D9B56A 0 4px,transparent 4px 9px);} .qfp .pl{left:0;} .qfp .pr{right:0;}
+.qfp .p1{position:absolute;left:30px;top:30px;width:10px;height:10px;border-radius:50%;background:#1A1C20;box-shadow:inset 0 1px 2px #000;}
+.qfp .logo{font-family:var(--font-display);font-weight:700;font-size:14px;letter-spacing:.34em;color:#80858F;}
+.qfp .pct{font-family:var(--font-mono);font-weight:500;font-size:44px;line-height:1;text-shadow:0 0 18px currentColor;}
+.qfp .pl2{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#80858F;}
+.status{display:flex;gap:12px;margin-top:8px;}
+.status span{display:flex;flex-direction:column;align-items:center;gap:3px;font-family:var(--font-mono);font-size:8.5px;letter-spacing:.08em;color:#6E737D;text-transform:uppercase;}
+.status i{width:10px;height:6px;border-radius:1px;background:#2A2D33;}
+.status .on i{background:var(--lc);box-shadow:0 0 8px var(--lc),0 0 2px #fff;}
+.status .on{color:#E6E3DA;}
+.qfp .bat{display:flex;gap:2px;margin-top:6px;}
+.qfp .bat i{width:12px;height:6px;border-radius:1px;background:#1E2A2E;}
+.qfp .bat i.on{background:#4FD1E7;box-shadow:0 0 5px #4FD1E7;}
+.qfp .bat.low i.on{background:#F4557B;box-shadow:0 0 5px #F4557B;}
+.regs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;width:300px;}
+.reg{background:rgba(6,32,28,.85);border:1px solid #1F4A44;border-radius:4px;padding:5px 8px;min-width:0;}
+.reg span{display:block;font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--v-mute);white-space:nowrap;}
+.reg b{display:block;font-family:var(--font-mono);font-weight:500;font-size:13px;color:var(--silk);white-space:nowrap;}
+.chipcol{display:flex;flex-direction:column;align-items:center;}
+
+/* конденсаторы */
+.caps{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
+.cap{position:relative;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#3A4C5E,#16202A 70%);box-shadow:0 0 0 2px #0A0E12,0 4px 10px rgba(0,0,0,.6);overflow:hidden;}
+.cap::before{content:'';position:absolute;left:0;top:0;bottom:0;width:22%;background:rgba(216,230,227,.25);}
+.cap::after{content:'';position:absolute;inset:30%;border-radius:50%;border:1.5px solid rgba(255,255,255,.12);}
+.cap b{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,rgba(79,209,231,.75),rgba(79,209,231,.35));transition:height .4s;}
+.cap.low b{background:linear-gradient(0deg,rgba(244,85,123,.8),rgba(244,85,123,.35));}
+.res-body{display:flex;align-items:center;gap:0;margin-top:6px;}
+.res-body .lead{flex:1;height:3px;background:#C9A04A;}
+.res-body .rb{width:96px;height:26px;border-radius:13px;background:linear-gradient(180deg,#D8C3A0,#A88B62);position:relative;overflow:hidden;box-shadow:0 3px 8px rgba(0,0,0,.6);}
+.res-body .rb i{position:absolute;top:0;bottom:0;width:7px;}
+.res-body.hot .rb{background:linear-gradient(180deg,#FF9B5A,#C2410C);box-shadow:0 0 18px #FF6A2B,0 3px 8px rgba(0,0,0,.6);}
+.idle{opacity:.6;}
+
+/* потребители */
+.grp{cursor:help;outline:none;}
+.grp .chip{border-left:none;}
+.grp:hover .chip,.grp:focus-visible .chip{box-shadow:0 0 0 1px var(--nc),0 0 24px color-mix(in srgb,var(--nc) 30%,transparent),0 8px 20px rgba(0,0,0,.6);}
+.gh{display:flex;align-items:baseline;gap:8px;}
+.gh .val{font-size:19px;flex:1;}
+.gh em{font-style:normal;font-family:var(--font-mono);font-size:11px;color:#8A8F99;}
+.grp .gpop{right:calc(100% + 18px);top:-4px;transform:translateX(8px);}
+
+/* журнал — DIP-переключатели и чипы */
+.sec-h{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.sec-h h2{margin:0;font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.14em;text-transform:uppercase;}
+.sec-h h2 b{color:var(--gold);font-weight:700;}
+.sec-h .p-tabs{margin-left:auto;gap:0;padding:6px 8px;border-radius:4px;background:#B5242E;box-shadow:inset 0 0 0 1px rgba(0,0,0,.4),0 4px 12px rgba(0,0,0,.5);}
+.p-tab{display:flex;flex-direction:column;align-items:center;gap:4px;border:none;background:none;border-radius:0;padding:2px 9px;color:#FFE1E1;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:none;font-weight:500;}
+.p-tab::before{content:'';width:14px;height:24px;border-radius:2px;background:linear-gradient(180deg,#F2F2F2 0 45%,#3A0A0E 45%);box-shadow:inset 0 0 0 1px rgba(0,0,0,.5);}
+.p-tab.active{background:none;color:#fff;}
+.p-tab.active::before{background:linear-gradient(180deg,#3A0A0E 55%,#F2F2F2 55%);}
+.p-tab:hover{background:rgba(0,0,0,.12);}
+.live{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--font-mono);font-size:12px;color:var(--v-dim);}
+.live b{font-weight:500;color:var(--gold);}
+.cov{font-size:11.5px;color:var(--v-mute);} .cov:empty{display:none;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:22px 18px;padding:6px 8px;}
+.kpi{--nc:var(--kc);}
+.kpi .chip{padding:11px 14px 10px;}
+.kpi .chip::before,.kpi .chip::after{top:12px;bottom:12px;}
+.kh{display:flex;align-items:center;gap:8px;}
+.kh .etch{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--kc);opacity:.9;}
+.kpi .val{font-size:21px;margin-top:3px;}
+.kpi .of{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.kpi .j-d{margin-top:4px;}
+.bom-h{font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 -6px;color:var(--v-dim);}
+.d-wrap{background:#081312;}
+.d-table th{font-family:var(--font-mono);}
+.d-table tr.grp td{color:var(--gold);font-family:var(--font-mono);font-weight:500;letter-spacing:.14em;}
+
+@media (max-width:1080px){
+  .grid{grid-template-columns:1fr;grid-template-areas:'chip' 'src' 'store' 'cons';gap:24px;}
+  #fl{display:none;}
+  .grp .gpop{right:auto;left:0;top:calc(100% + 8px);}
+  .board{padding:24px 16px;}
+}
+@media (max-width:420px){ .qfp{width:250px;height:250px;} .regs{width:100%;} .qfp .pct{font-size:36px;} }
+</style>
+</head>
+<body>
+<div class="page">
+  <a class="back" href="index.html">← Все варианты</a>
+  <header>
+    <div class="eyebrow">ИНДУСТРИАЛЬНЫЙ ПОЯС · ЭНЕРГИЯ · ВАРИАНТ 5</div>
+    <h1>Плата <span>базы</span></h1>
+    <p class="sub">Энергосистема как печатная плата: инвертор — главный чип, источники и потребители — микросхемы, аккумуляторы — конденсаторы, сброс — резистор. Энергия бежит импульсами по золотым дорожкам.</p>
+  </header>
+  <div id="invCtl"></div>
+  <div id="app"></div>
+</div>
+<script src="inv-core.js"></script>
+<script>
+(function(){
+var I=INV, L=null;
+var stCol={ok:'#4ADE9B',sag:'#F0B93D',black:'#F4557B'};
+function leds(p,n){ var s='',on=Math.round(Math.max(0,Math.min(1,p))*n); for(var i=0;i<n;i++) s+='<i'+(i<on?' class="on"':'')+'></i>'; return s; }
+function sun(c){
+  return '<div class="ic" id="nSun" style="--nc:#FFDD57"><div class="silk"><b>D1</b> Солнце · фотодатчик '+I.infoBtn('sun')+'</div>'+
+    '<div class="chip"><span class="dot"></span><div class="pd">'+
+      '<svg class="lens" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24" fill="#0A0B0D" stroke="#3A3E46"/><circle cx="26" cy="26" r="17" fill="#141A2E" stroke="#2B3A7A"/>'+
+        '<g class="lens-rays" data-live="sunRays" opacity="'+Math.max(.1,c.sun).toFixed(2)+'"><path d="M26 11v5M26 36v5M11 26h5M36 26h5M15.4 15.4l3.5 3.5M33.1 33.1l3.5 3.5M36.6 15.4l-3.5 3.5M18.9 33.1l-3.5 3.5" stroke="#FFDD57" stroke-width="2" stroke-linecap="round"/></g>'+
+        '<circle data-live="sunDisc" cx="26" cy="26" r="7" fill="'+(c.day?'#FFDD57':'#C9D2EE')+'" opacity="'+Math.max(.3,c.sun).toFixed(2)+'" style="filter:drop-shadow(0 0 6px #FFDD57)"/><circle data-live="moonCut" cx="29.5" cy="23" r="6.5" fill="#141A2E" opacity="'+(c.day?0:1)+'"/></svg>'+
+      '<div style="flex:1;min-width:0"><div class="etch">освещённость</div><div class="val" data-live="sunPct">'+Math.round(c.sun*100)+'%</div><div class="of" data-live="sunTxt">'+(c.day?'День':'Ночь')+' · '+c.clock+'</div></div></div></div>'+I.sunPopHtml()+'</div>';
+}
+function gen(g,c,n){
+  var k='g_'+g.id, extra='';
+  if(g.isSolar){ var t=''; for(var i=0;i<Math.min(g.count,40);i++) t+='<i></i>';
+    extra='<div class="die" data-live="'+k+'_t" style="--to:'+(0.1+0.9*c.sun).toFixed(2)+'">'+t+'</div><div class="ln"><span>Прогноз на сутки</span><b data-live="'+k+'_d">'+I.kwh(g.daily)+'</b></div>'; }
+  else extra='<div class="ln"><span>Работает</span><b data-live="'+k+'_u">'+Math.round(g.pct)+'%</b></div>';
+  return '<div class="ic" id="nGen-'+g.id+'" style="--nc:'+g.color+'"><div class="silk"><b>U'+(n+2)+'</b> '+g.title+' ×'+g.count+(g.isSolar?I.infoBtn('gen',g.id):'')+'</div>'+
+    '<div class="chip"><span class="dot"></span><div class="etch" style="padding-left:12px">'+(g.isSolar?'PV-ARRAY':'TPP-COAL')+'</div><div class="val" data-live="'+k+'_n">'+I.kw(g.now)+'</div><div class="of" data-live="'+k+'_o">из '+I.kw(g.nameplate)+' установленных</div>'+
+    '<div class="leds" data-live="'+k+'_b">'+leds(g.pct/100,10)+'</div>'+extra+'</div>'+I.genPopHtml(g)+'</div>';
+}
+function dnp(p,i){
+  return '<div class="ic dnp" id="nPlan-'+p.id+'"><div class="silk"><b>U'+(8+i)+'</b> DNP</div><div class="chip"><div class="etch">'+p.title+'</div><div class="val">'+I.kw(0)+'</div><div class="of">'+p.kind+' · '+p.note+'</div></div></div>';
+}
+function chip(c){
+  var col=stCol[c.state], pct=c.frac*100, bat='', on=Math.round(c.pct/10);
+  for(var i=0;i<10;i++) bat+='<i'+(i<on?' class="on"':'')+'></i>';
+  return '<div class="chipcol"><div class="silk" style="align-self:center"><b>U1</b> Инвертор базы</div>'+
+    '<div class="qfp" id="nCore"><div class="pins pt"></div><div class="pins pb"></div><div class="pins pl"></div><div class="pins pr"></div>'+
+    '<div class="body"><span class="p1"></span><span class="logo">INV·01</span>'+
+      '<span class="pct" data-live="cPct" style="color:'+col+'">'+(pct<99.5&&pct>0?pct.toFixed(1):Math.round(pct))+'%</span><span class="pl2">обеспечено</span>'+
+      '<div class="status" data-live="cSt">'+[['ok','норма'],['sag','просадка'],['black','блэкаут']].map(function(m){ return '<span class="'+(c.state===m[0]?'on':'')+'" style="--lc:'+stCol[m[0]]+'"><i></i>'+m[1]+'</span>'; }).join('')+'</div>'+
+      '<div class="bat'+(c.pct<15?' low':'')+'" data-live="cBat" title="Заряд аккумуляторов '+Math.round(c.pct)+'%">'+bat+'</div></div></div>'+
+    '<div class="regs">'+
+      '<div class="reg"><span>Потребность</span><b data-live="rDem">'+I.kw(c.demand)+'</b></div><div class="reg"><span>Получено</span><b data-live="rSup">'+I.kw(c.supply)+'</b></div><div class="reg"><span>Выработка</span><b data-live="rGen">'+I.kw(c.gen)+'</b></div>'+
+      '<div class="reg"><span>Акк. поток</span><b data-live="rFl">'+c.flowSigned+'</b></div><div class="reg"><span>Автономия</span><b data-live="rAu">'+c.autonomy+'</b></div><div class="reg"><span>Сброс</span><b data-live="rCu">'+(c.curtail>0.01?I.kw(c.curtail):'нет')+'</b></div>'+
+    '</div></div>';
+}
+function caps(c){
+  var n=Math.max(1,Math.min(8,c.batteries||1)), s='';
+  for(var i=0;i<n;i++){ var f=Math.max(0,Math.min(1,c.pct/100*n-i)); s+='<span class="cap'+(c.pct<15?' low':'')+'"><b style="height:'+(f*100).toFixed(0)+'%"></b></span>'; }
+  return '<div class="ic" id="nBat" style="--nc:#4FD1E7"><div class="silk"><b>C1–C'+(c.batteries||1)+'</b> Аккумуляторы '+(c.batteries?'×'+c.batteries:'· базовый блок')+'</div>'+
+    '<div class="chip"><div class="val" data-live="bJ">'+I.J(c.stored)+'<small>'+I.kwh(c.stored)+'</small></div><div class="of" data-live="bOf">из '+I.J(c.cap)+' ('+I.kwh(c.cap)+')</div>'+
+    '<div class="caps" data-live="bCaps">'+s+'</div><div class="of" data-live="bFlow" style="margin-top:8px">'+c.flowTxt+'</div></div></div>';
+}
+function res(c){
+  var hot=c.curtail>0.01;
+  return '<div class="ic'+(hot?'':' idle')+'" id="nCurt" data-live-class="resC"><div class="silk"><b>R1</b> Сброс излишка · <span data-live="curtV">'+(hot?I.kw(c.curtail):'нет')+'</span></div>'+
+    '<div class="res-body'+(hot?' hot':'')+'" data-live-class="resB"><span class="lead"></span><span class="rb"><i style="left:18px;background:#7A4A1A"></i><i style="left:34px;background:#111"></i><i style="left:50px;background:#B5242E"></i><i style="left:74px;background:#E3B65A"></i></span><span class="lead"></span></div></div>';
+}
+function grp(g,i){
+  return '<div class="ic grp has-gpop" tabindex="0" id="nGrp-'+g.id+'" style="--nc:'+g.color+'" aria-describedby="gpop-'+g.id+'"><div class="silk"><b>U'+(10+i)+'</b> '+g.name+'</div>'+
+    '<div class="chip"><span class="dot"></span><div class="gh" style="padding-left:12px"><span class="val" data-live="gv_'+g.id+'">'+I.kw(g.sum)+'</span><em data-live="gl_'+g.id+'">загрузка '+Math.round(g.load)+'%</em></div>'+
+    '<div class="of">'+g.kinds+' '+I.plural(g.kinds,'вид','вида','видов')+' · '+g.units+' '+I.plural(g.units,'установка','установки','установок')+'</div>'+
+    '<div class="leds" data-live="gb_'+g.id+'">'+leds(g.load/100,10)+'</div></div>'+I.groupPop(g)+'</div>';
+}
+function journal(c){
+  var jv=I.journal(I.UI.period);
+  return '<section style="display:flex;flex-direction:column;gap:12px"><div class="sec-h"><h2>Журнал <b>·</b> осциллограф</h2><div class="p-tabs">'+I.periodTabs('data-en-period',I.UI.period)+'</div></div>'+
+    '<div class="live" data-live="jLive"><span>выработка <b>'+I.kw(c.gen)+'</b></span><span>нагрузка <b>'+I.kw(c.demand)+'</b></span><span>обеспечено <b>'+Math.round(c.frac*100)+'%</b></span><span>заряд <b>'+I.J(c.stored)+'</b></span></div>'+
+    '<div class="cov" data-live="jCov">'+jv.covNote+'</div><div class="kpis">'+jv.list.map(function(k){
+      return '<div class="ic kpi" style="--kc:'+k.color+'" data-live="k_'+k.id+'"><div class="chip"><div class="kh"><span class="etch">'+k.l+'</span><button type="button" class="i-btn" data-kpi-chart="'+k.id+'" title="График: '+k.l.toLowerCase()+'">i</button></div>'+
+        '<div class="val">'+k.v+'</div><div class="of">'+k.s+'</div><div class="leds">'+leds(k.frac,10)+'</div>'+I.deltaHtml(k.d)+'</div></div>'; }).join('')+'</div></section>';
+}
+function render(c){
+  return '<section class="board" id="scheme"><span class="hole" style="left:16px;top:16px"></span><span class="hole" style="right:16px;top:16px"></span><span class="hole" style="left:16px;bottom:16px"></span><span class="hole" style="right:16px;bottom:16px"></span>'+
+    '<svg id="fl" aria-hidden="true"></svg><div class="grid">'+
+    '<div class="col-src">'+sun(c)+c.gens.map(function(g,i){ return gen(g,c,i); }).join('')+'<div class="dnprow">'+I.PLANNED.map(dnp).join('')+'</div></div>'+
+    '<div class="col-chip">'+chip(c)+'</div>'+
+    '<div class="col-store">'+caps(c)+res(c)+'</div>'+
+    '<div class="col-cons">'+(c.groups.length?c.groups.map(grp).join(''):'<div class="of">Пока никто не потребляет энергию.</div>')+'</div>'+
+  '</div></section>'+journal(c)+'<div class="bom-h">Спецификация · BOM</div><section class="d-wrap"><table class="d-table" data-live="tbl">'+I.tableRows(c)+'</table></section>';
+}
+function build(c){
+  L=new I.FlowLayer(document.getElementById('fl'),document.getElementById('scheme'),{route:'ortho',style:function(f,i,on,w){
+    f.base.setAttribute('stroke','#B8913F'); f.base.setAttribute('stroke-width',(2.5+w*0.5).toFixed(1)); f.base.style.opacity=on?'.85':'.35';
+    f.dash.setAttribute('stroke-width',Math.max(3,w*0.5+1.5).toFixed(1)); f.dash.style.opacity=on?'1':'0'; f.dash.style.strokeDasharray='0.5 12.5'; }});
+  I.stdFlows(L,{sun:'nSun',gen:function(id){ return 'nGen-'+id; },bus:'nCore',admin:'nPlan-admin',genset:'nPlan-genset',bat:'nBat',curt:'nCurt',grp:function(id){ return 'nGrp-'+id; }},c,{busGrp:{spreadFrom:true}});
+}
+I.start({root:document.getElementById('app'),render:render,build:build,tick:function(c){ if(L) L.update(c); },layout:function(){ if(L) L.layout(); }});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+/* Вкладка «Штаб». */
+.hq-mini-list{display:flex;flex-direction:column;gap:7px;}
+.hq-mini-row{display:flex;align-items:center;gap:10px;font-size:12px;}
+.hq-mini-name{width:130px;flex-shrink:0;color:var(--text-secondary);}
+.hq-mini-count{font-family:var(--font-mono);color:var(--text-muted);flex-shrink:0;}
+.hq-mini-rate{font-family:var(--font-mono);color:var(--text-primary);flex:1;text-align:right;font-variant-numeric:tabular-nums;}

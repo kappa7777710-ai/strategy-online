@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Рабочие — Кадровое досье</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="workers-core.css">
+<style>
+/* Посадочный талон набора — героическая карточка вверху. */
+.ticket{background:linear-gradient(135deg,#1A2143,#12172A);border:1px solid var(--border-strong);border-radius:16px;padding:18px 20px;display:flex;flex-wrap:wrap;gap:20px;align-items:center;position:relative;overflow:hidden;}
+.ticket::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(232,193,90,.04) 0 2px,transparent 2px 14px);pointer-events:none;}
+.ticket-ring{position:relative;z-index:1;}
+.ticket-info{flex:1;min-width:220px;position:relative;z-index:1;}
+.ticket-info h2{margin:0 0 4px;font-family:var(--font-display);font-weight:700;font-size:19px;}
+.ticket-info p{margin:0;font-size:12.5px;color:var(--text-secondary);}
+.ticket-stats{display:flex;gap:22px;position:relative;z-index:1;flex-wrap:wrap;}
+.ticket-stats .s{display:flex;flex-direction:column;gap:2px;}
+.ticket-stats .s b{font-family:var(--font-mono);font-size:16px;}
+.ticket-stats .s span{font-size:10.5px;color:var(--text-muted);}
+.ticket-slider{flex-basis:100%;position:relative;z-index:1;display:flex;align-items:center;gap:12px;padding-top:12px;border-top:1px dashed var(--border-strong);}
+.ticket-slider label{font-size:11.5px;color:var(--text-secondary);white-space:nowrap;}
+
+.dcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px;}
+.dcard{perspective:1400px;height:360px;}
+.dcard-inner{position:relative;width:100%;height:100%;transition:transform .6s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;cursor:pointer;}
+.dcard.flipped .dcard-inner{transform:rotateY(180deg);}
+.dface{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;border:1px solid var(--border);background:linear-gradient(180deg,#171D33,#12172A);border-left:4px solid var(--c);padding:16px;display:flex;flex-direction:column;}
+.dback{transform:rotateY(180deg);overflow-y:auto;}
+.dcard-top{display:flex;align-items:center;gap:12px;}
+.dcard-top svg{width:34px;height:34px;color:var(--c);flex-shrink:0;}
+.dcard-top h3{margin:0;font-family:var(--font-display);font-weight:700;font-size:18px;}
+.dcard-top span{font-size:10.5px;color:var(--text-muted);}
+.dcard-ring-wrap{display:flex;justify-content:center;margin:14px 0;}
+.dcard-ring{width:118px;height:118px;--p:0;--c2:var(--c);border-radius:50%;background:conic-gradient(var(--c2) calc(var(--p)*1%),var(--border) 0);display:flex;align-items:center;justify-content:center;position:relative;}
+.dcard-ring::after{content:'';position:absolute;inset:10px;border-radius:50%;background:var(--card);}
+.dcard-ring div{position:relative;z-index:1;text-align:center;}
+.dcard-ring b{display:block;font-family:var(--font-mono);font-size:24px;}
+.dcard-ring span{font-size:10px;color:var(--text-muted);}
+.dcard-mini{display:flex;justify-content:space-around;font-size:11px;color:var(--text-secondary);margin-bottom:6px;}
+.dcard-mini b{display:block;font-family:var(--font-mono);color:var(--text-primary);font-size:13px;}
+.dcard-ticks{display:flex;flex-direction:column;gap:7px;margin-top:auto;}
+.tick-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);}
+.tick-row .bar{flex:1;height:5px;}
+.dcard-hint{text-align:center;font-size:10.5px;color:var(--text-muted);margin-top:10px;}
+
+.dback h4{margin:0 0 8px;font-family:var(--font-display);font-size:13px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;}
+.dback .hous{font-size:12px;background:var(--panel);border-radius:8px;padding:8px 10px;margin-bottom:10px;border-left:3px solid var(--c);}
+.dback .svc{font-size:11.5px;background:var(--panel);border-radius:8px;padding:7px 9px;margin-bottom:6px;}
+.dback .svc b{display:block;font-size:12.5px;}
+.dback .svc .r{color:var(--text-muted);font-size:10.5px;}
+.dback .bar{height:4px;margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="wk-page">
+  <a class="wk-back" href="index.html">← все варианты</a>
+  <div class="wk-eyebrow">Вкладка «Рабочие» · Вариант 2</div>
+  <h1 class="wk-h1">Кадровое досье</h1>
+  <p class="wk-sub">Каждый класс персонала — карточка-досье с кольцевым индикатором продуктивности. Клик переворачивает карточку и показывает жильё и постройки. Набор населения подан как «посадочный талон» переселенца. Более персонифицированный, менее табличный взгляд на тот же набор данных.</p>
+
+  <div class="ticket" id="ticket"></div>
+  <div class="dcards" id="cards"></div>
+
+  <p class="footnote">Переворот карточки — чистый CSS (rotateY), без перехода на другую страницу; подходит и для мыши, и для тача.</p>
+</div>
+
+<script src="workers-data.js"></script>
+<script>
+const D=WORKERS_DATA, r=D.recruit, pct=Math.round(r.pop/r.cap*100);
+document.getElementById('ticket').innerHTML=
+  '<div class="ticket-ring"><div class="ring" style="--p:'+pct+';--c:var(--class1);width:84px;height:84px"><span style="font-size:16px">'+pct+'%</span></div></div>'+
+  '<div class="ticket-info"><h2>Приток переселенцев</h2><p>Разнорабочие набираются с других планет — скорость зависит от свободного жилья и доли урожая, уходящей на бонусные пайки.</p></div>'+
+  '<div class="ticket-stats">'+
+    '<div class="s"><b>'+r.pop+' / '+r.cap+'</b><span>мест занято</span></div>'+
+    '<div class="s"><b class="'+(r.short?'':'')+'" style="'+(r.short?'color:var(--bad)':'')+'">'+r.actualRate.toFixed(2)+'/ч</b><span>текущая скорость</span></div>'+
+    '<div class="s"><b>'+r.maxRatePerDay.toFixed(0)+'/сутки</b><span>потолок найма</span></div>'+
+    '<div class="s"><b>'+r.room+'</b><span>свободно мест</span></div>'+
+  '</div>'+
+  '<div class="ticket-slider"><label>Бонусные пайки (стоимость 1 чел.: '+r.cost.water+' H₂O + '+r.cost.ration+' Паёк)</label>'+
+    '<input type="range" id="rslider" min="0" max="100" value="'+r.rationLevel+'" style="flex:1"><span class="mono" id="rval" style="width:36px;text-align:right">'+r.rationLevel+'%</span></div>';
+document.getElementById('rslider').addEventListener('input',e=>{ document.getElementById('rval').textContent=e.target.value+'%'; });
+
+function ticks(c){
+  return c.needs.map(n=>{
+    const color=n.fraction>0.95?'var(--good)':(n.fraction>0.5?'var(--'+c.color+')':'var(--bad)');
+    return '<div class="tick-row"><span style="width:100px;flex-shrink:0">'+n.label+'</span><div class="bar"><i style="width:'+Math.round(n.fraction*100)+'%;background:'+color+'"></i></div><span class="mono" style="width:30px;text-align:right">'+Math.round(n.fraction*100)+'%</span></div>';
+  }).join('');
+}
+function backSvc(c){
+  const label=(st)=>REASON_LABELS_DEMO[st]||st;
+  return '<div class="hous"><b>'+c.housing.name+'</b><br><span style="color:var(--text-secondary)">Построено '+c.housing.count+' · мест '+c.housing.totalCap+'</span></div>'+
+    '<h4>Постройки</h4>'+
+    c.services.map(sv=>'<div class="svc"><b>'+sv.name+' <span style="float:right;color:var(--text-muted);font-weight:400">×'+sv.count+'</span></b><div class="r">'+sv.recipe+'</div><div class="bar"><i style="width:'+Math.round(sv.util*100)+'%;background:var(--'+c.color+')"></i></div><div class="r">'+label(sv.state)+'</div></div>').join('');
+}
+
+const cardsHtml=D.classes.map((c,i)=>{
+  const prod=Math.round(c.staffing*c.satisfaction*100);
+  return '<div class="dcard" data-i="'+i+'" style="--c:var(--'+c.color+')"><div class="dcard-inner">'+
+    '<div class="dface">'+
+      '<div class="dcard-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>'+
+        '<div><h3>'+c.name+'</h3><span>'+(c.recruited?'набор с других планет':'внутренний рост')+'</span></div></div>'+
+      '<div class="dcard-ring-wrap"><div class="dcard-ring" style="--p:'+prod+'"><div><b>'+prod+'%</b><span>производит.</span></div></div></div>'+
+      '<div class="dcard-mini"><div><b>'+Math.floor(c.assigned)+'/'+Math.floor(c.demand)+'</b>занято</div><div><b>'+Math.round(c.staffing*100)+'%</b>штат</div><div><b>'+Math.round(c.satisfaction*100)+'%</b>быт</div></div>'+
+      '<div class="dcard-ticks">'+ticks(c)+'</div>'+
+      '<div class="dcard-hint">нажмите, чтобы увидеть постройки ↻</div>'+
+    '</div>'+
+    '<div class="dface dback">'+backSvc(c)+'</div>'+
+  '</div></div>';
+}).join('');
+document.getElementById('cards').innerHTML=cardsHtml;
+document.querySelectorAll('.dcard').forEach(card=>card.addEventListener('click',()=>card.classList.toggle('flipped')));
+</script>
+</body>
+</html>
