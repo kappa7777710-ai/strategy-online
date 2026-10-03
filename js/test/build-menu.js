@@ -9,7 +9,6 @@ const BM_CATS=[
 ];
 const bm={tab:'projects', cat:'all', sort:'ready', q:'', sel:null, qty:1, recipe:{}};
 const bmArt={};   // кэш SVG-сцен: строим один раз, иначе анимации сбрасывались бы каждый тик
-const bmLast={};  // последние отрисованные строки по блокам — DOM трогаем только при изменениях
 
 // ---------- Каталог ----------
 function bmCatalog(){
@@ -37,6 +36,8 @@ function bmCatalog(){
   return items;
 }
 const BM_ITEMS=bmCatalog();
+// Ссылка вида build-menu-test.html#type-solar сразу открывает нужный проект (так ведёт кнопка со страницы энергии).
+{ const h=location.hash.slice(1); if(h && BM_ITEMS.some(i=>i.key===h)) bm.sel=h; }
 function bmItem(key){ return BM_ITEMS.find(i=>i.key===key); }
 function bmArtOf(it){ return bmArt[it.key] || (bmArt[it.key]=it.art()); }
 function bmRecipe(it){
@@ -65,22 +66,7 @@ function bmMaxQty(it){
   return Math.max(0,m);
 }
 
-// ---------- Мелочи ----------
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const num=n=>Math.round(n).toLocaleString('ru-RU');
-function ico(key,cv,size){ return '<svg class="bm-ico" viewBox="0 0 20 20" width="'+(size||16)+'" height="'+(size||16)+'" style="color:var(--'+cv+')" fill="currentColor" aria-hidden="true">'+(ICONS[key]||'<circle cx="10" cy="10" r="6"/>')+'</svg>'; }
-function hms(sec){
-  sec=Math.max(0,Math.round(sec));
-  const p=n=>String(n).padStart(2,'0');
-  return p(Math.floor(sec/3600))+'Ч : '+p(Math.floor(sec%3600/60))+'М : '+p(sec%60)+'С';
-}
-function setHtml(id,html){
-  if(bmLast[id]===html) return;
-  const el=document.getElementById(id), f=document.activeElement;
-  // Не перерисовываем блок, пока игрок печатает в его поле или держит открытым список.
-  if(f && el.contains(f) && /^(INPUT|SELECT)$/.test(f.tagName)) return;
-  bmLast[id]=html; el.innerHTML=html;
-}
+// ---------- Мелочи ---------- (esc, num, ico, hms, setHtml — в sage-shell.js)
 const STATUS_TAG={
   ok:['ok','Доступно'], area:['warn','Нет места'], locked:['dim','Закрыто'],
 };
@@ -89,53 +75,10 @@ function statusTag(c){
   const t=STATUS_TAG[c.status]; return '<span class="bm-tag '+t[0]+'">'+t[1]+'</span>';
 }
 
-// ---------- Шапка, станция, меню слева, статус-бар ----------
-const BM_NAV=[
-  {id:'hq',label:'Штаб'},{id:'buildings',label:'Здания'},{id:'warehouse',label:'Склад'},
-  {id:'build',label:'Стройка',sub:true},{id:'workers',label:'Рабочие'},{id:'skills',label:'Навыки'},{id:'energy',label:'Энергия'},
-];
-function renderNav(){
-  let h='';
-  BM_NAV.forEach(n=>{
-    if(!n.sub){ h+='<a class="bm-nav-btn" href="index.html">'+n.label+'</a>'; return; }
-    h+='<button class="bm-nav-btn active" data-cat="all">'+n.label+'</button><div class="bm-nav-sub">';
-    BM_CATS.filter(c=>c.id!=='all').forEach(c=>{
-      h+='<button class="bm-nav-subbtn'+(bm.cat===c.id?' active':'')+'" data-cat="'+c.id+'">'+c.label+'</button>';
-    });
-    h+='</div>';
-  });
-  setHtml('bmNav',h);
-}
-function renderChrome(){
-  const used=usedArea(), cap=energyCapacity(), en=state.resources.energy||0;
-  const units=state.units.length;
-  const assigned=Object.values(lastWorkforce).reduce((s,c)=>s+Math.floor(c.assigned),0);
-  const hasMiner=BUILDINGS.some(b=>b.type==='miner' && (state.buildings[b.id]||0)>0);
-  const hasPower=['solar','coal_power'].some(id=>(state.buildings[id]||0)>0);
-  document.getElementById('bmObjective').textContent=
-    !hasMiner?'Построить горнодобывающую установку':!hasPower?'Обеспечить базу энергией':'Расширить колонию';
-  document.getElementById('bmRank').textContent=1+Math.floor(units/5);
-  document.getElementById('bmRankBar').style.width=((units%5)/5*100)+'%';
-  document.getElementById('bmAreaLbl').textContent='Площадь '+num(used)+' / '+num(BASE_AREA);
-  document.getElementById('bmAreaBar').style.width=Math.min(100,used/BASE_AREA*100)+'%';
-  document.getElementById('bmEnergyLbl').textContent='Энергия '+num(en)+' / '+num(cap)+' кВт·ч';
-  document.getElementById('bmEnergyBar').style.width=(cap>0?Math.min(100,en/cap*100):0)+'%';
-  setHtml('bmTags',
-    '<div><span class="bm-chip red">Индустриальный пояс</span><span class="bm-chip">Ярус T0</span>'+
-      '<span class="bm-chip">Время '+dayClockStr(state.playSeconds||0)+'</span><span class="bm-chip">'+(sunFactor(state.playSeconds||0)>0?'День':'Ночь')+'</span></div>'+
-    '<div><span class="bm-chip">'+units+' установок</span><span class="bm-chip">Персонал '+assigned+' / '+(state.population||0)+'</span></div>');
-  const pct=Math.round(used/BASE_AREA*40);
-  setHtml('bmTicks',Array.from({length:40},(_,i)=>'<i'+(i<pct?' class="on"':'')+'></i>').join(''));
-  document.getElementById('bmAreaTxt').textContent=num(used)+' / '+num(BASE_AREA)+' м²';
+// ---------- Рамка страницы (sage-shell.js) ----------
+function renderShell(){
   const it=bm.sel&&bmItem(bm.sel);
-  document.getElementById('bmFocus').textContent=it?it.name:'—';
-}
-function renderQuick(){
-  const keys=['hq','buildings','build','workers','skills','production','energy','warehouse','planet'];
-  setHtml('bmQuick',keys.map(k=>{
-    const s=SECTIONS.find(x=>x.id===k);
-    return '<a href="index.html" class="'+(k==='build'?'active':'')+'" title="'+(s?s.label:k)+'"><svg viewBox="0 0 48 48" fill="currentColor">'+(SECTION_ICONS[k]||'')+'</svg></a>';
-  }).join(''));
+  sgShell({page:'build', mainSub:'all', subs:BM_CATS.filter(c=>c.id!=='all'), activeSub:bm.cat, focus:it?it.name:'—'});
 }
 
 // ---------- Каталог справа ----------
@@ -289,7 +232,7 @@ function renderBuildMenu(){
   const it=bmItem(bm.sel);
   bm.qty=Math.max(1,Math.min(99,bm.qty|0));
   const c=bmCheck(it,bm.qty);
-  renderNav(); renderQuick(); renderChrome(); renderCatalog();
+  renderShell(); renderCatalog();
   renderTitle(it,c); renderVis(it,c,bm.qty); renderCfg(it,c,bm.qty);
 }
 
@@ -303,8 +246,8 @@ document.getElementById('bmSearch').addEventListener('input',e=>{ bm.q=e.target.
 document.getElementById('bmFilter').addEventListener('change',e=>{ bm.cat=e.target.value; renderBuildMenu(); });
 document.getElementById('bmSort').addEventListener('change',e=>{ bm.sort=e.target.value; renderBuildMenu(); });
 document.getElementById('bmNav').addEventListener('click',e=>{
-  const b=e.target.closest('[data-cat]'); if(!b) return;
-  bm.cat=b.dataset.cat; document.getElementById('bmFilter').value=bm.cat; renderBuildMenu();
+  const b=e.target.closest('[data-sub]'); if(!b) return;
+  bm.cat=b.dataset.sub; document.getElementById('bmFilter').value=bm.cat; renderBuildMenu();
 });
 document.getElementById('bmCatTabs').addEventListener('click',e=>{
   const b=e.target.closest('[data-tab]'); if(!b) return; bm.tab=b.dataset.tab; renderBuildMenu();

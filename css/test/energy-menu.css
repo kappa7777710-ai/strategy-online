@@ -1,0 +1,58 @@
+/* Тестовая страница энергосети (energy-test.html): только то, чего нет в build-menu.css. */
+.bm .bm-cat-tabs{grid-template-columns:repeat(3,1fr);margin-bottom:16px;}
+.bm .bm-ctab{padding:14px 14px;font-size:11.5px;}
+.en-pos{color:var(--sg-green);} .en-neg{color:#FF6B76;}
+
+/* Цепочка: генераторы жёлтые, кольцо заряда вокруг ядра. */
+.bm-link.gen{stroke:rgba(255,221,87,.55);filter:drop-shadow(0 0 5px rgba(255,221,87,.7));}
+.bm-flow.gen{stroke:#FFF3C4;}
+.bm-node.gen polygon{stroke:rgba(255,221,87,.8);}
+.bm-node.gen .bm-node-qty{fill:#FFE27A;}
+.en-gdot{fill:var(--gc);opacity:.9;}
+.en-charge{fill:none;stroke:var(--sg-cyan);stroke-width:4;stroke-linecap:round;filter:drop-shadow(0 0 6px rgba(61,198,234,.8));transition:stroke-dasharray .6s;}
+
+/* Сегментные полосы, как полосы HP/SP в шапке. */
+.en-seg{height:12px;background:rgba(255,255,255,.06);
+  -webkit-mask:repeating-linear-gradient(90deg,#000 0 3px,transparent 3px 5px);mask:repeating-linear-gradient(90deg,#000 0 3px,transparent 3px 5px);}
+.en-seg i{display:block;height:100%;background:var(--sg-green);transition:width .6s;}
+.en-seg.bad i{background:var(--sg-red);} .en-seg.cyan i{background:var(--sg-cyan);}
+.en-note{margin-top:7px;font-family:var(--f-ui);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--sg-dim);}
+
+/* Профиль суток: столбики выработки по часам и линия нагрузки. */
+.en-prof-wrap{padding:10px 12px 6px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);}
+.en-prof{display:block;width:100%;height:auto;}
+.en-bar{fill:rgba(255,221,87,.45);}
+.en-bar.now{fill:#FFDD57;}
+.en-dem{stroke:var(--sg-blue2);stroke-width:1.5;stroke-dasharray:4 3;}
+.en-axisl{stroke:var(--sg-line2);stroke-width:1;}
+.en-tick{font-family:var(--f-ui);font-size:8.5px;letter-spacing:.06em;fill:var(--sg-muted);text-anchor:middle;}
+.en-tick.start{text-anchor:start;} .en-tick.end{text-anchor:end;} .en-tick.dem{fill:#8FB6F5;}
+
+.bm-act{color:inherit;text-decoration:none;}
+
+/* Справа. */
+.en-cat-body .bm-cards{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+.en-card-val{font-family:var(--f-ui);font-size:15px;font-weight:600;letter-spacing:.04em;color:#FFE27A;margin-top:4px;}
+.bm-card.off .en-card-val{color:var(--sg-dim);}
+.en-cons{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+.en-cons li{padding:14px 16px;background:linear-gradient(180deg,#121B2B,#0D1420);border:2px solid #1E2B3D;border-left:3px solid var(--gc);}
+.en-cons-h,.en-cons-f{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-family:var(--f-ui);text-transform:uppercase;}
+.en-cons-h{margin-bottom:9px;} .en-cons-f{margin-top:8px;font-size:11px;letter-spacing:.08em;color:#B8C5D6;}
+.en-cons-h b{font-size:13px;letter-spacing:.12em;font-weight:600;}
+.en-cons-h span{font-size:10.5px;letter-spacing:.12em;color:var(--sg-dim);}
+.en-cons-f .ok{color:var(--sg-green);} .en-cons-f .idle{color:var(--sg-dim);} .en-cons-f .bad{color:#FF6B76;}
+.en-periods{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.en-period{padding:9px 12px;cursor:pointer;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);font-family:var(--f-ui);font-size:10.5px;letter-spacing:.14em;color:#B4C1D2;}
+.en-period.active{background:#173B78;border-color:var(--sg-blue2);color:#fff;}
+.en-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.en-kpi{display:flex;flex-direction:column;gap:4px;padding:12px 14px;background:linear-gradient(180deg,#121B2B,#0D1420);border:2px solid #1E2B3D;box-shadow:inset 0 3px 0 var(--kc);}
+.en-kpi label{font-family:var(--f-ui);font-size:9.5px;letter-spacing:.14em;color:var(--sg-dim);}
+.en-kpi b{font-family:var(--f-ui);font-size:17px;font-weight:600;letter-spacing:.03em;font-variant-numeric:tabular-nums;}
+.en-kpi span{font-size:11px;color:#9EADC1;}
+.en-kpi .j-d{font-family:var(--f-ui);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--sg-muted);}
+.en-kpi .j-d.good{color:var(--sg-green);} .en-kpi .j-d.bad{color:#FF6B76;} .en-kpi .j-d.warn{color:var(--sg-amber);}
+
+@media (max-width:759px){
+  .bm .bm-cat-tabs{grid-template-columns:1fr;}
+  .en-cat-body .bm-cards,.en-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
