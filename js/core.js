@@ -386,11 +386,14 @@ function resFullName(id){ const r=resById(id); return r?r.name:id; }
 function resTag(id){ return '<span class="res-f" title="'+resFullName(id)+'">'+resName(id)+'</span>'; }
 function colorVarOf(res){ return res.colorVar || ('tier'+res.tier); }
 
+// Тестовый стартовый запас на каждый ресурс и его версия — при изменении TEST_RESOURCE_SEED
+// нужно поднять и TEST_RESOURCE_SEED_VERSION, иначе у уже идущих сохранений запас не
+// переустановится (см. блок переустановки запаса ниже, после loadState()).
+const TEST_RESOURCE_SEED=1000;
+const TEST_RESOURCE_SEED_VERSION=2;
 function freshState(){
   const resources={};
-  // Тестовый стартовый набор: все базовые ресурсы по 10000 — чтобы сразу было с чем тестировать
-  // любую постройку/рецепт, без ручной правки через консоль.
-  RESOURCES.forEach(r=>resources[r.id]=10000);
+  RESOURCES.forEach(r=>resources[r.id]=TEST_RESOURCE_SEED);
   POP_GOODS.forEach(r=>resources[r.id]=0);
   const richness={};
   RESOURCES.filter(r=>r.tier===0).forEach(r=>{ const k=r.family||r.id; if(richness[k]==null) richness[k]=Math.round((0.8+Math.random()*0.5)*100)/100; });
@@ -400,7 +403,7 @@ function freshState(){
   // Тестовый стартовый набор: 30 рабочих, 2 жилых блока, 1 отдел кадров — чтобы вкладка
   // «Рабочие» сразу была с чем тестировать, без ручной правки через консоль.
   return {resources,buildings:{house_c1:2,hr_dept:1},richness,skills,units:[],nextUnitId:1,training:'t0',lastTs:now,startTs:now,playSeconds:0,
-    population:30, hrRationLevel:0, testSeeded:true};
+    population:30, hrRationLevel:0, testSeeded:true, resourceSeedVersion:TEST_RESOURCE_SEED_VERSION};
 }
 
 function loadState(){
@@ -446,11 +449,16 @@ if((state.population||0)<30){
   state.population=30;
   saveState();
 }
-// Жёсткий пол базовых ресурсов для тестовой версии: каждый раз при загрузке поднимаем то,
-// что ниже 10000, не трогая то, что уже выше (наработанные запасы не срезаем).
-let resourcesTopUp=false;
-RESOURCES.forEach(r=>{ if((state.resources[r.id]||0)<10000){ state.resources[r.id]=10000; resourcesTopUp=true; } });
-if(resourcesTopUp) saveState();
+// Переустановка тестового запаса ресурсов: срабатывает один раз на каждое изменение
+// TEST_RESOURCE_SEED (версия хранится в сейве) — ставит именно TEST_RESOURCE_SEED на каждый
+// ресурс, а не просто поднимает до минимума, чтобы по запросу «сделай всем по X» склад
+// реально стал равен X, а не только не ниже X. После этого обычный игровой прогресс (добыча,
+// трата) снова ничем не ограничен — до следующего изменения версии.
+if(state.resourceSeedVersion!==TEST_RESOURCE_SEED_VERSION){
+  RESOURCES.forEach(r=>{ state.resources[r.id]=TEST_RESOURCE_SEED; });
+  state.resourceSeedVersion=TEST_RESOURCE_SEED_VERSION;
+  saveState();
+}
 
 const util={};
 // Доля покрытия расхода энергии за последний тик (1 = всем хватило, 0 = блэкаут) — тот же
