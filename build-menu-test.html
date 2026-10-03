@@ -1,0 +1,107 @@
+<!doctype html><html lang="ru"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Стройка · тестовое меню</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400;500;600;700&family=Exo+2:wght@400;500;600&family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/pages/3-build.css">
+<link rel="stylesheet" href="css/test/build-menu.css">
+</head><body class="bm">
+
+<!-- Тестовое меню стройки. Игра под ним настоящая: те же core/ui/pages скрипты и тот же сейв,
+     что и в index.html. Старые панели лежат в скрытом #legacy, чтобы ui.js нашёл свои элементы. -->
+<header class="bm-top">
+  <a class="bm-brand" href="index.html">STRATEGY ONLINE</a>
+  <div class="bm-objective"><i></i><span>Текущая задача</span><b id="bmObjective">—</b></div>
+  <nav class="bm-quick" id="bmQuick" aria-label="Разделы"></nav>
+  <div class="bm-cmdr">
+    <div class="bm-cmdr-badge" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M16 4 27 27H21L16 16 11 27H5Z" fill="currentColor"/></svg></div>
+    <div class="bm-cmdr-body">
+      <b>Командир</b>
+      <div class="bm-cmdr-line"><span>Ранг колонии <em id="bmRank">1</em></span><span class="sep"></span><span class="hl">Журнал задач</span></div>
+      <div class="bm-cmdr-bar"><i id="bmRankBar"></i></div>
+    </div>
+  </div>
+</header>
+
+<div class="bm-frame">
+  <section class="bm-station">
+    <div class="bm-emblem" aria-hidden="true"><svg viewBox="0 0 40 46"><path d="M20 2 38 12v22L20 44 2 34V12Z" fill="currentColor"/><path d="M20 12 29 17v12l-9 5-9-5V17Z" fill="#1A1205" opacity=".55"/></svg></div>
+    <div class="bm-station-name">
+      <div><b>Керберос-9</b><span>Центральная база</span></div>
+      <div class="bm-bars">
+        <div class="bm-bar red"><label id="bmAreaLbl">Площадь</label><div class="seg"><i id="bmAreaBar"></i></div></div>
+        <div class="bm-bar cyan"><label id="bmEnergyLbl">Энергия</label><div class="seg"><i id="bmEnergyBar"></i></div></div>
+      </div>
+    </div>
+    <div class="bm-tags" id="bmTags"></div>
+    <a class="bm-close" href="index.html" title="Вернуться в игру" aria-label="Закрыть">×</a>
+  </section>
+
+  <div class="bm-body">
+    <nav class="bm-nav" id="bmNav" aria-label="Меню базы"></nav>
+
+    <main class="bm-main">
+      <div class="bm-crumb"><span>Стройка</span><b>Выбор здания</b></div>
+      <div class="bm-grid">
+        <section class="bm-title" id="bmTitle"></section>
+        <section class="bm-vis" id="bmVis"></section>
+        <section class="bm-cfg" id="bmCfg"></section>
+        <section class="bm-cat">
+          <div class="bm-cat-tabs" id="bmCatTabs"></div>
+          <div class="bm-tools">
+            <label class="bm-search"><svg viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="2"/></svg><input id="bmSearch" type="search" placeholder="Поиск" autocomplete="off"><span id="bmFound"></span></label>
+            <label class="bm-select"><select id="bmFilter"></select></label>
+            <label class="bm-select"><select id="bmSort">
+              <option value="ready">Сначала доступные</option>
+              <option value="az">Имя А–Я</option>
+              <option value="za">Имя Я–А</option>
+              <option value="area">Площадь ↑</option>
+            </select></label>
+          </div>
+          <div class="bm-cards" id="bmCards"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <footer class="bm-status">
+    <span>Вкладка <b>Стройка</b></span>
+    <span>Фокус <b id="bmFocus">—</b></span>
+    <span>Сектор <b>Керберос-9</b></span>
+    <span class="bm-dev" id="devbar">Тест <button data-speed="1" class="active">×1</button><button data-speed="60">×60</button><button data-speed="600">×600</button><button data-speed="3600">×3600</button><em id="devHint">1 с = 1 с игры</em></span>
+    <span class="bm-status-right">Площадь <span class="ticks" id="bmTicks"></span><b id="bmAreaTxt">—</b></span>
+  </footer>
+</div>
+
+<div id="legacy" hidden>
+  <div id="statTime"></div><div id="statBuilt"></div><div id="statWorkers"></div><div id="statSaved"></div>
+  <nav id="sections"></nav><nav id="tabs"></nav>
+  <div id="hqPanel"></div><div id="buildingsPanel"></div><div id="bgrid"></div><div id="productionPanel"></div>
+  <div id="popPanel"></div><div id="skillsPanel"></div><div id="energyPanel"></div><div id="warehousePanel"></div><div id="planetPanel"></div>
+</div>
+
+<div class="modal-backdrop" id="offlineModal" hidden>
+  <div class="modal">
+    <h2>С возвращением на базу</h2>
+    <div class="modal-time" id="modalTime"></div>
+    <div class="modal-rows" id="modalRows"></div>
+    <div class="modal-cap-note" id="modalCapNote">Учтено не более 12 часов офлайн-прогресса за один раз.</div>
+    <button class="modal-close" id="modalClose">Продолжить работу колонии</button>
+  </div>
+</div>
+
+<script src="js/core.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/pages/1-hq.js"></script>
+<script src="js/pages/2-buildings.js"></script>
+<script src="js/pages/3-build-art.js"></script>
+<script src="js/pages/3-build.js"></script>
+<script src="js/pages/4-workers.js"></script>
+<script src="js/pages/5-skills.js"></script>
+<script src="js/pages/6-production.js"></script>
+<script src="js/pages/7-warehouse.js"></script>
+<script src="js/pages/8-energy.js"></script>
+<script src="js/pages/9-planet.js"></script>
+<script src="js/test/build-menu.js"></script>
+<script src="js/main.js"></script>
+</body></html>
