@@ -22,8 +22,13 @@
   margin:0;min-height:100vh;color:var(--sg-text);font-family:var(--f-text);font-size:13px;background:transparent;
 }
 html:has(.bm),body:has(.bm),body.bm{background:#0A111D;}
-/* Космос рисует js/test/space-bg.js на холсте под интерфейсом. */
-.space-bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block;}
+/* Фон — картинка станции (assets/bg/station.jpg) под синеватым затемнением, как у SAGE:
+   слой зафиксирован, поэтому при прокрутке фон стоит на месте, а панели едут поверх. */
+.bm-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(120% 90% at 50% 30%,rgba(30,70,120,.10),rgba(4,8,16,.55) 75%),
+    linear-gradient(180deg,rgba(16,36,66,.50) 0%,rgba(10,22,42,.45) 45%,rgba(5,10,20,.78) 100%),
+    url("../../assets/bg/station.jpg") center 32%/cover no-repeat;}
 .bm-top,.bm-frame{position:relative;z-index:1;}
 .bm *{box-sizing:border-box;}
 .bm button,.bm input,.bm select{font:inherit;color:inherit;}
