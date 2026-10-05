@@ -1,0 +1,76 @@
+/* Переключатель V1/V2 (есть в обеих шапках) и перекраска обычных разделов в интерфейсе V2:
+   Штаб, Здания, Рабочие, Навыки, Цех, Склад, Планета. Их разметку рисуют js/pages/*.js —
+   здесь только токены и детали в духе SAGE: прямые углы, тонкие рамки, заглавные подписи. */
+
+.ui-switch{display:inline-flex;flex:none;border:1px solid var(--border-strong);}
+.ui-switch button{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.08em;padding:6px 11px;cursor:pointer;
+  background:transparent;color:var(--text-muted);border:none;}
+.ui-switch button:hover{color:var(--text-primary);}
+.ui-switch button.active{background:var(--tier0);color:#0A0D18;}
+.v1-head{position:relative;}
+.v1-head .ui-switch{position:absolute;top:0;right:0;border-radius:8px;overflow:hidden;}
+.bm .ui-switch{border-color:var(--sg-line2);}
+.bm .ui-switch button{font-family:var(--f-ui);font-size:11.5px;letter-spacing:.16em;padding:9px 13px;color:var(--sg-dim);}
+.bm .ui-switch button.active{background:var(--sg-amber);color:#1C1306;font-weight:600;}
+
+/* ---------- Токены разделов внутри V2 ---------- */
+#v2root{
+  --bg:#0A111D;
+  --panel:rgba(13,21,34,.82);
+  --card:rgba(255,255,255,.035);
+  --card-hover:rgba(255,255,255,.07);
+  --border:#26364D;
+  --border-strong:#3A4D69;
+  --text-primary:#D9E2EE;
+  --text-secondary:#9DAEC4;
+  --text-muted:#5F7089;
+  --skill:#F4A93A;
+  --radius:0px;
+  --font-display:'Tektur','Rajdhani',sans-serif;
+  --font-body:'Exo 2','IBM Plex Sans',sans-serif;
+  --font-mono:'Tektur','IBM Plex Mono',monospace;
+}
+.v2-about{font-size:12.5px;color:var(--sg-dim);letter-spacing:.02em;}
+.v2-panels>*{margin-top:16px!important;}
+
+/* Общие блоки: панели, рамки, «вдавленные» поля, фишки ресурсов. */
+#v2Panels .panel,#v2Panels .bevel-frame,#v2Panels .pop-panel>section{border-radius:0;}
+#v2Panels .bevel-frame,#v2Panels .panel{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.18));border:1px solid var(--sg-line);box-shadow:none;}
+#v2Panels .bevel{border-radius:0;background:linear-gradient(180deg,#121B2B,#0D1420);border:2px solid #1E2B3D;box-shadow:none;}
+#v2Panels .sunk{border-radius:0;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.05);box-shadow:none;}
+#v2Panels .chip{border-radius:0;background:linear-gradient(180deg,#121B2B,#0D1420);border:1px solid #1E2B3D;border-left:3px solid var(--chip-color,var(--tier0));}
+#v2Panels .chip-bar,#v2Panels .warehouse-bar{border-radius:0;}
+#v2Panels h2,#v2Panels h3{font-family:var(--f-ui);font-weight:500;letter-spacing:.16em;text-transform:uppercase;}
+#v2Panels .panel h2{color:var(--sg-dim);font-size:12.5px;}
+#v2Panels button{border-radius:0;}
+
+/* Прямые углы у карточек и плашек разделов (круглые индикаторы остаются круглыми). */
+#v2Panels :is(.unit-tile,.unit-tile-bar,.tile-btn,.locked-banner,.bcard,.util-bar,.cost-item,.build-btn,.bart,
+  .hr-stat-box,.rec-cost-info,.need-row .need-bar,.mi-chev,.cv-power,.cv-ore,.cv-out b,.cv-add,
+  .wh-grid,.wh-tanks,.wh-tank,.wh-tank-btn,.wh-tank-cost span,.m-scheme,.m-node,.m-bar,.m-group,.m-gbar,.m-row,.m-rowbar,
+  .pl-presets button,.pl-nudge button,.j-kpi,.j-mbox,.d-table-wrap){border-radius:0;}
+
+/* Действия — синие кнопки, как «Начать стройку» на экране стройки. */
+#v2Panels :is(.build-btn,.wh-tank-btn){position:relative;background:#173B78;border:2px solid var(--sg-blue2);color:#fff;
+  font-family:var(--f-ui);font-weight:500;letter-spacing:.16em;box-shadow:0 0 16px rgba(74,139,245,.25);}
+#v2Panels :is(.build-btn,.wh-tank-btn):hover:not(:disabled){background:#1D4A95;filter:none;}
+#v2Panels :is(.build-btn,.wh-tank-btn):disabled{background:#142440;border-color:#2C4670;color:#7F93B3;box-shadow:none;}
+#v2Panels .wh-tank-btn small{color:#9FC0F5;opacity:1;}
+#v2Panels .tile-btn{background:rgba(255,255,255,.04);border-color:var(--sg-line2);}
+#v2Panels .cv-add{border-color:var(--sg-line2);color:var(--sg-dim);}
+#v2Panels .cv-add:hover{border-color:var(--sg-blue2);color:#fff;}
+
+/* Карточки: тёмная заливка, тонкая рамка, цвет яруса — только полосой слева. */
+#v2Panels :is(.bcard,.unit-tile,.wh-tank,.hr-stat-box){background:linear-gradient(180deg,#121B2B,#0D1420);box-shadow:none;}
+#v2Panels .bcard{border:2px solid #1E2B3D;border-left:3px solid var(--tier-color,var(--tier0));}
+#v2Panels .bcard:hover{border-color:#3A4E6B;border-left-color:var(--tier-color,var(--tier0));}
+#v2Panels .wh-grid,#v2Panels .wh-tanks{background:rgba(0,0,0,.22);border-color:var(--sg-line);}
+
+/* Переключатели времени суток на «Планете» — как вкладки каталога. */
+#v2Panels :is(.pl-presets,.pl-nudge) button{font-family:var(--f-ui);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+  background:rgba(255,255,255,.035);border:2px solid #34465F;color:#C0CCDB;}
+#v2Panels :is(.pl-presets,.pl-nudge) button.active{background:linear-gradient(180deg,#1D3F7C,#16305E);border-color:var(--sg-blue2);color:#fff;}
+
+/* Подпись «Тест: ускорение времени» в статус-баре короче. */
+#v2Dev .devbar>span:first-child{display:none;}
+#v2Dev .devbar::before{content:"Тест";margin-right:4px;}

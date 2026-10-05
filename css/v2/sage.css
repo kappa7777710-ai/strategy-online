@@ -1,4 +1,4 @@
-/* Тестовое меню стройки (build-menu-test.html): компоновка и вид в духе SAGE —
+/* Интерфейс V2: рамка, стройка и общие детали в духе SAGE —
    широкие заглавные подписи, тонкие рамки, янтарный активный пункт, синий выбор,
    цепочка шестиугольников «материалы → здание → выпуск». */
 .bm{
@@ -21,7 +21,10 @@
   --f-text:'Exo 2','IBM Plex Sans',sans-serif;
   margin:0;min-height:100vh;color:var(--sg-text);font-family:var(--f-text);font-size:13px;background:transparent;
 }
-html:has(.bm),body:has(.bm),body.bm{background:#0A111D;}
+/* Версия выбирается атрибутом data-ui на <html> (см. index.html и js/v2/shell.js). */
+html:not([data-ui="v2"]) #v2root{display:none;}
+html[data-ui="v2"] .page{display:none;}
+html[data-ui="v2"],html[data-ui="v2"] body{background:#0A111D;}
 /* Фон — картинка станции (assets/bg/station.jpg) под синеватым затемнением, как у SAGE:
    слой зафиксирован, поэтому при прокрутке фон стоит на месте, а панели едут поверх. */
 .bm-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
@@ -37,14 +40,14 @@ html:has(.bm),body:has(.bm),body.bm{background:#0A111D;}
 
 /* ---------- Верхняя полоса ---------- */
 .bm-top{display:flex;align-items:center;gap:22px;padding:14px 28px;min-height:76px;}
-.bm-brand{font-family:var(--f-ui);font-weight:700;font-size:19px;letter-spacing:.06em;white-space:nowrap;padding-right:22px;border-right:1px solid var(--sg-line2);}
+.bm-brand{background:none;border:none;border-right:1px solid var(--sg-line);cursor:pointer;font-family:var(--f-ui);font-weight:700;font-size:19px;letter-spacing:.06em;white-space:nowrap;padding-right:22px;border-right:1px solid var(--sg-line2);}
 .bm-objective{display:flex;align-items:center;gap:12px;font-family:var(--f-ui);font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;min-width:0;}
 .bm-objective i{width:10px;height:10px;border-radius:50%;border:2px solid var(--sg-cyan);flex:none;}
 .bm-objective span{color:var(--sg-cyan);white-space:nowrap;}
 .bm-objective b{font-weight:600;letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .bm-quick{display:flex;gap:8px;margin-left:auto;}
-.bm-quick a{width:30px;height:30px;color:#7C8EA8;display:grid;place-items:center;--ink:#0A111D;--hi:#C9D4E4;transition:color .15s;}
-.bm-quick a:hover,.bm-quick a.active{color:var(--sg-amber);}
+.bm-quick button{background:none;border:none;padding:0;cursor:pointer;width:30px;height:30px;color:#7C8EA8;display:grid;place-items:center;--ink:#0A111D;--hi:#C9D4E4;transition:color .15s;}
+.bm-quick button:hover,.bm-quick button.active{color:var(--sg-amber);}
 .bm-quick svg{width:24px;height:24px;}
 .bm-cmdr{display:flex;align-items:center;gap:12px;padding:6px 16px 6px 6px;background:rgba(255,255,255,.04);border:1px solid var(--sg-line);}
 .bm-cmdr-badge{width:44px;height:44px;display:grid;place-items:center;background:#E9EEF5;color:#14202F;position:relative;
@@ -60,7 +63,7 @@ html:has(.bm),body:has(.bm),body.bm{background:#0A111D;}
 
 /* ---------- Рама приложения ---------- */
 .bm-frame{margin:0 20px 20px;background:rgba(9,15,26,.58);border:1px solid var(--sg-line);backdrop-filter:blur(4px);}
-.bm-station{position:relative;display:flex;gap:18px;align-items:flex-start;padding:18px 84px 18px 26px;border-bottom:1px solid var(--sg-line);}
+.bm-station{position:relative;display:flex;gap:18px;align-items:flex-start;padding:18px 26px;border-bottom:1px solid var(--sg-line);}
 .bm-emblem{width:46px;color:#F06A3A;flex:none;filter:drop-shadow(0 0 10px rgba(240,106,58,.4));}
 .bm-station-name{flex:1;min-width:0;}
 .bm-station-name>div:first-child{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;}
@@ -78,15 +81,13 @@ html:has(.bm),body:has(.bm),body.bm{background:#0A111D;}
 .bm-tags>div{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
 .bm-chip{font-family:var(--f-ui);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:8px 12px;background:rgba(255,255,255,.06);color:#B8C5D6;white-space:nowrap;}
 .bm-chip.red{background:rgba(238,75,87,.2);color:#FF6B76;}
-.bm-close{position:absolute;right:22px;top:24px;width:44px;height:44px;display:grid;place-items:center;font-size:26px;line-height:1;background:rgba(255,255,255,.06);border:1px solid var(--sg-line);color:var(--sg-dim);}
-.bm-close:hover{color:var(--sg-text);border-color:var(--sg-line2);}
 
 .bm-body{display:grid;grid-template-columns:232px minmax(0,1fr);gap:28px;padding:20px 22px 24px;}
 
 /* ---------- Меню слева ---------- */
-.bm-nav{display:flex;flex-direction:column;gap:14px;}
+.bm-nav{display:flex;flex-direction:column;gap:9px;}
 .bm-nav-btn,.bm-nav-subbtn{position:relative;display:block;width:100%;text-align:left;cursor:pointer;font-family:var(--f-ui);letter-spacing:.2em;}
-.bm-nav-btn{text-transform:uppercase;padding:20px 22px;font-size:14px;color:#AEBBCD;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0));border:2px solid #34465F;}
+.bm-nav-btn{text-transform:uppercase;padding:15px 20px;font-size:13px;color:#AEBBCD;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0));border:2px solid #34465F;}
 .bm-nav-btn::after,.bm-card::after,.bm-ctab::after{content:"";position:absolute;top:5px;right:5px;border-style:solid;border-width:0 11px 11px 0;border-color:transparent #6D7F98 transparent transparent;}
 .bm-nav-btn:hover{border-color:#4A6080;color:var(--sg-text);}
 .bm-nav-btn.active{background:var(--sg-amber);border-color:#FFC266;color:#1C1306;font-weight:600;box-shadow:0 0 22px rgba(244,169,58,.25);}
@@ -235,19 +236,19 @@ html:has(.bm),body:has(.bm),body.bm{background:#0A111D;}
 .bm-status{display:flex;flex-wrap:wrap;align-items:center;gap:10px 26px;padding:14px 22px;border-top:1px solid var(--sg-line);
   font-family:var(--f-ui);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--sg-muted);}
 .bm-status b{color:#E6ECF4;font-weight:500;margin-left:6px;}
-.bm-dev{display:flex;align-items:center;gap:6px;}
+.bm-dev,.bm-dev .devbar{display:flex;align-items:center;gap:6px;font:inherit;color:inherit;}
 .bm-dev button{background:rgba(255,255,255,.05);border:1px solid var(--sg-line2);padding:4px 8px;font-family:var(--f-ui);font-size:10.5px;letter-spacing:.06em;cursor:pointer;color:#B4C1D2;}
 .bm-dev button.active{background:var(--sg-amber);border-color:var(--sg-amber);color:#1C1306;}
-.bm-dev em{font-style:normal;text-transform:none;letter-spacing:.02em;margin-left:4px;}
+.bm-dev #devHint{font-style:normal;text-transform:none;letter-spacing:.02em;margin-left:4px;}
 .bm-status-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
 .bm-status .ticks{display:flex;gap:3px;}
 .bm-status .ticks i{width:4px;height:6px;background:#2A3A52;}
 .bm-status .ticks i.on{background:var(--sg-cyan);}
 
 /* Окно «Пока вас не было» в той же стилистике. */
-.bm .modal{border-radius:0;background:#0E1626;border:2px solid #34465F;font-family:var(--f-text);}
-.bm .modal h2{font-family:var(--f-ui);letter-spacing:.1em;text-transform:uppercase;}
-.bm .modal-close{border-radius:0;background:#173B78;border:2px solid var(--sg-blue2);color:#fff;font-family:var(--f-ui);letter-spacing:.14em;}
+html[data-ui="v2"] .modal{border-radius:0;background:#0E1626;border:2px solid #34465F;font-family:var(--f-text);}
+html[data-ui="v2"] .modal h2{font-family:var(--f-ui);letter-spacing:.1em;text-transform:uppercase;}
+html[data-ui="v2"] .modal-close{border-radius:0;background:#173B78;border:2px solid var(--sg-blue2);color:#fff;font-family:var(--f-ui);letter-spacing:.14em;}
 
 /* ---------- Адаптив ---------- */
 @media (max-width:1279px){
@@ -261,18 +262,18 @@ html:has(.bm),body:has(.bm),body.bm{background:#0A111D;}
   .bm-nav-btn::after{display:none;}
   .bm-nav-sub{flex-direction:row;margin:0;flex:none;gap:8px;}
   .bm-nav-subbtn{width:auto;flex:none;padding:12px 14px;}
-  .bm-station{flex-wrap:wrap;padding-right:76px;}
+  .bm-station{flex-wrap:wrap;}
   .bm-tags{align-items:flex-start;width:100%;}
   .bm-tags>div{justify-content:flex-start;}
 }
 @media (max-width:759px){
   .bm-top{flex-wrap:wrap;gap:10px 16px;padding:12px 16px;}
   .bm-brand{border-right:none;padding-right:0;}
-  .bm-cmdr{margin-left:auto;}
+  .bm-cmdr{display:none;}
+  .bm-top .ui-switch{margin-left:auto;}
   .bm-objective{order:3;width:100%;font-size:11px;}
   .bm-frame{margin:0 0 16px;border-left:none;border-right:none;}
-  .bm-station{padding:14px 64px 14px 16px;}
-  .bm-close{right:12px;top:14px;}
+  .bm-station{padding:14px 16px;}
   .bm-body{padding:14px 16px 18px;}
   .bm-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"cat" "title" "vis" "cfg";}
   .bm-tools{grid-template-columns:1fr 1fr;}

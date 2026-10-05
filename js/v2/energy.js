@@ -1,6 +1,6 @@
-// Тестовая страница энергосети (energy-test.html) в стиле SAGE. Цифры берутся из игры:
+// Экран «Энергия» интерфейса V2. Цифры берутся из игры:
 // баланс и сводка — energyNow()/energyBalance() (core.js, 8-energy.js), журнал — journalValues(),
-// профиль суток — energySunProfile(). Скрипт только рисует и обновляется вместе с renderAll.
+// профиль суток — energySunProfile(). Скрипт только рисует; обновляет его рамка V2 (shell.js).
 
 const EN_SUBS=[{id:'sources',label:'Источники'},{id:'consumers',label:'Потребители'},{id:'journal',label:'Журнал'}];
 const en={tab:'sources'};
@@ -45,17 +45,13 @@ function renderEnTitle(c){
     : c.frac>=0.999 ? '<span class="bm-tag ok">Обеспечено 100%</span>'
     : '<span class="bm-tag bad">Дефицит · обеспечено '+Math.round(c.frac*100)+'%</span>';
   const net=c.bal.net;
-  setHtml('bmTitle',
+  setHtml('enTitle',
     '<div class="bm-title-main"><h1>Энергосеть базы</h1><div class="bm-title-tags"><b>T0</b>'+tag+'</div></div>'+
     '<div class="bm-through"><div><label>Баланс сети</label><b class="'+(net>=0?'en-pos':'en-neg')+'">'+(net>=0?'+':'−')+fmtPowerKw(Math.abs(net))+'</b></div>'+
       '<div class="r"><label>Заряд аккумуляторов</label><b>'+Math.round(c.pct)+'%</b></div></div>');
 }
 
 // ---------- Центр: генераторы → сеть → потребители ----------
-function hexPts(cx,cy,r){
-  let p=[]; for(let k=0;k<6;k++){ const a=Math.PI/180*(60*k-90); p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1)); }
-  return p.join(' ');
-}
 function hexSvgIcon(inner,cv,cx,cy,s,vb){
   return '<svg x="'+(cx-s/2)+'" y="'+(cy-s/2)+'" width="'+s+'" height="'+s+'" viewBox="'+(vb||'0 0 20 20')+'" fill="currentColor" style="color:var(--'+cv+')">'+inner+'</svg>';
 }
@@ -111,7 +107,7 @@ function renderEnVis(c){
   const art='<svg x="'+(CX-R*0.86)+'" y="'+(CY-R*0.72)+'" width="'+(R*1.72)+'" height="'+(R*1.42)+'" viewBox="18 4 224 184" class="bart" style="--tier-color:var(--energy);--chg:'+(c.pct/100).toFixed(3)+'">'+enArt.core+'</svg>';
   // Кольцо заряда по периметру ядра.
   const per=6*R, dash=(c.pct/100*per).toFixed(1);
-  setHtml('bmVis','<svg class="bm-chain '+(ok?'ok':'bad')+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Генераторы, сеть и потребители">'+
+  setHtml('enVis','<svg class="bm-chain '+(ok?'ok':'bad')+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Генераторы, сеть и потребители">'+
     '<defs><clipPath id="enHexClip"><polygon points="'+hexPts(CX,CY,R-10)+'"/></clipPath></defs>'+
     '<g class="bm-cells">'+bg+'</g>'+links+
     '<polygon class="bm-core-glow" points="'+hexPts(CX,CY,R+6)+'"/>'+
@@ -162,27 +158,27 @@ function renderEnCfg(c){
     (c.curtail>0.01?'<li class="info">'+ico('trash','text-muted')+'<span>Сбрасывается излишек</span><b>'+fmtPowerKw(c.curtail)+'</b></li>':'')+
     '</ul></div>';
   h+='<div class="bm-actions"><label>Действия</label><div>'+
-    '<a class="bm-act" href="'+sgHref('build')+'#type-solar"><svg viewBox="0 0 20 20" width="14" height="14"><path d="M10 2v3M10 15v3M2 10h3M15 10h3M4.3 4.3l2.1 2.1M13.6 13.6l2.1 2.1M4.3 15.7l2.1-2.1M13.6 6.4l2.1-2.1" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="10" r="3.2" fill="currentColor"/></svg><span>Генератор<small>Открыть в стройке</small></span></a>'+
-    '<a class="bm-act primary" href="'+sgHref('build')+'#bat-battery_small"><svg viewBox="0 0 20 20" width="14" height="14"><rect x="3" y="5" width="13" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="16" y="8" width="2" height="4" fill="currentColor"/><path d="M10 7l-2 3.5h3L9 14" stroke="currentColor" stroke-width="1.5" fill="none"/></svg><span>Аккумулятор<small>Увеличить ёмкость</small></span></a>'+
+    '<button class="bm-act" data-goto="build" data-key="type-solar"><svg viewBox="0 0 20 20" width="14" height="14"><path d="M10 2v3M10 15v3M2 10h3M15 10h3M4.3 4.3l2.1 2.1M13.6 13.6l2.1 2.1M4.3 15.7l2.1-2.1M13.6 6.4l2.1-2.1" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="10" r="3.2" fill="currentColor"/></svg><span>Генератор<small>Открыть в стройке</small></span></button>'+
+    '<button class="bm-act primary" data-goto="build" data-key="bat-battery_small"><svg viewBox="0 0 20 20" width="14" height="14"><rect x="3" y="5" width="13" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="16" y="8" width="2" height="4" fill="currentColor"/><path d="M10 7l-2 3.5h3L9 14" stroke="currentColor" stroke-width="1.5" fill="none"/></svg><span>Аккумулятор<small>Увеличить ёмкость</small></span></button>'+
   '</div></div>';
-  setHtml('bmCfg',h);
+  setHtml('enCfg',h);
 }
 
 // ---------- Справа: источники, потребители, журнал ----------
 function renderEnCat(c){
   const src=enSources(), cons=enConsumers();
   const built=src.filter(s=>s.count>0).length;
-  setHtml('bmCatTabs',EN_SUBS.map(t=>{
+  setHtml('enCatTabs',EN_SUBS.map(t=>{
     const extra=t.id==='sources'?' · '+built+' в сети':t.id==='consumers'?' · '+cons.length+' групп':' · '+EN_PMAP[enUi.period].label;
     return '<button class="bm-ctab'+(en.tab===t.id?' active':'')+'" data-tab="'+t.id+'">'+t.label+' <span>'+extra+'</span></button>';
   }).join(''));
   let h='';
   if(en.tab==='sources'){
     h='<div class="bm-cards">'+src.map(s=>
-      '<a class="bm-card'+(s.count>0?'':' off')+'" href="'+sgHref('build')+'#'+s.key+'" style="--tier-color:var(--'+s.color+')">'+
+      '<button class="bm-card'+(s.count>0?'':' off')+'" data-goto="build" data-key="'+s.key+'" style="--tier-color:var(--'+s.color+')">'+
         '<span class="bm-card-top"><span class="bm-count">×'+s.count+'</span><span class="bm-tag '+s.tag[0]+'">'+s.tag[1]+'</span></span>'+
         '<span class="bm-card-art"><svg class="bart" viewBox="18 4 224 184" style="--tier-color:var(--'+s.color+')">'+enArtOf(s)+'</svg></span>'+
-        '<span class="bm-card-name">'+esc(s.name)+'</span><span class="en-card-val">'+s.main+'</span><span class="bm-card-sub">'+s.sub+'</span></a>').join('')+'</div>';
+        '<span class="bm-card-name">'+esc(s.name)+'</span><span class="en-card-val">'+s.main+'</span><span class="bm-card-sub">'+s.sub+'</span></button>').join('')+'</div>';
   }else if(en.tab==='consumers'){
     h=cons.length?'<ul class="en-cons">'+cons.map(g=>{
       const pct=g.full>0?g.now/g.full*100:0, idle=g.now<=0.01;
@@ -197,25 +193,26 @@ function renderEnCat(c){
       '<div class="en-kpis">'+jv.list.map(k=>
         '<div class="en-kpi" style="--kc:'+k.color+'"><label>'+k.l+'</label><b>'+k.v+'</b><span>'+k.s+'</span>'+k.d+'</div>').join('')+'</div>';
   }
-  setHtml('bmCards',h);
+  setHtml('enCards',h);
 }
 
 function renderEnergyMenu(){
   const c=energyNow();
-  sgShell({page:'energy', mainSub:'sources', subs:EN_SUBS, activeSub:en.tab, focus:EN_SUBS.find(s=>s.id===en.tab).label});
   renderEnTitle(c); renderEnVis(c); renderEnCfg(c); renderEnCat(c);
 }
 
-const _enRenderAll=renderAll;
-renderAll=function(){ _enRenderAll(); renderEnergyMenu(); };
+V2_PAGES.energy={
+  subs:EN_SUBS,
+  activeSub:()=>en.tab,
+  onSub:id=>{ en.tab=id; },
+  focus:()=>EN_SUBS.find(s=>s.id===en.tab).label,
+  crumb:'Энергосеть базы',
+  render:renderEnergyMenu,
+};
 
-{ const h=location.hash.slice(1); if(EN_SUBS.some(s=>s.id===h)) en.tab=h; }
-document.getElementById('bmNav').addEventListener('click',e=>{
-  const b=e.target.closest('[data-sub]'); if(!b) return; en.tab=b.dataset.sub; renderEnergyMenu();
+document.getElementById('enCatTabs').addEventListener('click',e=>{
+  const b=e.target.closest('[data-tab]'); if(!b) return; en.tab=b.dataset.tab; v2Render();
 });
-document.getElementById('bmCatTabs').addEventListener('click',e=>{
-  const b=e.target.closest('[data-tab]'); if(!b) return; en.tab=b.dataset.tab; renderEnergyMenu();
-});
-document.getElementById('bmCards').addEventListener('click',e=>{
-  const b=e.target.closest('[data-period]'); if(!b) return; enUi.period=b.dataset.period; saveEnergyUi(); renderEnergyMenu();
+document.getElementById('enCards').addEventListener('click',e=>{
+  const b=e.target.closest('[data-period]'); if(!b) return; enUi.period=b.dataset.period; saveEnergyUi(); v2Render();
 });

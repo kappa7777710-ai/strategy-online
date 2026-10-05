@@ -1,6 +1,6 @@
-// Тестовое меню стройки (build-menu-test.html). Своих правил нет: данные, цены, площадь и
+// Экран «Стройка» интерфейса V2. Своих правил нет: данные, цены, площадь и
 // сама постройка берутся из core.js (tryBuild, scaledCost, freeArea …), картинки зданий из
-// 3-build-art.js. Скрипт только рисует и подключается к renderAll, чтобы обновляться каждый тик.
+// 3-build-art.js. Скрипт только рисует; обновляет его рамка V2 (shell.js) вместе с renderAll.
 
 const BM_CATS=[
   {id:'all',label:'Все категории'},
@@ -36,8 +36,6 @@ function bmCatalog(){
   return items;
 }
 const BM_ITEMS=bmCatalog();
-// Ссылка вида build-menu-test.html#type-solar сразу открывает нужный проект (так ведёт кнопка со страницы энергии).
-{ const h=location.hash.slice(1); if(h && BM_ITEMS.some(i=>i.key===h)) bm.sel=h; }
 function bmItem(key){ return BM_ITEMS.find(i=>i.key===key); }
 function bmArtOf(it){ return bmArt[it.key] || (bmArt[it.key]=it.art()); }
 function bmRecipe(it){
@@ -66,19 +64,13 @@ function bmMaxQty(it){
   return Math.max(0,m);
 }
 
-// ---------- Мелочи ---------- (esc, num, ico, hms, setHtml — в sage-shell.js)
+// ---------- Мелочи ---------- (esc, num, ico, hms, hexPts, setHtml — в shell.js)
 const STATUS_TAG={
   ok:['ok','Доступно'], area:['warn','Нет места'], locked:['dim','Закрыто'],
 };
 function statusTag(c){
   if(c.status==='missing') return '<span class="bm-tag bad">Не хватает '+c.missing.length+'</span>';
   const t=STATUS_TAG[c.status]; return '<span class="bm-tag '+t[0]+'">'+t[1]+'</span>';
-}
-
-// ---------- Рамка страницы (sage-shell.js) ----------
-function renderShell(){
-  const it=bm.sel&&bmItem(bm.sel);
-  sgShell({page:'build', mainSub:'all', subs:BM_CATS.filter(c=>c.id!=='all'), activeSub:bm.cat, focus:it?it.name:'—'});
 }
 
 // ---------- Каталог справа ----------
@@ -115,10 +107,6 @@ function renderCatalog(){
 }
 
 // ---------- Центр: цепочка «материалы → здание → выпуск» ----------
-function hexPts(cx,cy,r){
-  let p=[]; for(let k=0;k<6;k++){ const a=Math.PI/180*(60*k-90); p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1)); }
-  return p.join(' ');
-}
 function hexIcon(rid,cx,cy,s){
   const r=resById(rid), cv=r?colorVarOf(r):'tier0';
   return '<svg x="'+(cx-s/2)+'" y="'+(cy-s/2)+'" width="'+s+'" height="'+s+'" viewBox="0 0 48 48" fill="currentColor" style="color:var(--'+cv+')">'+(RES48[rid]||'<circle cx="24" cy="24" r="14"/>')+'</svg>';
@@ -232,30 +220,33 @@ function renderBuildMenu(){
   const it=bmItem(bm.sel);
   bm.qty=Math.max(1,Math.min(99,bm.qty|0));
   const c=bmCheck(it,bm.qty);
-  renderShell(); renderCatalog();
+  renderCatalog();
   renderTitle(it,c); renderVis(it,c,bm.qty); renderCfg(it,c,bm.qty);
 }
 
-// Игра зовёт renderAll каждый тик и после каждого действия — дорисовываем меню следом.
-const _bmRenderAll=renderAll;
-renderAll=function(){ _bmRenderAll(); renderBuildMenu(); };
+V2_PAGES.build={
+  subs:BM_CATS.filter(c=>c.id!=='all'),
+  activeSub:()=>bm.cat,
+  // Повторный клик по активной категории снимает фильтр.
+  onSub:id=>{ bm.cat=bm.cat===id?'all':id; document.getElementById('bmFilter').value=bm.cat; },
+  focus:()=>{ const it=bm.sel&&bmItem(bm.sel); return it?it.name:'—'; },
+  crumb:'Выбор здания',
+  render:renderBuildMenu,
+  open:key=>{ if(bmItem(key)){ bm.sel=key; bm.qty=1; bm.cat='all'; bm.q=''; document.getElementById('bmSearch').value=''; document.getElementById('bmFilter').value='all'; } },
+};
 
 // ---------- События ----------
 document.getElementById('bmFilter').innerHTML=BM_CATS.map(c=>'<option value="'+c.id+'">'+c.label+'</option>').join('');
-document.getElementById('bmSearch').addEventListener('input',e=>{ bm.q=e.target.value; renderBuildMenu(); });
-document.getElementById('bmFilter').addEventListener('change',e=>{ bm.cat=e.target.value; renderBuildMenu(); });
-document.getElementById('bmSort').addEventListener('change',e=>{ bm.sort=e.target.value; renderBuildMenu(); });
-document.getElementById('bmNav').addEventListener('click',e=>{
-  const b=e.target.closest('[data-sub]'); if(!b) return;
-  bm.cat=b.dataset.sub; document.getElementById('bmFilter').value=bm.cat; renderBuildMenu();
-});
+document.getElementById('bmSearch').addEventListener('input',e=>{ bm.q=e.target.value; v2Render(); });
+document.getElementById('bmFilter').addEventListener('change',e=>{ bm.cat=e.target.value; v2Render(); });
+document.getElementById('bmSort').addEventListener('change',e=>{ bm.sort=e.target.value; v2Render(); });
 document.getElementById('bmCatTabs').addEventListener('click',e=>{
-  const b=e.target.closest('[data-tab]'); if(!b) return; bm.tab=b.dataset.tab; renderBuildMenu();
+  const b=e.target.closest('[data-tab]'); if(!b) return; bm.tab=b.dataset.tab; v2Render();
 });
 document.getElementById('bmCards').addEventListener('click',e=>{
   const b=e.target.closest('[data-key]'); if(!b) return;
   if(bm.sel!==b.dataset.key){ bm.sel=b.dataset.key; bm.qty=1; }
-  renderBuildMenu();
+  v2Render();
   if(window.matchMedia('(max-width:1279px)').matches) document.getElementById('bmTitle').scrollIntoView({behavior:'smooth',block:'start'});
 });
 document.getElementById('bmCfg').addEventListener('click',e=>{
@@ -264,19 +255,19 @@ document.getElementById('bmCfg').addEventListener('click',e=>{
   if(q){
     const v=q.dataset.qty;
     bm.qty = v==='max' ? Math.max(1,bmMaxQty(it)) : v==='reset' ? 1 : bm.qty+parseInt(v,10);
-    renderBuildMenu(); return;
+    v2Render(); return;
   }
   const a=e.target.closest('[data-act]');
   if(!a) return;
-  if(a.dataset.act==='reset'){ bm.qty=1; delete bm.recipe[it.key]; renderBuildMenu(); return; }
+  if(a.dataset.act==='reset'){ bm.qty=1; delete bm.recipe[it.key]; v2Render(); return; }
   if(a.dataset.act==='build' && !a.disabled){
     const id=bmBuildId(it);
     for(let i=0;i<bm.qty;i++) tryBuild(id);
-    bm.qty=1; renderBuildMenu();
+    bm.qty=1; v2Render();
   }
 });
 document.getElementById('bmCfg').addEventListener('change',e=>{
   e.target.blur();
-  if(e.target.id==='bmQty'){ bm.qty=parseInt(e.target.value,10)||1; renderBuildMenu(); }
-  if(e.target.id==='bmRecipe'){ bm.recipe[bm.sel]=e.target.value; renderBuildMenu(); }
+  if(e.target.id==='bmQty'){ bm.qty=parseInt(e.target.value,10)||1; v2Render(); }
+  if(e.target.id==='bmRecipe'){ bm.recipe[bm.sel]=e.target.value; v2Render(); }
 });

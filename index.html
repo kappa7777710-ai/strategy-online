@@ -1,7 +1,7 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><script>try{document.documentElement.dataset.ui=localStorage.getItem('so-ui')==='v1'?'v1':'v2'}catch(e){document.documentElement.dataset.ui='v2'}</script></head><body>
 <title>Индустриальный пояс</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400;500;600;700&family=Exo+2:wght@400;500;600&family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/hotbar.css">
 <link rel="stylesheet" href="css/pages/1-hq.css">
@@ -13,9 +13,13 @@
 <link rel="stylesheet" href="css/pages/7-warehouse.css">
 <link rel="stylesheet" href="css/pages/8-energy.css">
 <link rel="stylesheet" href="css/pages/9-planet.css">
+<link rel="stylesheet" href="css/v2/sage.css">
+<link rel="stylesheet" href="css/v2/energy.css">
+<link rel="stylesheet" href="css/v2/pages.css">
 
 <div class="page">
-  <header>
+  <header class="v1-head">
+    <div class="ui-switch" role="group" aria-label="Версия интерфейса"><button data-ui-set="v1" class="active">V1</button><button data-ui-set="v2">V2</button></div>
     <div class="eyebrow">Управляющий модуль · Сектор Керберос-9</div>
     <h1>Индустриальный пояс</h1>
     <div class="sub">Замкнутая производственная экономика: каждый товар на складе кто-то добыл или произвёл, и каждую фабрику кто-то обслуживает. Ничего не появляется без цепочки и без персонала.</div>
@@ -53,6 +57,91 @@
   <div class="footnote">Этап 1: только сырьё T0 (железная руда, медная руда, уголь, камень, вода, нефть) — горнодобывающая установка одного универсального типа, перенастраиваемая на любой из четырёх видов руды, плюс буровая установка одного универсального типа, перенастраиваемая между водой и нефтью. Сырьё поступает только с месторождений (у каждого — своё случайное богатство, растущее с уровнем навыка «Горное дело»), а рабочие набираются из жилых модулей и не дают установке выйти на полную мощность, пока не укомплектован штат и не обеспечена вода. Все производственные установки также потребляют электроэнергию — при её нехватке выпуск падает в том же проценте, что и нехватка; вкладка «Энергия» — аккумуляторы базы (ёмкость заряда) и солнечные панели, чья выработка следует за игровым циклом дня и ночи. Симуляция идёт в реальном времени и продолжается, пока вкладка закрыта — при следующем заходе колония досчитает прогресс (не более 12 часов офлайн за раз).</div>
 </div>
 
+<!-- Интерфейс V2 (в духе SAGE). Игра та же: при запуске V2 панели разделов переносятся сюда из
+     .page, а стройка и энергия рисуются своими экранами (js/v2). -->
+<div class="bm" id="v2root">
+  <div class="bm-bg" aria-hidden="true"></div>
+  <header class="bm-top">
+    <button class="bm-brand" data-section="hq">STRATEGY ONLINE</button>
+    <div class="bm-objective"><i></i><span>Текущая задача</span><b id="bmObjective">—</b></div>
+    <nav class="bm-quick" id="bmQuick" aria-label="Разделы"></nav>
+    <div class="ui-switch" role="group" aria-label="Версия интерфейса"><button data-ui-set="v1">V1</button><button data-ui-set="v2" class="active">V2</button></div>
+    <div class="bm-cmdr">
+      <div class="bm-cmdr-badge" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M16 4 27 27H21L16 16 11 27H5Z" fill="currentColor"/></svg></div>
+      <div class="bm-cmdr-body">
+        <b>Командир</b>
+        <div class="bm-cmdr-line"><span>Ранг колонии <em id="bmRank">1</em></span><span class="sep"></span><span class="hl" id="bmSaved">—</span></div>
+        <div class="bm-cmdr-bar"><i id="bmRankBar"></i></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="bm-frame">
+    <section class="bm-station">
+      <div class="bm-emblem" aria-hidden="true"><svg viewBox="0 0 40 46"><path d="M20 2 38 12v22L20 44 2 34V12Z" fill="currentColor"/><path d="M20 12 29 17v12l-9 5-9-5V17Z" fill="#1A1205" opacity=".55"/></svg></div>
+      <div class="bm-station-name">
+        <div><b>Керберос-9</b><span>Центральная база</span></div>
+        <div class="bm-bars">
+          <div class="bm-bar red"><label id="bmAreaLbl">Площадь</label><div class="seg"><i id="bmAreaBar"></i></div></div>
+          <div class="bm-bar cyan"><label id="bmEnergyLbl">Энергия</label><div class="seg"><i id="bmEnergyBar"></i></div></div>
+        </div>
+      </div>
+      <div class="bm-tags" id="bmTags"></div>
+    </section>
+
+    <div class="bm-body">
+      <nav class="bm-nav" id="bmNav" aria-label="Меню базы"></nav>
+
+      <main class="bm-main">
+        <div class="bm-crumb"><span id="v2Crumb">—</span><b id="v2CrumbSub">—</b></div>
+
+        <div class="bm-grid" id="v2Build" hidden>
+          <section class="bm-title" id="bmTitle"></section>
+          <section class="bm-vis" id="bmVis"></section>
+          <section class="bm-cfg" id="bmCfg"></section>
+          <section class="bm-cat">
+            <div class="bm-cat-tabs" id="bmCatTabs"></div>
+            <div class="bm-tools">
+              <label class="bm-search"><svg viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="2"/></svg><input id="bmSearch" type="search" placeholder="Поиск" autocomplete="off"><span id="bmFound"></span></label>
+              <label class="bm-select"><select id="bmFilter"></select></label>
+              <label class="bm-select"><select id="bmSort">
+                <option value="ready">Сначала доступные</option>
+                <option value="az">Имя А–Я</option>
+                <option value="za">Имя Я–А</option>
+                <option value="area">Площадь ↑</option>
+              </select></label>
+            </div>
+            <div class="bm-cards" id="bmCards"></div>
+          </section>
+        </div>
+
+        <div class="bm-grid" id="v2Energy" hidden>
+          <section class="bm-title" id="enTitle"></section>
+          <section class="bm-vis" id="enVis"></section>
+          <section class="bm-cfg" id="enCfg"></section>
+          <section class="bm-cat">
+            <div class="bm-cat-tabs" id="enCatTabs"></div>
+            <div class="en-cat-body" id="enCards"></div>
+          </section>
+        </div>
+
+        <div class="v2-page" id="v2Page" hidden>
+          <section class="bm-title v2-head" id="v2Head"></section>
+          <div class="v2-panels" id="v2Panels"></div>
+        </div>
+      </main>
+    </div>
+
+    <footer class="bm-status">
+      <span>Вкладка <b id="v2Tab">—</b></span>
+      <span>Фокус <b id="bmFocus">—</b></span>
+      <span>Колония <b id="v2Time">—</b></span>
+      <span class="bm-dev" id="v2Dev"></span>
+      <span class="bm-status-right">Площадь <span class="ticks" id="bmTicks"></span><b id="bmAreaTxt">—</b></span>
+    </footer>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="offlineModal" hidden>
   <div class="modal">
     <h2>С возвращением на базу</h2>
@@ -75,6 +164,9 @@
 <script src="js/pages/7-warehouse.js"></script>
 <script src="js/pages/8-energy.js"></script>
 <script src="js/pages/9-planet.js"></script>
+<script src="js/v2/shell.js"></script>
+<script src="js/v2/build.js"></script>
+<script src="js/v2/energy.js"></script>
 <script src="js/main.js"></script>
 
 </body></html>
